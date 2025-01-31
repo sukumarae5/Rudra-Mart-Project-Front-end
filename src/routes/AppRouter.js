@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import Header from "../components/Layout/Header";
+import AppLayout from "../components/Layout/AppLayout";
 import HomePage from "../pages/HomePage";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
@@ -8,11 +8,14 @@ import CartPage from "../pages/CartPage";
 import SearchPage from "../pages/SearchPage";
 import UserAccontPage from "../pages/UserAccontDetialsPage/UserAccontpage";
 import UserProfile from "../pages/UserAccontDetialsPage/UserProfile";
+import AdminHeader from "../components/AdminPane/AdminHeader";
+import AdminRoute from "./AdminRoute";
 
 const AppRouter = createBrowserRouter([
   {
     path: "/",
     element: <Header />,
+    element: <AppLayout />,
     children: [
       {
         path: "/",
@@ -49,8 +52,18 @@ const AppRouter = createBrowserRouter([
           },
         ],
       },
+      {
+        path: "/admin",
+        element: (
+            <AdminHeader />
+        ),
+        children: AdminRoute,
+      },
     ],
   },
+    
+  
+ 
 ]);
 
 export default AppRouter;

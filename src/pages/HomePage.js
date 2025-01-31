@@ -13,6 +13,7 @@ import image4 from '../assets/images/image17.png';
 import image5 from '../assets/images/image19.png';
 import { fetchcartproductsendsuccess, fetchcartproductsuccess } from '../features/cart/cartActions';
 
+
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
