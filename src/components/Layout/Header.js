@@ -16,6 +16,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const { data = {} } = useSelector((state) => state.users);
+  console.log(data)
   const location = useLocation();
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";

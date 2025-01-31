@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "../components/Layout/AppLayout";
+
 import HomePage from "../pages/HomePage";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
@@ -14,7 +15,7 @@ import AdminRoute from "./AdminRoute";
 const AppRouter = createBrowserRouter([
   {
     path: "/",
-    element: <Header />,
+    
     element: <AppLayout />,
     children: [
       {
