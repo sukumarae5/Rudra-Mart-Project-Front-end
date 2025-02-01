@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FacebookOutlined, Twitter, Instagram, LinkedIn } from '@mui/icons-material';
+import { Facebook, Twitter, Instagram, LinkedIn } from '@mui/icons-material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import googlePlay from '../../assets/images/google.png';
 import appStore from '../../assets/images/AppStore.png';
 import qrCode from '../../assets/images/QrCode.jpg';
-
 
 const Footer = () => {
   return (
@@ -87,14 +86,14 @@ const Footer = () => {
                 <>
                   <p className="mb-2">Save $3 with App New User Only</p>
                   <div className="flex items-center mb-3">
-                  <img src={qrCode} alt="QR Code" className="w-20 h-20 object-contain" />
-                  <div className="flex flex-col ml-3">
-                  <img src={googlePlay} alt="Google Play" className="w-28 h-8" />
-                  <img src={appStore} alt="App Store" className="w-24 h-8 mt-1" />
-                  </div>
+                    <img src={qrCode} alt="QR Code" className="w-20 h-20 object-contain" />
+                    <div className="flex flex-col ml-3">
+                      <img src={googlePlay} alt="Google Play" className="w-28 h-8" />
+                      <img src={appStore} alt="App Store" className="w-24 h-8 mt-1" />
+                    </div>
                   </div>
                   <div className="flex space-x-4">
-                    {[FacebookOutlined, Twitter, Instagram, LinkedIn].map((Icon, idx) => (
+                    {[Facebook, Twitter, Instagram, LinkedIn].map((Icon, idx) => (
                       <a key={idx} href="#" className="hover:text-gray-400">
                         <Icon fontSize="large" />
                       </a>

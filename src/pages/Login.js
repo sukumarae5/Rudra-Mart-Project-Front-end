@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import sideImage from "../../src/assets/images/cart.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchusersrequest } from "../features/user/userActions";
+import { fetchusersrequest, userlogindata } from "../features/user/userActions";
 import { useDispatch, useSelector } from "react-redux";
 
 
@@ -46,6 +46,7 @@ const Login = () => {
 
       if (matchingUser) {
         alert("Login successful:", matchingUser);
+        dispatch(userlogindata(login))
         navigate("/");
       } else {
         console.log("Login failed:", error || "Invalid email or password");
