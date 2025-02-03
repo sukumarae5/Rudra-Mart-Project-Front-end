@@ -31,7 +31,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
             position: "fixed",
             top: "60px", // Below navbar
             left: 0,
-            backgroundColor: "#F3F3F3",
+            backgroundColor: "rgb(18, 5, 36)",
             boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
             padding: "20px",
             zIndex: 1040,
@@ -63,7 +63,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
         placement="start"
         style={{
           width: "250px",
-          backgroundColor: "#F3F3F3",
+          backgroundColor: "rgb(18, 5, 36)",
           top: "60px",
           height: "calc(100vh - 60px)",
           zIndex: 1040,
@@ -116,7 +116,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
 // Sidebar Menu Items
 const menuItems = [
   { path: "/admin/admindashboard", icon: <FaHome />, label: "Dashboard" },
-  { path: "/admin/orders", icon: <IoReorderThree />, label: "Orders" },
+  { path: "/admin/adminorders", icon: <IoReorderThree />, label: "Orders" },
   { path: "/admin/adminproducts", icon: <FaProductHunt />, label: "Products" },
   { path: "/admin/categories", icon: <BiSolidCategory />, label: "Categories" },
   { path: "/admin/adminusers", icon: <FaUser />, label: "Customers" },

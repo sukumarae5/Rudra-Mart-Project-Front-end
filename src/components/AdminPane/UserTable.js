@@ -166,9 +166,6 @@ const UserTable = () => {
           </DropdownButton>
 
           <InputGroup style={{ width: "300px", marginLeft: "10px" }}>
-            <InputGroup.Text>
-              <IoMdSearch />
-            </InputGroup.Text>
             <Form.Control
               type="text"
               placeholder="Search users..."
