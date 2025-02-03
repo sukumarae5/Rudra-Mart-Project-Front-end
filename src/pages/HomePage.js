@@ -11,8 +11,7 @@ import image2 from '../assets/images/image16.png';
 import image3 from '../assets/images/image18.png';
 import image4 from '../assets/images/image17.png';
 import image5 from '../assets/images/image19.png';
-import { fetchcartproductsendsuccess, fetchcartproductsuccess } from '../features/cart/cartActions';
-
+import { addToCart  } from '../features/cart/cartActions';
 
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
@@ -79,12 +78,18 @@ const HomePage = () => {
     }
   };
 
-  const addToCart = (product) => {
-    
-    setCartItems((prevCartItems) => [...prevCartItems, product]);
-    dispatch(fetchcartproductsendsuccess(product))
+  const handleAddToCart = (product) => {
+    // Check if the product is already in the cart
+    const isProductInCart = cartItems.some((item) => item.id === product.id);
+  
+    if (isProductInCart) {
+      alert('This item is already in the cart.');
+    } else {
+      // Add the product to the cart if it's not already there
+      setCartItems((prevCartItems) => [...prevCartItems, product]);
+      dispatch(addToCart(product)); // Correctly dispatch the Redux action
+    }
   };
-
   const handleRating = (rating, productId) => {
     setRatings((prevRatings) => ({ ...prevRatings, [productId]: rating }));
   };
@@ -216,10 +221,11 @@ const HomePage = () => {
       display: hoveredCard === product.id ? 'block' : 'none',
       cursor: 'pointer',
     }}
-    onClick={(e) => {
-      e.stopPropagation(); // Prevent card click navigation
-      addToCart(product);
-    }}
+     onClick={(e) => {
+    e.stopPropagation(); // Prevent card click navigation
+    handleAddToCart(product); // Use the correctly named function
+  }}
+  
   >
     Add to Cart
   </div>
@@ -289,7 +295,7 @@ const HomePage = () => {
                       }}
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent card click navigation
-                        addToCart(product);
+                        handleAddToCart(product); // Use the correctly named function
                       }}
                     >
                       Add to Cart

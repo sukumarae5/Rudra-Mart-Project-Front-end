@@ -11,7 +11,7 @@ import UserAccontPage from "../pages/UserAccontDetialsPage/UserAccontpage";
 import UserProfile from "../pages/UserAccontDetialsPage/UserProfile";
 import AdminHeader from "../components/AdminPane/AdminHeader";
 import AdminRoute from "./AdminRoute";
-
+import Contactpage from "../pages/Contactpage";
 const AppRouter = createBrowserRouter([
   {
     path: "/",
@@ -22,6 +22,11 @@ const AppRouter = createBrowserRouter([
         path: "/",
         element: <HomePage />,
         index: true,
+      },
+      {
+        path:"/Conatctpage",
+        element:<Contactpage/>
+
       },
       {
         path: "/cartPage",
