@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Form, Container } from "react-bootstrap";
+import { Navbar, Nav, Form, Container} from "react-bootstrap";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -8,12 +8,15 @@ import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchproductsrequest, searchquryproduct } from "../../features/product/productActions";
 import { userlogoutdata } from "../../features/user/userActions";
+import { FaRegUserCircle } from "react-icons/fa";
+import Dropdown from "react-bootstrap/Dropdown";
 
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const { data = {} } = useSelector((state) => state.users);
+  console.log(data)
   const location = useLocation();
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
@@ -26,8 +29,8 @@ const Header = () => {
     event.preventDefault();
 
     if (searchQuery.length >= 3) {
-      navigate('/searchpage');
-      dispatch(searchquryproduct(searchQuery)); // Pass searchQuery directly
+      navigate("/searchpage");
+      dispatch(searchquryproduct(searchQuery));
     } else {
       alert("Please enter at least 3 characters to search.");
     }
@@ -37,6 +40,9 @@ const Header = () => {
     dispatch(userlogoutdata());
     navigate("/login");
   };
+  const handleprofile=()=>{
+    navigate("/useraccontpage")
+  }
 
   return (
     <div>
@@ -102,14 +108,29 @@ const Header = () => {
 
             {!isAuthPage && (
               <div className="d-flex align-items-center">
-                <FavoriteBorderIcon
-                  className="text-dark me-3"
-                  style={{ cursor: "pointer" }}
-                />
+                {data.email ? (
+                  <Dropdown align="end">
+                    <Dropdown.Toggle
+                      variant="light"
+                      id="dropdown-basic"
+                      className="d-flex align-items-center border-0 bg-white"
+                    >
+                      <FaRegUserCircle size={24} className="me-2" />
+                      
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      <Dropdown.Item onClick={handleprofile}>Profile</Dropdown.Item>
+                      <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                ) : null}
+
+                <FavoriteBorderIcon className="text-dark mx-3" style={{ cursor: "pointer" }} />
                 <ShoppingCartIcon
                   className="text-dark"
                   style={{ cursor: "pointer" }}
-                  onClick={() => { navigate("/cartpage"); }}
+                  onClick={() => navigate("/cartpage")}
                 />
               </div>
             )}
