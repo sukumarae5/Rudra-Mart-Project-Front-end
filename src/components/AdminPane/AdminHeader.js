@@ -5,6 +5,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { FaBars, FaRegUserCircle } from "react-icons/fa";
 import { useLocation, Link } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
+import Footer from "../Layout/Footer";
 
 const AdminHeader = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -14,9 +15,9 @@ const AdminHeader = () => {
   const handleSidebarClose = () => setShowSidebar(false);
 
   useEffect(() => {
-    document.body.style.overflow = showSidebar ? "hidden" : "auto";
+    document.body.style.overflow = showSidebar ? "scroll" : "scroll";
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "scroll";
     };
   }, [showSidebar]);
 
@@ -27,7 +28,7 @@ const AdminHeader = () => {
       <Navbar
         className="fixed-top w-100"
         style={{
-          backgroundColor: "#6C63FF",
+          backgroundColor: "rgb(5, 5, 27)",
           color: "white",
           padding: "10px 20px",
           height: "60px",
@@ -100,6 +101,7 @@ const AdminHeader = () => {
           handleSidebarClose={handleSidebarClose}
         />
       )}
+      <Footer/>
     </>
   );
 };

@@ -3,6 +3,7 @@ import AddUserForm from "../components/AdminPane/AddUserForm";
 import Dashboard from "../components/AdminPane/Dashboard";
 import EditProductForm from "../components/AdminPane/EditProductForm";
 import EditUserForm from "../components/AdminPane/EditUserForm";
+import OrderTable from "../components/AdminPane/OrderTable";
 import ProductTable from "../components/AdminPane/ProductTable";
 import UserTable from "../components/AdminPane/UserTable";
 
@@ -18,6 +19,10 @@ const AdminRoute = [
   {
     path: "adminproducts",
     element: <ProductTable />,
+  },
+  {
+    path: "adminorders",
+    element: <OrderTable/>
   },
   {
     path: 'edituser',

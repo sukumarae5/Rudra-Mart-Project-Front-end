@@ -12,7 +12,6 @@ const AppLayout = () => {
   return (
     <div>
       {userRole === "admin" ? <AdminHeader /> : <Header />}
-     
     </div>
   );
 };

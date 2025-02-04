@@ -151,15 +151,14 @@ const ProductTable = () => {
           </DropdownButton>
 
           <InputGroup style={{ width: "300px", marginLeft: "10px" }}>
-            <InputGroup.Text>
-              <IoMdSearch />
-            </InputGroup.Text>
+            
             <Form.Control
               type="text"
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            
           </InputGroup>
         </Col>
 
