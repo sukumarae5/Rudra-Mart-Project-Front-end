@@ -1,15 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 const ProfileEdit = () => {
+  const { data = {} } = useSelector((state) => state.users);
+
   const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    address: "",
+    phoneNo: "",
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
   });
+
+  useEffect(() => {
+    // Populate the profile state with user data when component mounts
+    setProfile({
+      firstName: data.name || "",
+      lastName: data.lastName || "",
+      email: data.email || "",
+      phoneNo: data.phone || "",
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    });
+  }, [data]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -59,7 +75,7 @@ const ProfileEdit = () => {
           </div>
         </div>
 
-        {/* Email and Address */}
+        {/* Email and Phone Number */}
         <div className="mb-4">
           <label className="block text-sm font-medium">Email</label>
           <input
@@ -72,11 +88,11 @@ const ProfileEdit = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium">Address</label>
+          <label className="block text-sm font-medium">Phone Number</label>
           <input
             type="text"
-            name="address"
-            value={profile.address}
+            name="phoneNo"
+            value={profile.phoneNo}
             onChange={handleInputChange}
             className="w-full p-2 border rounded-md"
           />

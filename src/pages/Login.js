@@ -46,7 +46,13 @@ const Login = () => {
 
       if (matchingUser) {
         alert("Login successful:", matchingUser);
-        dispatch(userlogindata(login))
+        dispatch(userlogindata({
+          name: matchingUser.name,
+          phone: matchingUser.
+          phone_number,
+          email: matchingUser.email,
+        }));
+        console.log(matchingUser.name)
         navigate("/");
       } else {
         console.log("Login failed:", error || "Invalid email or password");
