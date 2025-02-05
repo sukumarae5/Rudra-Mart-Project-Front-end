@@ -1,14 +1,16 @@
 import { takeEvery, call, put } from 'redux-saga/effects';
-import { FETCH_ORDERS_REQUEST } from '../order/orderActions';
-import { fetchOrdersSuccess, fetchOrdersFailure } from '../order/orderActions';
+import { FETCH_ORDERS_REQUEST, fetchOrdersSuccess, fetchOrdersFailure } from '../order/orderActions';
 
 // Function to fetch orders from API
 const fetchOrdersApi = async () => {
   try {
-    const response = await fetch('http://192.168.1.6:3000/api/orders/allorders', {
+    const token = localStorage.getItem('authToken'); // Get token dynamically
+    if (!token) throw new Error('No authentication token found.');
+
+    const response = await fetch('http://192.168.1.6:3000/api/orders/my-orders', {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // Replace with actual token
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -18,13 +20,13 @@ const fetchOrdersApi = async () => {
     }
 
     const data = await response.json();
-    return data.orders; // Assuming API returns an 'orders' array
+    return data.orders; // Assuming API returns { orders: [...] }
   } catch (error) {
     throw new Error('Failed to fetch orders: ' + error.message);
   }
 };
 
-// Saga to handle fetching the orders
+// Saga to handle fetching orders
 function* fetchOrderSaga() {
   try {
     const orders = yield call(fetchOrdersApi);
