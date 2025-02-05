@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
-import { updateCartProductQuantity } from "../features/cart/cartActions";
+import { updateCartProductQuantity, removeFromCart } from "../features/cart/cartActions";
 
 const CartPage = () => {
   const { cartProducts } = useSelector((state) => state.cart);
@@ -16,6 +16,11 @@ const CartPage = () => {
       return;
     }
     dispatch(updateCartProductQuantity(productId, parseInt(quantity, 10)));
+  };
+
+  const handleRemoveProduct = (productId) => {
+    dispatch(removeFromCart(productId));
+    alert("Product removed from the cart.");
   };
 
   const totalCost = cartProducts.reduce(
@@ -39,20 +44,21 @@ const CartPage = () => {
   const finalCost = (totalCost - discount).toFixed(2);
 
   return (
-    <Container className="mt-4" style={{padding:"1%"}}>
+    <Container className="mt-4" style={{ padding: "2%" }}>
       <h1 className="text-center mb-4">Shopping Cart</h1>
       {!cartProducts.length ? (
         <h4 className="text-center text-muted">Your cart is empty.</h4>
       ) : (
         <>
           {/* Product Table */}
-          <Table bordered responsive>
+          <Table bordered responsive className="mb-4">
             <thead>
               <tr>
                 <th>Product</th>
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Subtotal</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -80,60 +86,82 @@ const CartPage = () => {
                     />
                   </td>
                   <td>₹{(parseFloat(product.price) * product.quantity).toFixed(2)}</td>
+                  <td>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleRemoveProduct(product.id)}
+                    >
+                      Remove
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </Table>
 
-          {/* Coupon and Cart Summary Section */}
-          <Row className="mt-4">
-          <Col md={6}>
-  <Form>
-    <Row className="align-items-center">
-      <Col xs={8}>
-        <Form.Group className="mb-3">
-          <Form.Control
-            type="text"
-            placeholder="Enter coupon code"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-          />
-        </Form.Group>
-      </Col>
-      <Col xs={4} >
-        <Button variant="danger" onClick={handleApplyCoupon}>
-          Apply Coupon
-        </Button>
-      </Col>
-    </Row>
-  </Form>
-</Col>
+          {/* Actions Section */}
+          <Row className="mb-4 align-items-center">
+            <Col className="d-flex justify-content-start">
+              <Button variant="secondary">Return to Shop</Button>
+            </Col>
+            <Col className="d-flex justify-content-end">
+              <Button variant="primary">Update Cart</Button>
+            </Col>
+          </Row>
 
-  <Col md={6}>
-    <div className="p-3 bg-light border rounded">
-      <h4 className="text-center">Cart Total</h4>
-      <div className="d-flex justify-content-between">
-        <span>Subtotal:</span>
-        <span>₹{totalCost.toFixed(2)}</span>
-      </div>
-      <hr />
-      <div className="d-flex justify-content-between">
-        <span>Discount:</span>
-        <span>₹{discount.toFixed(2)}</span>
-      </div>
-      <hr />
-      <div className="d-flex justify-content-between">
-        <strong>Total:</strong>
-        <strong>₹{finalCost}</strong>
-      </div>
-      <div className="d-flex justify-content-center mt-3">
-        <Button variant="danger" className="w-50">
-          Proceed to Checkout
-        </Button>
-      </div>
-    </div>
-  </Col>
-</Row>
+          {/* Coupon and Cart Summary Section */}
+          <Row className="mb-4">
+            <Col md={6} className="d-flex align-items-center">
+              <Form className="w-100">
+                <Row className="align-items-center">
+                  <Col xs={8}>
+                    <Form.Group className="mb-0">
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col xs={4}>
+                    <Button variant="danger" onClick={handleApplyCoupon}>
+                      Apply Coupon
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+            </Col>
+
+            <Col md={6}>
+              <div className="p-3 bg-light border rounded">
+                <h4 className="text-center">Cart Total</h4>
+                <div className="d-flex justify-content-between">
+                  <span>Subtotal:</span>
+                  <span>₹{totalCost.toFixed(2)}</span>
+                </div>
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <span>Discount:</span>
+                  <span>₹{discount.toFixed(2)}</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Shipping:</span>
+                  <span>Free</span>
+                </div>
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <strong>Total:</strong>
+                  <strong>₹{finalCost}</strong>
+                </div>
+                <div className="d-flex justify-content-center mt-3">
+                  <Button variant="danger" className="w-100">
+                    Proceed to Checkout
+                  </Button>
+                </div>
+              </div>
+            </Col>
+          </Row>
         </>
       )}
     </Container>
