@@ -170,84 +170,84 @@ const HomePage = () => {
               </button>
             </Col>
           </Row>
-        </Container>
-
-        <Container fluid className="mt-4 mb-4 ">
-          <Row>
-            <Col md={12} className="position-relative ">
-              <div
-              
-                id="product-scroll-container"
-                className="d-flex overflow-auto "
-                style={{ scrollBehavior: 'smooth', whiteSpace: 'nowrap', padding: '0 50px' }}
-              >
-                {loading ? (
-                  <div className="text-center w-100">Loading products...</div>
-                ) : error ? (
-                  <div className="text-center w-100">{error}</div>
-                ) : products.length > 0 ? (
-                  products.map((product) => (
+        </Container> <Container fluid className="py-4">
+      <Row className="justify-content-center">
+        <Col lg={12} md={12}>
+          <div
+            id="product-scroll-container"
+            className="d-flex overflow-auto gap-3"
+            style={{ scrollBehavior: 'smooth', whiteSpace: 'nowrap' }}
+          >
+            {loading ? (
+              <div className="text-center w-100">Loading products...</div>
+            ) : error ? (
+              <div className="text-center w-100">{error}</div>
+            ) : products.length > 0 ? (
+              products.map((product) => (
+                <div
+                  key={product.id}
+                  className="card col-lg-2 col-md-3 col-sm-4 col-6 p-2"
+                  style={{
+                    minWidth: '250px',
+                    maxWidth: '300px',
+                    minHeight: '400px',
+                    borderRadius: '10px',
+                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+                    position: 'relative',
+                    display: 'inline-block',
+                    transition: 'transform 0.3s ease',
+                  }}
+                  onMouseEnter={() => setHoveredCard(product.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  onClick={() => handleCardClick(product.id, product)}
+                >
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="card-img-top img-fluid"
+                    style={{ height: '200px', objectFit: 'cover', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}
+                  />
+                  {hoveredCard === product.id && (
                     <div
-  key={product.id}
-  className="card m-2 col-lg-3 col-md-4 col-sm-12 col-xs-12 col-xm-12"
-  style={{
-    height: '400px',
-    width: '300px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-    position: 'relative',
-  }}
-  onMouseEnter={() => setHoveredCard(product.id)}
-  onMouseLeave={() => setHoveredCard(null)}
-  onClick={() => handleCardClick(product.id, product)} // Pass the entire product object
->
-  <img
-    src={product.image_url}
-    alt={product.name}
-    className="card-img-top"
-    style={{ width: 'auto', height: '200px', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}
-  />
-  <div
-    className="add-to-cart-btn"
-    style={{
-      position: 'relative',
-      top: '0',
-      left: '0',
-      width: '100%',
-      backgroundColor: 'black',
-      color: 'white',
-      textAlign: 'center',
-      padding: '10px 0',
-      display: hoveredCard === product.id ? 'block' : 'none',
-      cursor: 'pointer',
-    }}
-     onClick={(e) => {
-    e.stopPropagation(); // Prevent card click navigation
-    handleAddToCart(product); // Use the correctly named function
-  }}
-  
-  >
-    Add to Cart
-  </div>
-  <div className="card-body">
-    <h5 className="card-title">{product.name}</h5>
-    <p className="card-text">{product.description}</p>
-    <p className="card-text">
-      <strong>Price:</strong> ₹{product.price}
-    </p>
-    <div className="d-flex justify-content-start">
-      {renderStars(ratings[product.id] || 0, handleRating, product.id)}
-    </div>
-  </div>
-</div>
-
-                  ))
-                ) : (
-                  <div className="text-center w-100">No products available.</div>
-                )}
-              </div>
-            </Col>
-          </Row>
+                      className="add-to-cart-btn"
+                      style={{
+                        position: 'relative',
+                        top: '0',
+                        left: '0',
+                        width: '100%',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        textAlign: 'center',
+                        padding: '10px 0',
+                        cursor: 'pointer',
+                        opacity: 0.9,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
+                    >
+                      Add to Cart
+                    </div>
+                  )}
+                  <div className="card-body">
+                    <h5 className="card-title">{product.name}</h5>
+                    <p className="card-text">{product.description}</p>
+                    <p className="card-text">
+                      <strong>Price:</strong> ₹{product.price}
+                    </p>
+                    <div className="d-flex justify-content-start">
+                      {renderStars(ratings[product.id] || 0, handleRating, product.id)}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center w-100">No products available.</div>
+            )}
+          </div>
+        </Col>
+      </Row>
 
           <Row className="mt-4">
             <Col md={12} className="text-center">
