@@ -13,8 +13,7 @@ import { IoGiftOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { setSelectedProduct } from "./productActions";
 import { CiMobile4 } from "react-icons/ci";
-import { addToCart  } from '../cart/cartActions';
-
+import { addToCart } from '../cart/cartActions';
 
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
@@ -45,11 +44,13 @@ const ProductCategory = () => {
   };
 
   const handleCardClick = (productId, product) => {
-      dispatch(setSelectedProduct(product));   
-      navigate('/productpage');
+    dispatch(setSelectedProduct(product));   
+    navigate('/productpage');
   };
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (event, product) => {
+    event.stopPropagation();  // Prevents event from bubbling up to parent elements
+
     const isProductInCart = cartItems.some((item) => item.id === product.id);
 
     if (isProductInCart) {
@@ -186,7 +187,7 @@ const ProductCategory = () => {
                         display: hoveredCard === product.id ? 'block' : 'none',
                         cursor: 'pointer',
                       }}
-                      onClick={() => handleAddToCart(product)} // Add to cart on click
+                      onClick={(e) => handleAddToCart(e, product)} // Pass event to stop propagation
                     >
                       Add to Cart
                     </div>
