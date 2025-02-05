@@ -124,7 +124,7 @@ const OrderTable = () => {
     <div className="container-fluid">
       <Row className="align-items-center mb-3">
         <Col xs={12} md={6} className="text-md-start text-center">
-          <h1 style={{ fontSize: "2rem", color: "#007bff", fontWeight: "bold" }}>
+          <h1 style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>
             Orders
           </h1>
         </Col>
@@ -135,7 +135,7 @@ const OrderTable = () => {
             style={{
               fontSize: "1.1rem",
               padding: "0.5rem 1rem",
-              backgroundColor: "#28a745",
+              backgroundColor: " #1E5EFF",
               border: "none",
             }}
           >
@@ -151,7 +151,7 @@ const OrderTable = () => {
             variant="light"
             title={`Filter: ${filterOption}`}
             onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
-            style={{ border: "1px solid #007bff", color: "#007bff" }}
+            style={{ border: "1px solid #1E5EFF", color: " #1E5EFF" }}
           >
             <Dropdown.Item eventKey="All">All</Dropdown.Item>
             <Dropdown.Item eventKey="Pending">Pending</Dropdown.Item>
@@ -174,17 +174,17 @@ const OrderTable = () => {
             variant="light"
             size="sm"
             onClick={handleEditSelectedOrders}
-            style={{ border: "1px solid #007bff" }}
+            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdModeEditOutline style={{ color: "#007bff" }} />
+            <MdModeEditOutline style={{ color: " #1E5EFF" }} />
           </Button>
           <Button
             variant="light"
             size="sm"
             onClick={handleDeleteSelectedOrders}
-            style={{ border: "1px solid #007bff" }}
+            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdOutlineDeleteOutline style={{ color: "#007bff" }} />
+            <MdOutlineDeleteOutline style={{ color: " #1E5EFF" }} />
           </Button>
         </Col>
       </Row>

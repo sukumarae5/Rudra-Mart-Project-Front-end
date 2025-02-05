@@ -14,7 +14,6 @@ import {
 } from "react-bootstrap";
 import PaginationComponent from "./Pagination";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
-import { IoMdSearch } from "react-icons/io";
 import { GoPlus } from "react-icons/go";
 
 const UserTable = () => {
@@ -26,7 +25,7 @@ const UserTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("All");
   const [selectedUsers, setSelectedUsers] = useState([]);
-
+  console.log(users);
   useEffect(() => {
     dispatch(fetchusersrequest());
   }, [dispatch]);
@@ -120,7 +119,7 @@ const UserTable = () => {
       <Row className="align-items-center mb-3">
         <Col xs={12} md={6} className="text-md-start text-center">
           <h1
-            style={{ fontSize: "2rem", color: "#007bff", fontWeight: "bold" }}
+            style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}
           >
             Users
           </h1>
@@ -136,7 +135,7 @@ const UserTable = () => {
             style={{
               fontSize: "1.1rem",
               padding: "0.5rem 1rem",
-              backgroundColor: "#28a745",
+              backgroundColor: " #1E5EFF",
               border: "none",
             }}
           >
@@ -158,7 +157,7 @@ const UserTable = () => {
             variant="light" // White background
             title={`Filter: ${filterOption}`}
             onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
-            style={{ border: "1px solid #007bff", color: "#007bff" }} // Blue border and text
+            style={{ border: "1px solid #1E5EFF", color: " #1E5EFF" }} // Blue border and text
           >
             <Dropdown.Item eventKey="All">All</Dropdown.Item>
             <Dropdown.Item eventKey="Admin">Admin</Dropdown.Item>
@@ -181,17 +180,17 @@ const UserTable = () => {
             variant="light"
             size="sm"
             onClick={handleEditSelectedUsers}
-            style={{ border: "1px solid #007bff" }}
+            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdModeEditOutline style={{ color: "#007bff" }} />
+            <MdModeEditOutline style={{ color: " #1E5EFF" }} />
           </Button>
           <Button
             variant="light"
             size="sm"
             onClick={handleDeleteSelectedUsers}
-            style={{ border: "1px solid #007bff" }}
+            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdOutlineDeleteOutline style={{ color: "#007bff" }} />
+            <MdOutlineDeleteOutline style={{ color: " #1E5EFF" }} />
           </Button>
         </Col>
       </Row>
@@ -233,10 +232,10 @@ const UserTable = () => {
                   />
                 </td>
                 <td>{indexOfFirstUser + index + 1}</td>
-                <td>{user.name || "N/A"}</td>
-                <td>{user.email || "N/A"}</td>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
                 <td>{user.password}</td>
-                <td>{user.phone_number || "N/A"}</td>
+                <td>{user.phone_number}</td>
               </tr>
             ))
           ) : (

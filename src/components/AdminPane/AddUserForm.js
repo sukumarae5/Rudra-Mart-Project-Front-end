@@ -84,7 +84,7 @@ const AddUserForm = () => {
 
           <Col xs={12} md={6} className="text-md-start text-center">
             <h1
-              style={{ fontSize: "2rem", color: "#007bff", fontWeight: "bold" }}
+              style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}
             >
               New Users
             </h1>

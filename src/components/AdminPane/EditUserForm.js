@@ -101,7 +101,7 @@ const EditUserForm = () => {
       <Row className="align-items-center mb-3">
         {/* Title - Left */}
         <Col xs={6}>
-          <h1 className="text-start" style={{ fontSize: "2rem", color: "#007bff", fontWeight: "bold" }}>
+          <h1 className="text-start" style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>
             Edit User
           </h1>
         </Col>

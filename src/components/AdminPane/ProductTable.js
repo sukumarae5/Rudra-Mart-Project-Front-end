@@ -115,7 +115,7 @@ const ProductTable = () => {
       {/* Header Section */}
       <Row className="align-items-center mb-3">
         <Col xs={12} md={6} className="text-md-start text-center">
-          <h1 style={{ fontSize: "2rem", color: "#007bff", fontWeight: "bold" }}>
+          <h1 style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>
             Products
           </h1>
         </Col>
@@ -126,7 +126,7 @@ const ProductTable = () => {
             style={{
               fontSize: "1.1rem",
               padding: "0.5rem 1rem",
-              backgroundColor: "#28a745",
+              backgroundColor: " #1E5EFF",
               border: "none",
             }}
           >
@@ -143,7 +143,7 @@ const ProductTable = () => {
             variant="light"
             title={`Filter: ${filterOption}`}
             onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
-            style={{ border: "1px solid #007bff", color: "#007bff" }}
+            style={{ border: "1px solid #1E5EFF", color: " #1E5EFF" }}
           >
             <Dropdown.Item eventKey="All">All</Dropdown.Item>
             <Dropdown.Item eventKey="Category1">Category 1</Dropdown.Item>
@@ -176,17 +176,17 @@ const ProductTable = () => {
                 alert("Please select one product to edit.");
               }
             }}
-            style={{ border: "1px solid #007bff" }}
+            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdModeEditOutline  style={{ color: "#007bff" }}/>
+            <MdModeEditOutline  style={{ color: " #1E5EFF" }}/>
           </Button>
           <Button
             variant="light"
             size="sm"
             onClick={handleBulkDelete}
-            style={{ border: "1px solid #007bff" }}
+            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdOutlineDeleteOutline style={{ color: "#007bff" }} />
+            <MdOutlineDeleteOutline style={{ color: " #1E5EFF" }} />
           </Button>
         </Col>
       </Row>

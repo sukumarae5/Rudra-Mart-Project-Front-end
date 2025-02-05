@@ -125,7 +125,7 @@ const HomePage = () => {
               ))}
             </ul>
           </Col>
-          <Col md={9} className="pr-20">
+          <Col md={9} className="pr-15">
             <Carousel>
               {[image1, image2, image3, image4, image5].map((image, index) => (
                 <Carousel.Item key={index}>
