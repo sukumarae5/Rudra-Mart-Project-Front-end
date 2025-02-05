@@ -12,7 +12,6 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
   const location = useLocation();
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 992);
 
-  // Update screen size on resize
   useEffect(() => {
     const handleResize = () => setIsLargeScreen(window.innerWidth >= 992);
     window.addEventListener("resize", handleResize);
@@ -29,14 +28,13 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
             width: "250px",
             height: "100vh",
             position: "fixed",
-            top: "60px", // Below navbar
+            top: "60px",
             left: 0,
-            backgroundColor: "rgb(18, 5, 36)",
+            backgroundColor: " #1E2753", // Corrected color
             boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
             padding: "20px",
             zIndex: 1040,
-            overflowY: "scroll", // Enables vertical scrolling
-            overflowX: "auto", // Prevents horizontal scrolling
+            overflowY: "auto",
           }}
         >
           <Nav className="flex-column">
@@ -45,8 +43,8 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
                 key={path}
                 as={Link}
                 to={path}
-                className={`d-flex align-items-center gap-2 ${
-                  location.pathname === path ? "active fw-bold text-primary" : ""
+                className={`d-flex align-items-center gap-2 text-white ${
+                  location.pathname === path ? "fw-bold text-primary" : ""
                 }`}
               >
                 {icon} <span>{label}</span>
@@ -63,15 +61,15 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
         placement="start"
         style={{
           width: "250px",
-          backgroundColor: "rgb(18, 5, 36)",
+          backgroundColor: " #1E2753", // Same as large screen sidebar
           top: "60px",
           height: "calc(100vh - 60px)",
           zIndex: 1040,
-          overflowY: "auto", // Enables scrolling for long menus
+          overflowY: "auto",
         }}
       >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Admin Menu</Offcanvas.Title>
+        <Offcanvas.Header closeButton className="custom-close-btn">
+          <Offcanvas.Title className="text-white">Admin Menu</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Nav className="flex-column">
@@ -81,8 +79,8 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
                 as={Link}
                 to={path}
                 onClick={handleSidebarClose}
-                className={`d-flex align-items-center gap-2 ${
-                  location.pathname === path ? "active fw-bold text-primary" : ""
+                className={`d-flex align-items-center gap-2 text-white ${
+                  location.pathname === path ? "fw-bold text-primary" : ""
                 }`}
               >
                 {icon} <span>{label}</span>
@@ -94,21 +92,26 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
 
       {/* Main Content Area */}
       <div
-        className="main-content"
         style={{
-          marginLeft: isLargeScreen ? "250px" : "0", // Adjust dynamically
-          padding: "20px",
-          transition: "margin-left 0.3s ease-in-out",
-          marginTop: "60px",
-          minHeight: "calc(100vh - 60px)", // Ensures content fills the entire screen
-          overflowY: "auto", // Enables vertical scrolling
-          overflowX: "auto", // Enables horizontal scrolling if content overflows
+          marginLeft: isLargeScreen ? "150px" : "0", // Adjust dynamically
+          marginTop: "40px",
+          minHeight: "calc(100vh - 60px)",
+          overflowY: "auto",
         }}
       >
         <Container fluid>
           <Outlet />
         </Container>
       </div>
+
+      {/* Custom Styles */}
+      <style>
+        {`
+          .custom-close-btn .btn-close {
+            filter: invert(1); /* Makes the close button white */
+          }
+        `}
+      </style>
     </>
   );
 };
