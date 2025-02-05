@@ -11,6 +11,7 @@ import {
   DropdownButton,
   Row,
   Col,
+  Card,
 } from "react-bootstrap";
 import PaginationComponent from "./Pagination";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
@@ -19,7 +20,10 @@ import { GoPlus } from "react-icons/go";
 const OrderTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { orders = [] } = useSelector((state) => state.orders || {});
+
+  // Get orders state from Redux store
+  const { orders, loading, error } = useSelector((state) => state.orders || {});
+  
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,62 +31,8 @@ const OrderTable = () => {
   const [selectedOrders, setSelectedOrders] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchOrdersRequest());
+    dispatch(fetchOrdersRequest()); // Fetch orders on component mount
   }, [dispatch]);
-
-  const handleEditSelectedOrders = () => {
-    if (selectedOrders.length !== 1) {
-      alert("Please select exactly one order to edit.");
-      return;
-    }
-
-    const orderToEdit = orders.find((order) => order.id === selectedOrders[0]);
-
-    if (!orderToEdit) {
-      alert("Order data not found.");
-      return;
-    }
-
-    navigate("/admin", { state: { order: orderToEdit } });
-  };
-
-  const handleDeleteSelectedOrders = async () => {
-    if (selectedOrders.length === 0) {
-      alert("Please select at least one order to delete.");
-      return;
-    }
-
-    if (!window.confirm("Are you sure you want to delete selected orders?")) {
-      return;
-    }
-
-    try {
-      await Promise.all(
-        selectedOrders.map(async (orderId) => {
-          const response = await fetch(
-            `http://192.168.1.6:3000/api/orders/delete/${orderId}`,
-            {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-            }
-          );
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error || "Failed to delete order");
-          }
-        })
-      );
-
-      alert("Selected orders deleted successfully!");
-      dispatch(fetchOrdersRequest());
-      setSelectedOrders([]);
-    } catch (error) {
-      console.error("Error deleting orders:", error);
-      alert("Error: Could not delete orders");
-    }
-  };
 
   const handleCheckboxChange = (orderId) => {
     setSelectedOrders((prevSelected) =>
@@ -121,130 +71,145 @@ const OrderTable = () => {
   };
 
   return (
-    <div className="container-fluid">
-      <Row className="align-items-center mb-3">
-        <Col xs={12} md={6} className="text-md-start text-center">
-          <h1 style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>
-            Orders
-          </h1>
-        </Col>
-        <Col xs={12} md={6} className="text-md-end d-flex justify-content-end mt-2 mt-md-0">
-          <Button
-            onClick={() => navigate("/admin/addorder")}
-            className="d-flex align-items-center mx-auto mx-md-0"
-            style={{
-              fontSize: "1.1rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: " #1E5EFF",
-              border: "none",
-            }}
-          >
-            <GoPlus style={{ marginRight: "8px", fontSize: "1.5rem" }} />
-            Add Order
-          </Button>
-        </Col>
-      </Row>
+    <div className="container-fluid p-4">
+      <Card className="p-4 shadow-lg border-0 rounded-3">
+        {/* Header Section */}
+        <Row className="align-items-center mb-3">
+          <Col xs={12} md={6}>
+            <h1 className="fw-bold" style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>Orders</h1>
+          </Col>
+          <Col xs={12} md={6} className="text-md-end d-flex justify-content-end">
+            <Button
+              onClick={() => navigate("/admin/addorder")}
+              className="d-flex align-items-center btn-primary shadow"
+              style={{
+                fontSize: "1rem",
+                padding: "0.6rem 1.2rem",
+                borderRadius: "8px",
+                border: "none",
+              }}
+            >
+              <GoPlus className="me-2" size={22} />
+              Add Order
+            </Button>
+          </Col>
+        </Row>
 
-      <Row className="align-items-center mb-3">
-        <Col xs={12} md={6} className="d-flex justify-content-start mb-2 mb-md-0">
-          <DropdownButton
-            variant="light"
-            title={`Filter: ${filterOption}`}
-            onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
-            style={{ border: "1px solid #1E5EFF", color: " #1E5EFF" }}
-          >
-            <Dropdown.Item eventKey="All">All</Dropdown.Item>
-            <Dropdown.Item eventKey="Pending">Pending</Dropdown.Item>
-            <Dropdown.Item eventKey="Completed">Completed</Dropdown.Item>
-            <Dropdown.Item eventKey="Cancelled">Cancelled</Dropdown.Item>
-          </DropdownButton>
+        {/* Filters & Search */}
+        <Row className="align-items-center mb-3">
+          <Col xs={12} md={6} className="d-flex align-items-center gap-3">
+            <DropdownButton
+              variant="outline-primary"
+              title={`Filter: ${filterOption}`}
+              onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
+            >
+              <Dropdown.Item eventKey="All">All</Dropdown.Item>
+              <Dropdown.Item eventKey="Pending">Pending</Dropdown.Item>
+              <Dropdown.Item eventKey="Completed">Completed</Dropdown.Item>
+              <Dropdown.Item eventKey="Cancelled">Cancelled</Dropdown.Item>
+            </DropdownButton>
 
-          <InputGroup style={{ width: "300px", marginLeft: "10px" }}>
-            <Form.Control
-              type="text"
-              placeholder="Search orders..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </InputGroup>
-        </Col>
-
-        <Col xs={12} md={6} className="d-flex justify-content-end gap-2">
-          <Button
-            variant="light"
-            size="sm"
-            onClick={handleEditSelectedOrders}
-            style={{ border: "1px solid #1E5EFF" }}
-          >
-            <MdModeEditOutline style={{ color: " #1E5EFF" }} />
-          </Button>
-          <Button
-            variant="light"
-            size="sm"
-            onClick={handleDeleteSelectedOrders}
-            style={{ border: "1px solid #1E5EFF" }}
-          >
-            <MdOutlineDeleteOutline style={{ color: " #1E5EFF" }} />
-          </Button>
-        </Col>
-      </Row>
-
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>
-              <Form.Check
-                type="checkbox"
-                onChange={(e) =>
-                  setSelectedOrders(
-                    e.target.checked ? currentOrders.map((order) => order.id) : []
-                  )
-                }
-                checked={
-                  selectedOrders.length === currentOrders.length && currentOrders.length > 0
-                }
+            <InputGroup className="w-50">
+              <Form.Control
+                type="text"
+                placeholder="Search orders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </th>
-            <th>Order ID</th>
-            <th>Customer Name</th>
-            <th>Status</th>
-            <th>Total Amount</th>
-            <th>Order Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentOrders.length > 0 ? (
-            currentOrders.map((order, index) => (
-              <tr key={order.id}>
-                <td>
+            </InputGroup>
+          </Col>
+
+          {/* Action Buttons */}
+          <Col xs={12} md={6} className="d-flex justify-content-end gap-3">
+            <Button variant="outline-primary" size="sm">
+              <MdModeEditOutline size={20} />
+            </Button>
+            <Button variant="outline-danger" size="sm">
+              <MdOutlineDeleteOutline size={20} />
+            </Button>
+          </Col>
+        </Row>
+
+        {/* Order Table */}
+        {loading ? (
+          <p>Loading orders...</p>
+        ) : error ? (
+          <p className="text-danger">{error}</p>
+        ) : (
+          <Table striped bordered hover responsive className="rounded shadow-sm">
+            <thead className="bg-light">
+              <tr>
+                <th>
                   <Form.Check
                     type="checkbox"
-                    checked={selectedOrders.includes(order.id)}
-                    onChange={() => handleCheckboxChange(order.id)}
+                    onChange={(e) =>
+                      setSelectedOrders(
+                        e.target.checked
+                          ? currentOrders.map((order) => order.id)
+                          : []
+                      )
+                    }
+                    checked={
+                      selectedOrders.length === currentOrders.length &&
+                      currentOrders.length > 0
+                    }
                   />
-                </td>
-                <td>{indexOfFirstOrder + index + 1}</td>
-                <td>{order.customerName || "N/A"}</td>
-                <td>{order.orderStatus || "N/A"}</td>
-                <td>${order.totalAmount?.toFixed(2) || "N/A"}</td>
-                <td>{order.orderDate || "N/A"}</td>
+                </th>
+                <th>Order ID</th>
+                <th>Customer ID</th>
+                <th>Status</th>
+                <th>Total Amount</th>
+                <th>Order Date</th>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="text-center">
-                No orders available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+            </thead>
+            <tbody>
+              {currentOrders.length > 0 ? (
+                currentOrders.map((order, index) => (
+                  <tr key={order.id}>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={selectedOrders.includes(order.id)}
+                        onChange={() => handleCheckboxChange(order.id)}
+                      />
+                    </td>
+                    <td className="fw-bold">{indexOfFirstOrder + index + 1}</td>
+                    <td>{order.user_id || "N/A"}</td>
+                    <td
+                      className={`fw-bold ${
+                        order.status === "Completed"
+                          ? "text-success"
+                          : order.status === "Pending"
+                          ? "text-warning"
+                          : "text-danger"
+                      }`}
+                    >
+                      {order.status || "N/A"}
+                    </td>
+                    <td className="fw-bold">${order.total_price?.toFixed(2) || "N/A"}</td>
+                    <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center text-muted py-4">
+                    No orders available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        )}
 
-      <PaginationComponent
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        {/* Pagination */}
+        <div className="d-flex justify-content-end mt-3">
+          <PaginationComponent
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      </Card>
     </div>
   );
 };

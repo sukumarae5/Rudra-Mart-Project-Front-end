@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../features/cart/cartActions';
+import { useNavigate } from 'react-router-dom';
 
 const SearchPage = () => {
   const { products = [] } = useSelector((state) => state.products);
   const { searchproduct = '' } = useSelector((state) => state.products);
-
   const [filteredProducts, setFilteredProducts] = useState([]);
-
+  const navigate = useNavigate();
+  const dispatch=useDispatch()
+ const handleAddToCart = (product) => {
+    // Check if the product is already in the cart
+    
+    dispatch(addToCart(product)); // Correctly dispatch the Redux action
+    navigate("/cartPage")
+    
+  };
   useEffect(() => {
     if (!searchproduct) return;
 
@@ -50,9 +59,7 @@ const SearchPage = () => {
                     borderRadius: '8px',
                   }}
                 />
-              </div>
-
-              {/* Details Section */}
+              </div>            
               <div style={{ flex: '3', marginLeft: '20px' }}>
                 <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
                   {product.name}
@@ -76,7 +83,10 @@ const SearchPage = () => {
                   }}
                   onMouseOver={(e) => (e.target.style.backgroundColor = '#0056b3')}
                   onMouseOut={(e) => (e.target.style.backgroundColor = '#007bff')}
-                >
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent card click navigation
+                    handleAddToCart(product); // Use the correctly named function
+                  }}                >
                   Buy Now
                 </button>
               </div>

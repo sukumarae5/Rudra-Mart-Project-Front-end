@@ -5,38 +5,32 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchusersrequest, userlogindata } from "../features/user/userActions";
 import { useDispatch, useSelector } from "react-redux";
 
-
 const Login = () => {
-  
   const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
   const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
   const dispatch = useDispatch();
   const { users = [], error = null } = useSelector((state) => state.users);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
-    console.log("Users from Redux on Component Render:", users);
-  }, [users]);
+    dispatch(fetchusersrequest());
+  }, [dispatch]);
 
   const [login, setLogin] = useState({
     email: "",
     password: "",
   });
+
   const { email, password } = login;
 
-  const changefun = async (e) => {
-    await setLogin({ ...login, [e.target.name]: e.target.value });
+  const changefun = (e) => {
+    setLogin({ ...login, [e.target.name]: e.target.value });
   };
 
-  useEffect(() => {
-    dispatch(fetchusersrequest());
-  }, [dispatch]);
-  
-  console.log(login)
   const sub = (e) => {
     e.preventDefault();
 
-    if (login.email === adminEmail && login.password === adminPassword) {
+    if (email === adminEmail && password === adminPassword) {
       alert("Admin Login Successful!");
       navigate("/admin");
     } else {
@@ -45,22 +39,27 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        alert("Login successful:", matchingUser);
-        dispatch(userlogindata({
-          name: matchingUser.name,
-          phone: matchingUser.
-          phone_number,
-          email: matchingUser.email,
-        }));
-        console.log(matchingUser.name)
+        // Generate a token (simulated for now)
+        const userToken = btoa(JSON.stringify({ email: matchingUser.email }));
+
+        alert("Login successful!");
+
+        // Save token to localStorage
+        localStorage.setItem("userToken", userToken);
+
+        // Dispatch Redux action to set user data
+        dispatch(
+          userlogindata({
+            name: matchingUser.name,
+            phone: matchingUser.phone_number,
+            email: matchingUser.email,
+          })
+        );
         navigate("/");
       } else {
-        console.log("Login failed:", error || "Invalid email or password");
+        alert("Invalid login credentials");
       }
     }
-   
-    console.log("Login form submitted:", login);
-    // Dispatch action to fetch users
   };
 
   return (
