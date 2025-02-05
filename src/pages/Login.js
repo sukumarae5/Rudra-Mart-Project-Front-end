@@ -39,15 +39,9 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        // Generate a token (simulated for now)
-        const userToken = btoa(JSON.stringify({ email: matchingUser.email }));
-
-        alert("Login successful!");
-
-        // Save token to localStorage
-        localStorage.setItem("userToken", userToken);
-
-        // Dispatch Redux action to set user data
+        // const userToken = btoa(JSON.stringify({ email: matchingUser.email }));
+        // alert("Login successful!");
+        // localStorage.setItem("userToken", userToken);
         dispatch(
           userlogindata({
             name: matchingUser.name,
@@ -55,6 +49,7 @@ const Login = () => {
             email: matchingUser.email,
           })
         );
+        
         navigate("/");
       } else {
         alert("Invalid login credentials");

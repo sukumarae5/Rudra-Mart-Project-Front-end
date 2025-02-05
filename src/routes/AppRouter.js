@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "../components/Layout/AppLayout";
-
+import UserCheckOutpage from "../pages/UserAccontDetialsPage/UserCheckOutpage";
 import HomePage from "../pages/HomePage";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
@@ -12,6 +12,7 @@ import UserProfile from "../pages/UserAccontDetialsPage/UserProfile";
 import AdminHeader from "../components/AdminPane/AdminHeader";
 import AdminRoute from "./AdminRoute";
 import Contactpage from "../pages/Contactpage";
+import WishListpage from "../pages/UserAccontDetialsPage/WishListpage";
 const AppRouter = createBrowserRouter([
   {
     path: "/",
@@ -48,6 +49,7 @@ const AppRouter = createBrowserRouter([
         path: "/productpage",
         element: <ProductPage />,
       },
+
       {
         path: "/useraccontpage",
         element: <UserAccontPage />,
@@ -55,6 +57,15 @@ const AppRouter = createBrowserRouter([
           {
             path: "userprofile",  // Remove the leading slash
             element: <UserProfile />,
+          },
+          {
+            path:"usercheckoutpage",
+            element:<UserCheckOutpage/>
+          },
+          {
+
+            path:"WishListpage",
+            element:<WishListpage/>
           },
         ],
       },
