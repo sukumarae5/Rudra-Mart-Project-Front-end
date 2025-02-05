@@ -69,7 +69,7 @@ const ProductDetailPage = () => {
               src={mainImage.image_url}  
               alt="Product"
               className="img-fluid"
-              style={{ width: "400px", height: "400px", border: "1px solid #ccc" }}
+              style={{ width: "450px", height: "450px", border: "1px solid #ccc",borderRadius:"10px" }}
             />
           </div>
         </div>
