@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Form, Container} from "react-bootstrap";
+import { Navbar, Nav, Form, Container, Badge } from "react-bootstrap";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -16,7 +16,8 @@ const Header = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const { data = {} } = useSelector((state) => state.users);
-  console.log(data)
+  const { addToWishlist = [] } = useSelector((state) => state.products);
+  const { cartProducts } = useSelector((state) => state.cart);
   const location = useLocation();
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
@@ -40,9 +41,10 @@ const Header = () => {
     dispatch(userlogoutdata());
     navigate("/login");
   };
-  const handleprofile=()=>{
-    navigate("/useraccontpage")
-  }
+
+  const handleProfile = () => {
+    navigate("/useraccontpage");
+  };
 
   return (
     <div>
@@ -116,22 +118,60 @@ const Header = () => {
                       className="d-flex align-items-center border-0 bg-white"
                     >
                       <FaRegUserCircle size={24} className="me-2" />
-                      
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
-                      <Dropdown.Item onClick={handleprofile}>Profile</Dropdown.Item>
+                      <Dropdown.Item onClick={handleProfile}>Profile</Dropdown.Item>
                       <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 ) : null}
 
-                <FavoriteBorderIcon  onClick={() => navigate("/useraccontpage/WishListpage")} className="text-dark mx-3" style={{ cursor: "pointer" }} />
-                <ShoppingCartIcon
-                  className="text-dark"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigate("/cartpage")}
-                />
+                {/* Display wishlist length */}
+                <div className="position-relative mx-3">
+                  <FavoriteBorderIcon
+                    onClick={() => navigate("/WishListpage")}
+                    className="text-dark"
+                    style={{ cursor: "pointer" }}
+                  />
+                  {addToWishlist.length > 0 && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-10px",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {addToWishlist.length}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Display cart products length */}
+                <div className="position-relative mx-3">
+                  <ShoppingCartIcon
+                    className="text-dark"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/cartpage")}
+                  />
+                  {cartProducts.length > 0 && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-10px",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {cartProducts.length}
+                    </Badge>
+                  )}
+                </div>
               </div>
             )}
           </Navbar.Collapse>

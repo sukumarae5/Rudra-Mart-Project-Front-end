@@ -2,7 +2,6 @@
 const initialState = {
   users: [], // Default to empty array
   data:[],
-  
   error: null, // Default to null
 };
 
@@ -15,7 +14,8 @@ const userReducer = (state = initialState, action) => {
   console.log("Updating Users State:", action.payload);
   return {
     ...state,
-    users:  action.payload , // Ensure users is an array
+    users:  action.payload ,
+     // Ensure users is an array
     error: null,
   };
     case 'FETCH_USERS_FAILURE':

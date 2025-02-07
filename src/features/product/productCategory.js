@@ -15,7 +15,7 @@ import { setSelectedProduct } from "./productActions";
 import { CiMobile4 } from "react-icons/ci";
 import { addToCart } from "../cart/cartActions";
 import { addToWishlist } from "../product/productActions";
-
+import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 
 const ProductCategory = () => {
@@ -145,7 +145,7 @@ const ProductCategory = () => {
                   }}
                   onClick={() => categoryCardClick(category.categoryid)}
                 >
-                  <span style={{ fontSize: "40px", padding: "10px" }}>
+                  <span style={{ fontSize: "40px", padding: "15px" }}>
                     {category.categoryicon}
                   </span>
                   <p style={{ margin: 0 }}>{category.context}</p>
@@ -162,7 +162,7 @@ const ProductCategory = () => {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: "10px",
+                  gap: "20px",
                 }}
               >
                 {filteredProducts.map((product, index) => (
@@ -172,7 +172,7 @@ const ProductCategory = () => {
                     onMouseLeave={() => setHoveredCard(null)}
                     onClick={() => handleCardClick(product.id, product)}
                     style={{
-                      padding: "10px",
+                      padding: "15px",
                       border: "1px solid #ccc",
                       borderRadius: "8px",
                       background: "#f9f9f9",
@@ -180,52 +180,80 @@ const ProductCategory = () => {
                       position: "relative",
                     }}
                   >
-                    {clickedProducts.has(product.id) ? (
-                      <FaHeart
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "7px",
+                        left: "90%",
+                        
+                        gap: "8px",
+                        alignItems: "center",
+                        marginBottom: "100px",
+                      }}
+                    >
+                     
+
+                      {clickedProducts.has(product.id) ? (
+                        <FaHeart
+                          style={{
+                            fontSize: "1.3rem",
+                            color: "red",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "40%",
+                          }}
+                          onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      ) : (
+                        <FaRegHeart
+                          style={{
+                            fontSize: "1.2rem",
+                            color: "black",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "40%",
+                          }}
+                          onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      )}
+                      <FaEye
                         style={{
-                          position: "relative",
-                          top: "0%",
-                          left: "86%",
-                          fontSize: "1.3rem",
-                          color: "red",
+                          fontSize: "1.2rem",
+                          color: "gray",
                           cursor: "pointer",
+                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "40%",
                         }}
-                        onClick={(e) => handleWishlistClick(e, product)}
-                      />
-                    ) : (
-                      <FaRegHeart
-                        style={{
-                          position: "relative",
-                          top: "0%",
-                          left: "86%",
-                          fontSize: "1.3rem",
-                          color: "black",
-                          cursor: "pointer",
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(product.id, product);
                         }}
-                        onClick={(e) => handleWishlistClick(e, product)}
                       />
-                    )}
+                    </div>
+
                     <img
                       src={product.image_url}
                       alt={product.name}
                       style={{
-                        width: "100%",
-                        height: "150px",
+                        width: "99%",
+                        padding:"10px",
+                        height: "170px",
                         objectFit: "cover",
-                        borderRadius: "4px",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
                       }}
                     />
+                     
                     <div
                       style={{
                         position: "relative",
-                        textAlign: "end",
+                        textAlign: "center",
                         top: "0",
                         left: "0",
                         width: "100%",
                         backgroundColor: "black",
                         color: "white",
-                        textAlign: "center",
-                        padding: "10px 0",
+                        padding: "12px 0",
                         display: hoveredCard === product.id ? "block" : "none",
                         cursor: "pointer",
                       }}
@@ -233,7 +261,7 @@ const ProductCategory = () => {
                     >
                       Add to Cart
                     </div>
-                    <h5>{product.name}</h5>
+                    <h5 style={{ margin: "10px 0" }}>{product.name}</h5>
                     <p>Price: ${product.price}</p>
                   </div>
                 ))}
