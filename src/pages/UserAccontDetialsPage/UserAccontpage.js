@@ -32,12 +32,15 @@ const UserAccountPage = () => {
             </li>
             <li>Address Book</li>
             <li>My Payment Options</li>
+            
           </ul>
 
           <h2 className="text-lg font-semibold text-gray-800 mt-6 mb-4">
             My Orders
           </h2>
           <ul className="text-gray-600 space-y-2">
+          <li className="cursor-pointer hover:text-purple-600"
+            onClick={()=>navigate("usercheckoutpage")}>Order History</li>
             <li>My Returns</li>
             <li>My Cancellations</li>
           </ul>
@@ -46,7 +49,8 @@ const UserAccountPage = () => {
             My Wishlist
           </h2>
           <ul className="text-gray-600">
-            <li>Wishlisted Products</li>
+            <li className="cursor-pointer hover:text-purple-600"
+            onClick={()=>navigate()}>Wishlisted Products</li>
           </ul>
         </div>
 

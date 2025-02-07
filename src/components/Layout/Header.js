@@ -126,7 +126,7 @@ const Header = () => {
                   </Dropdown>
                 ) : null}
 
-                <FavoriteBorderIcon className="text-dark mx-3" style={{ cursor: "pointer" }} />
+                <FavoriteBorderIcon  onClick={() => navigate("/useraccontpage/WishListpage")} className="text-dark mx-3" style={{ cursor: "pointer" }} />
                 <ShoppingCartIcon
                   className="text-dark"
                   style={{ cursor: "pointer" }}
