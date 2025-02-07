@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Form, Container } from "react-bootstrap";
+import { Navbar, Nav, Form, Container, Badge } from "react-bootstrap";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "./Footer";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchproductsrequest, searchquryproduct } from "../../features/product/productActions";
 import { FaRegUserCircle } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -15,6 +15,9 @@ const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+  const { data = {} } = useSelector((state) => state.users);
+  const { addToWishlist = [] } = useSelector((state) => state.products);
+  const { cartProducts } = useSelector((state) => state.cart);
   const [user, setUser] = useState(null);
   const location = useLocation();
 
@@ -49,6 +52,25 @@ const Header = () => {
   }, []); // Only run once when component mounts
   
 
+  const handleLogin = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+    window.dispatchEvent(new Event("storage")); // Sync for other tabs
+    window.location.reload(); // Refresh page after login
+  };
+
+  const handleLogout = () => {
+    dispatch(userlogoutdata());
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/login");
+    window.dispatchEvent(new Event("storage")); // Trigger update for all tabs
+  };
+
+  const handleProfile = () => {
+    navigate("/useraccountpage");
+  };
   const handleSearch = (event) => {
     event.preventDefault();
     if (searchQuery.length >= 3) {
@@ -58,22 +80,6 @@ const Header = () => {
       alert("Please enter at least 3 characters to search.");
     }
   };
-
-  const handleLogout = () => {
-    dispatch(userlogoutdata());
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-
-   
-    setUser(null);
-    navigate("/login");
-    window.dispatchEvent(new Event("storage")); // Manually trigger update
-  };
-
-  const handleProfile = () => {
-    navigate("/useraccountpage");
-  };
-
   return (
     <div>
       <div className="bg-black text-white py-2 d-flex justify-content-between align-items-center px-3">
@@ -149,13 +155,51 @@ const Header = () => {
                   </Dropdown>
                 ) : null}
 
-                <FavoriteBorderIcon  onClick={() => navigate("/useraccontpage/WishListpage")} className="text-dark mx-3" style={{ cursor: "pointer" }} />
-                <ShoppingCartIcon
-                  className="text-dark"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigate("/cartpage")}
-                />
-                
+                {/* Display wishlist length */}
+                <div className="position-relative mx-3">
+                  <FavoriteBorderIcon
+                    onClick={() => navigate("/WishListpage")}
+                    className="text-dark"
+                    style={{ cursor: "pointer" }}
+                  />
+                  {addToWishlist.length > 0 && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-10px",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {addToWishlist.length}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Display cart products length */}
+                <div className="position-relative mx-3">
+                  <ShoppingCartIcon
+                    className="text-dark"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/cartpage")}
+                  />
+                  {cartProducts.length > 0 && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-10px",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {cartProducts.length}
+                    </Badge>
+                  )}
+                </div>
               </div>
             )}
           </Navbar.Collapse>

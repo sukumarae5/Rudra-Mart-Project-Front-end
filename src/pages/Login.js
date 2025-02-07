@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchusersrequest, userlogindata } from "../features/user/userActions";
+import { fetchusersrequest } from "../features/user/userActions";
 import sideImage from "../../src/assets/images/cart.jpg";
 
 const Login = () => {
@@ -14,6 +14,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState("");
 
@@ -27,7 +28,7 @@ const Login = () => {
     dispatch(fetchusersrequest());
   }, [dispatch]);
 
-  const sub = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const matchingUser = users.find(
@@ -47,8 +48,12 @@ const Login = () => {
           localStorage.setItem("authToken", data.token);
           localStorage.setItem("user", JSON.stringify(matchingUser));
 
-          navigate("/");
           alert(data.message);
+          navigate("/");
+
+          setTimeout(() => {
+            window.location.reload(); // Ensure one-time refresh for updates
+          }, 500);
         } else {
           setError("Login failed, invalid credentials");
         }
@@ -67,36 +72,6 @@ const Login = () => {
       setError("Something went wrong. Please try again.");
     }
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      setError("No token found, please log in.");
-      return;
-    }
-
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user) {
-        fetch(`http://192.168.1.6:3000/api/users/profile/${user.id}`, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((response) => {
-            if (!response.ok) throw new Error("Invalid or expired token");
-            return response.json();
-          })
-          .then((data) => setUserData(data))
-          .catch((err) => {
-            console.error("Error fetching user data:", err);
-            setError("Your session has expired. Please log in again.");
-          });
-      }
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      setError("An error occurred. Please log in again.");
-    }
-  }, []);
 
   return (
     <div>
@@ -119,7 +94,7 @@ const Login = () => {
                   </h1>
                   <p className="text-muted mb-4">Enter your details below</p>
 
-                  <form onSubmit={sub} className="space-y-4 w-80">
+                  <form onSubmit={handleLogin} className="space-y-4 w-80">
                     <input
                       type="email"
                       placeholder="Email or Phone Number"
