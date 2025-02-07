@@ -155,8 +155,7 @@ const Header = () => {
                   style={{ cursor: "pointer" }}
                   onClick={() => navigate("/cartpage")}
                 />
-                <FavoriteBorderIcon className="text-dark mx-3" style={{ cursor: "pointer" }} />
-                <ShoppingCartIcon className="text-dark" style={{ cursor: "pointer" }} onClick={() => navigate("/cartpage")} />
+                
               </div>
             )}
           </Navbar.Collapse>
