@@ -1,17 +1,17 @@
-import { takeEvery, call, put } from 'redux-saga/effects';
-import { FETCH_ORDERS_REQUEST, fetchOrdersSuccess, fetchOrdersFailure } from '../order/orderActions';
+import { takeEvery, call, put } from "redux-saga/effects";
+import { FETCH_ORDERS_REQUEST, fetchOrdersSuccess, fetchOrdersFailure } from "./orderActions";
 
 // Function to fetch orders from API
 const fetchOrdersApi = async () => {
   try {
-    const token = localStorage.getItem('authToken'); // Get token dynamically
-    if (!token) throw new Error('No authentication token found.');
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No authentication token found.");
 
-    const response = await fetch('http://192.168.1.6:3000/api/orders/my-orders', {
-      method: 'GET',
+    const response = await fetch("http://192.168.1.6:3000/api/orders/my-orders", {
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
@@ -22,7 +22,7 @@ const fetchOrdersApi = async () => {
     const data = await response.json();
     return data.orders; // Assuming API returns { orders: [...] }
   } catch (error) {
-    throw new Error('Failed to fetch orders: ' + error.message);
+    throw new Error("Failed to fetch orders: " + error.message);
   }
 };
 
