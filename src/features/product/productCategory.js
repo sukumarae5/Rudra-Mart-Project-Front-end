@@ -7,23 +7,27 @@ import { IoBookOutline } from "react-icons/io5";
 import { BsSmartwatch } from "react-icons/bs";
 import { CiCamera } from "react-icons/ci";
 import { GiLighter } from "react-icons/gi";
-import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
+import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { IoHeadsetOutline } from "react-icons/io5";
 import { IoGiftOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { setSelectedProduct } from "./productActions";
 import { CiMobile4 } from "react-icons/ci";
-import { addToCart } from '../cart/cartActions';
+import { addToCart } from "../cart/cartActions";
+import { addToWishlist } from "../product/productActions";
+
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
-  const { cartItems = [] } = useSelector((state) => state.cart || {}); // Get cartItems from Redux
+  const { cartItems = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [clickedProducts, setClickedProducts] = useState(new Set());
 
   const categoryCardClick = (categoryid) => {
     const filtered = products.filter(
@@ -44,24 +48,39 @@ const ProductCategory = () => {
   };
 
   const handleCardClick = (productId, product) => {
-    dispatch(setSelectedProduct(product));   
-    navigate('/productpage');
+    dispatch(setSelectedProduct(product));
+    navigate("/productpage");
+  };
+
+  const handleWishlistClick = (e, product) => {
+    e.stopPropagation();
+    const isClicked = clickedProducts.has(product.id);
+    if (isClicked) {
+      setClickedProducts((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(product.id);
+        return newSet;
+      });
+    } else {
+      setClickedProducts((prev) => new Set(prev).add(product.id));
+      dispatch(addToWishlist(product));
+    }
   };
 
   const handleAddToCart = (event, product) => {
-    event.stopPropagation();  // Prevents event from bubbling up to parent elements
+    event.stopPropagation();
 
     const isProductInCart = cartItems.some((item) => item.id === product.id);
 
     if (isProductInCart) {
-      alert('This item is already in the cart.');
+      alert("This item is already in the cart.");
     } else {
       dispatch(addToCart(product));
     }
   };
 
   const categories = [
-    { categoryicon: <CiMobile4 /> , context: "Phone", categoryid: "1" },
+    { categoryicon: <CiMobile4 />, context: "Phone", categoryid: "1" },
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },
     { categoryicon: <BsSmartwatch />, context: "Smartwatch", categoryid: "5" },
     { categoryicon: <CiCamera />, context: "Camera", categoryid: "3" },
@@ -75,33 +94,39 @@ const ProductCategory = () => {
   return (
     <div>
       <hr />
-      <div className="d-flex justify-content-between align-items-center" style={{paddingLeft:"3%"}}>
+      <div
+        className="d-flex justify-content-between align-items-center"
+        style={{ paddingLeft: "3%" }}
+      >
+        <h2 style={{ color: "red", fontSize: "30px" }}>Product Category</h2>
         <div>
-          <h2 style={{ color: 'red', fontSize: '30px' }}>Product Category</h2>
-        </div>
-        <div>
-          <button className="btn btn-light" onClick={() => scrollCategory("left")}>
+          <button
+            className="btn btn-light"
+            onClick={() => scrollCategory("left")}
+          >
             <ArrowBackIos />
           </button>
-          <button className="btn btn-light" onClick={() => scrollCategory("right")}>
+          <button
+            className="btn btn-light"
+            onClick={() => scrollCategory("right")}
+          >
             <ArrowForwardIos />
           </button>
         </div>
       </div>
-      <br />
       <Container>
         <Row>
           <Col>
             <div
               id="scroll-category-product"
-              className="d-flex overflow-auto"
               style={{
                 display: "flex",
                 gap: "10px",
                 justifyContent: "flex-start",
-                scrollBehavior: 'smooth',
-                padding: '0 20px',
-                whiteSpace: 'nowrap',
+                scrollBehavior: "smooth",
+                padding: "0 20px",
+                whiteSpace: "nowrap",
+                overflowX: "auto",
               }}
             >
               {categories.map((category, index) => (
@@ -120,13 +145,7 @@ const ProductCategory = () => {
                   }}
                   onClick={() => categoryCardClick(category.categoryid)}
                 >
-                  <span
-                    style={{
-                      fontSize: "40px",
-                      display: "block",
-                      padding: "10px",
-                    }}
-                  >
+                  <span style={{ fontSize: "40px", padding: "10px" }}>
                     {category.categoryicon}
                   </span>
                   <p style={{ margin: 0 }}>{category.context}</p>
@@ -135,9 +154,6 @@ const ProductCategory = () => {
             </div>
           </Col>
         </Row>
-
-        <br />
-        <br />
 
         <Row>
           <Col>
@@ -154,15 +170,41 @@ const ProductCategory = () => {
                     key={index}
                     onMouseEnter={() => setHoveredCard(product.id)}
                     onMouseLeave={() => setHoveredCard(null)}
-                    onClick={() => handleCardClick(product.id, product)} 
+                    onClick={() => handleCardClick(product.id, product)}
                     style={{
                       padding: "10px",
                       border: "1px solid #ccc",
                       borderRadius: "8px",
                       background: "#f9f9f9",
                       textAlign: "center",
+                      position: "relative",
                     }}
                   >
+                    {clickedProducts.has(product.id) ? (
+                      <FaHeart
+                        style={{
+                          position: "relative",
+                          top: "0%",
+                          left: "86%",
+                          fontSize: "1.3rem",
+                          color: "red",
+                          cursor: "pointer",
+                        }}
+                        onClick={(e) => handleWishlistClick(e, product)}
+                      />
+                    ) : (
+                      <FaRegHeart
+                        style={{
+                          position: "relative",
+                          top: "0%",
+                          left: "86%",
+                          fontSize: "1.3rem",
+                          color: "black",
+                          cursor: "pointer",
+                        }}
+                        onClick={(e) => handleWishlistClick(e, product)}
+                      />
+                    )}
                     <img
                       src={product.image_url}
                       alt={product.name}
@@ -174,20 +216,20 @@ const ProductCategory = () => {
                       }}
                     />
                     <div
-                      className="add-to-cart-btn"
                       style={{
-                        position: 'relative',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        backgroundColor: 'black',
-                        color: 'white',
-                        textAlign: 'center',
-                        padding: '10px 0',
-                        display: hoveredCard === product.id ? 'block' : 'none',
-                        cursor: 'pointer',
+                        position: "relative",
+                        textAlign: "end",
+                        top: "0",
+                        left: "0",
+                        width: "100%",
+                        backgroundColor: "black",
+                        color: "white",
+                        textAlign: "center",
+                        padding: "10px 0",
+                        display: hoveredCard === product.id ? "block" : "none",
+                        cursor: "pointer",
                       }}
-                      onClick={(e) => handleAddToCart(e, product)} // Pass event to stop propagation
+                      onClick={(e) => handleAddToCart(e, product)}
                     >
                       Add to Cart
                     </div>

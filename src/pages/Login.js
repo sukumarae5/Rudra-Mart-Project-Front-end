@@ -55,7 +55,7 @@ const Login = () => {
       } else {
         setError("Invalid login credentials");
       }
-      
+
       const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
       const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
       if (email === adminEmail && password === adminPassword) {

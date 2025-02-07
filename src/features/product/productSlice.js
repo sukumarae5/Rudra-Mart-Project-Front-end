@@ -3,7 +3,7 @@ import {
   FETCH_PRODUCTS_SUCCESS,
   FETCH_PRODUCTS_FAILURE,
   SET_SELECTED_PRODUCT,
-  GET_SEARCH_PRODUCT,
+  GET_SEARCH_PRODUCT,ADD_TO_WISHlIST,
   
 } from './productActions';
 
@@ -11,6 +11,7 @@ const initialState = {
   products: [],
   searchproduct:[],
   selectedProduct: [],
+  addToWishlist:[],
   loading: false,
   error: null,
 };
@@ -31,6 +32,8 @@ const productReducer = (state = initialState, action) => {
     case GET_SEARCH_PRODUCT:
       
       return {...state,searchproduct:action.payload}
+    case ADD_TO_WISHlIST:
+      return {...state,addToWishlist:action.payload}  
     default:
       return state;
   }

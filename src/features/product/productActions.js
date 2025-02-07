@@ -5,6 +5,7 @@ export const FETCH_PRODUCTS_FAILURE = 'FETCH_PRODUCTS_FAILURE';
 export const GET_SEARCH_PRODUCT='GET_SEARCH_PRODUCT'
 
 export const SET_SELECTED_PRODUCT='SET_SELECTED_PRODUCT' 
+export const ADD_TO_WISHlIST="ADD_TO_WISHlIST"
 // Action Creators
 export const fetchproductsrequest = () => ({
   type: FETCH_PRODUCTS_REQUEST,
@@ -31,6 +32,13 @@ export const setSelectedProduct = (selectedProduct) => {
     payload: selectedProduct,
   };
 };
+export const addToWishlist=(addToWishlist)=>{
+  return{
+    type:"ADD_TO_WISHlIST",
+    payload:addToWishlist,
+  };
+  
+}
 
 
 
