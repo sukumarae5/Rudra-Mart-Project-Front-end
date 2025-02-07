@@ -1,16 +1,12 @@
 import { takeEvery, call, put } from "redux-saga/effects";
 import { FETCH_ORDERS_REQUEST, fetchOrdersSuccess, fetchOrdersFailure } from "./orderActions";
 
-// Function to fetch orders from API
+// Function to fetch orders from API without authentication
 const fetchOrdersApi = async () => {
   try {
-    const token = localStorage.getItem("authToken");
-    if (!token) throw new Error("No authentication token found.");
-
-    const response = await fetch("http://192.168.1.6:3000/api/orders/my-orders", {
+    const response = await fetch("http://192.168.1.6:3000/api/orders", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });

@@ -68,36 +68,6 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      setError("No token found, please log in.");
-      return;
-    }
-
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user) {
-        fetch(`http://192.168.1.6:3000/api/users/profile/${user.id}`, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((response) => {
-            if (!response.ok) throw new Error("Invalid or expired token");
-            return response.json();
-          })
-          .then((data) => setUserData(data))
-          .catch((err) => {
-            console.error("Error fetching user data:", err);
-            setError("Your session has expired. Please log in again.");
-          });
-      }
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      setError("An error occurred. Please log in again.");
-    }
-  }, []);
-
   return (
     <div>
       <Container fluid className="py-5">
