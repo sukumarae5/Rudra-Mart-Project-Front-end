@@ -22,8 +22,8 @@ const OrderTable = () => {
   const navigate = useNavigate();
 
   // Get orders state from Redux store
-  const { orders, loading, error } = useSelector((state) => state.orders || {});
-  
+  const { orders = [], loading, error } = useSelector((state) => state.order || {});
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,8 +31,8 @@ const OrderTable = () => {
   const [selectedOrders, setSelectedOrders] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchOrdersRequest()); // Fetch orders on component mount
-  }, [dispatch]);
+    if (!orders.length) dispatch(fetchOrdersRequest());
+  }, [dispatch, orders.length]);
 
   const handleCheckboxChange = (orderId) => {
     setSelectedOrders((prevSelected) =>
@@ -42,33 +42,25 @@ const OrderTable = () => {
     );
   };
 
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  const indexOfLastOrder = currentPage * itemsPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
-
+  // Filter Orders
   const filteredOrders = orders.filter((order) => {
     const matchesSearchQuery =
-      (order?.customerName?.toLowerCase() || "").includes(
-        searchQuery.toLowerCase()
-      ) ||
-      (order?.orderStatus?.toLowerCase() || "").includes(
-        searchQuery.toLowerCase()
-      ) ||
-      (order?.totalAmount?.toString() || "").includes(searchQuery);
+      (order?.user_id?.toString() || "").includes(searchQuery.toLowerCase()) ||
+      (order?.status?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (order?.total_price?.toString() || "").includes(searchQuery);
 
     return filterOption === "All"
       ? matchesSearchQuery
-      : matchesSearchQuery && order?.orderStatus === filterOption;
+      : matchesSearchQuery && order?.status === filterOption;
   });
 
-  const currentOrders = filteredOrders.slice(
-    indexOfFirstOrder,
-    indexOfLastOrder
-  );
+  // Pagination Logic
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage));
+  const indexOfLastOrder = currentPage * itemsPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="container-fluid p-4">
@@ -76,18 +68,15 @@ const OrderTable = () => {
         {/* Header Section */}
         <Row className="align-items-center mb-3">
           <Col xs={12} md={6}>
-            <h1 className="fw-bold" style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>Orders</h1>
+            <h1 className="fw-bold" style={{ fontSize: "2rem", color: "#131523", fontWeight: "bold" }}>
+              Orders
+            </h1>
           </Col>
           <Col xs={12} md={6} className="text-md-end d-flex justify-content-end">
             <Button
               onClick={() => navigate("/admin/addorder")}
               className="d-flex align-items-center btn-primary shadow"
-              style={{
-                fontSize: "1rem",
-                padding: "0.6rem 1.2rem",
-                borderRadius: "8px",
-                border: "none",
-              }}
+              style={{ fontSize: "1rem", padding: "0.6rem 1.2rem", borderRadius: "8px", border: "none" }}
             >
               <GoPlus className="me-2" size={22} />
               Add Order
@@ -144,18 +133,13 @@ const OrderTable = () => {
                     type="checkbox"
                     onChange={(e) =>
                       setSelectedOrders(
-                        e.target.checked
-                          ? currentOrders.map((order) => order.id)
-                          : []
+                        e.target.checked ? currentOrders.map((order) => order.id) : []
                       )
                     }
-                    checked={
-                      selectedOrders.length === currentOrders.length &&
-                      currentOrders.length > 0
-                    }
+                    checked={selectedOrders.length === currentOrders.length && currentOrders.length > 0}
                   />
                 </th>
-                <th>Order ID</th>
+                <th>Order #</th>
                 <th>Customer ID</th>
                 <th>Status</th>
                 <th>Total Amount</th>
@@ -175,19 +159,11 @@ const OrderTable = () => {
                     </td>
                     <td className="fw-bold">{indexOfFirstOrder + index + 1}</td>
                     <td>{order.user_id || "N/A"}</td>
-                    <td
-                      className={`fw-bold ${
-                        order.status === "Completed"
-                          ? "text-success"
-                          : order.status === "Pending"
-                          ? "text-warning"
-                          : "text-danger"
-                      }`}
-                    >
+                    <td className={`fw-bold ${order.status === "Completed" ? "text-success" : order.status === "Pending" ? "text-warning" : "text-danger"}`}>
                       {order.status || "N/A"}
                     </td>
                     <td className="fw-bold">${order.total_price?.toFixed(2) || "N/A"}</td>
-                    <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+                    <td>{order.orderDate ? new Date(order.orderDate).toLocaleDateString() : "N/A"}</td>
                   </tr>
                 ))
               ) : (

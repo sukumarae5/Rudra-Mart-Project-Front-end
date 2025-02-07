@@ -7,9 +7,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchproductsrequest, searchquryproduct } from "../../features/product/productActions";
-import { userlogoutdata } from "../../features/user/userActions";
 import { FaRegUserCircle } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
+import { userlogoutdata } from "../../features/user/userActions";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -18,17 +18,61 @@ const Header = () => {
   const { data = {} } = useSelector((state) => state.users);
   const { addToWishlist = [] } = useSelector((state) => state.products);
   const { cartProducts } = useSelector((state) => state.cart);
+  const [user, setUser] = useState(null);
   const location = useLocation();
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
-
   useEffect(() => {
     dispatch(fetchproductsrequest());
+  
+    const checkUser = () => {
+      const storedUser = localStorage.getItem("user");
+      console.log("Stored User:", storedUser);
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
+      }
+    };
+  
+    checkUser(); // Initial check
+  
+    window.addEventListener("storage", checkUser);
+  
+    return () => {
+      window.removeEventListener("storage", checkUser);
+    };
   }, [dispatch]);
+  
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []); // Only run once when component mounts
+  
 
+  const handleLogin = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+    window.dispatchEvent(new Event("storage")); // Sync for other tabs
+    window.location.reload(); // Refresh page after login
+  };
+
+  const handleLogout = () => {
+    dispatch(userlogoutdata());
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/login");
+    window.dispatchEvent(new Event("storage")); // Trigger update for all tabs
+  };
+
+  const handleProfile = () => {
+    navigate("/useraccountpage");
+  };
   const handleSearch = (event) => {
     event.preventDefault();
-
     if (searchQuery.length >= 3) {
       navigate("/searchpage");
       dispatch(searchquryproduct(searchQuery));
@@ -36,21 +80,11 @@ const Header = () => {
       alert("Please enter at least 3 characters to search.");
     }
   };
-
-  const handleLogout = () => {
-    dispatch(userlogoutdata());
-    navigate("/login");
-  };
-
-  const handleProfile = () => {
-    navigate("/useraccontpage");
-  };
-
   return (
     <div>
       <div className="bg-black text-white py-2 d-flex justify-content-between align-items-center px-3">
         <div className="text-center flex-grow-1">
-          <span>Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%! </span>
+          <span>Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!</span>
           <a href="https://example.com" className="text-decoration-underline text-white ms-2">
             Shop Now
           </a>
@@ -65,7 +99,7 @@ const Header = () => {
 
       <Navbar bg="white" expand="lg" className="shadow-sm">
         <Container>
-          <Navbar.Brand href="#" className="text-dark fw-bold">
+          <Navbar.Brand as={Link} to="/" className="text-dark fw-bold">
             Light Up
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbarNav" />
@@ -74,14 +108,13 @@ const Header = () => {
               <Nav.Link as={Link} to="/" className="text-dark">
                 Home
               </Nav.Link>
-              <Nav.Link as={Link} to="/Cartpage" className="text-dark">
+              <Nav.Link as={Link} to="/cartpage" className="text-dark">
                 About
               </Nav.Link>
-              <Nav.Link as={Link} to="/Conatctpage" className="text-dark">
+              <Nav.Link as={Link} to="/contactpage" className="text-dark">
                 Contact
               </Nav.Link>
-
-              {data.email ? (
+              {user ? (
                 <Nav.Link onClick={handleLogout} className="text-dark">
                   Logout
                 </Nav.Link>
@@ -110,16 +143,11 @@ const Header = () => {
 
             {!isAuthPage && (
               <div className="d-flex align-items-center">
-                {data.email ? (
+                {user ? (
                   <Dropdown align="end">
-                    <Dropdown.Toggle
-                      variant="light"
-                      id="dropdown-basic"
-                      className="d-flex align-items-center border-0 bg-white"
-                    >
+                    <Dropdown.Toggle variant="light" id="dropdown-basic" className="d-flex align-items-center border-0 bg-white">
                       <FaRegUserCircle size={24} className="me-2" />
                     </Dropdown.Toggle>
-
                     <Dropdown.Menu>
                       <Dropdown.Item onClick={handleProfile}>Profile</Dropdown.Item>
                       <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>

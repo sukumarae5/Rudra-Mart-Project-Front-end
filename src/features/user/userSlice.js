@@ -1,4 +1,3 @@
-
 const initialState = {
   users: [], // Default to empty array
   data:[],
@@ -25,7 +24,7 @@ const userReducer = (state = initialState, action) => {
       return{...state,data:action.payload};
     case 'USER_LOGOUT_DATA':
       console.log(action.payload)
-      return{...state,data:action.payload}
+      return{...state,data:null}
     default:
      return state;
   }
