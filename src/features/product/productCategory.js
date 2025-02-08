@@ -183,9 +183,8 @@ const ProductCategory = () => {
                     <div
                       style={{
                         position: "absolute",
-                        top: "7px",
-                        left: "90%",
-                        
+                        top: "29px",
+                        left: "73%",                      
                         gap: "8px",
                         alignItems: "center",
                         marginBottom: "100px",
@@ -195,24 +194,29 @@ const ProductCategory = () => {
 
                       {clickedProducts.has(product.id) ? (
                         <FaHeart
-                          style={{
-                            fontSize: "1.3rem",
+                        style={{
+                          fontSize: "1.3rem",
+                          padding:"5%",
+                          width:"150%",
                             color: "red",
                             cursor: "pointer",
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
-                          }}
+                            borderRadius: "50%",
+                        }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       ) : (
                         <FaRegHeart
-                          style={{
-                            fontSize: "1.2rem",
-                            color: "black",
+                        style={{
+                          fontSize: "1.2rem",
+                          padding:"10%",                          
+                            color: "#575B5A",
                             cursor: "pointer",
+                            width:"150%",
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
-                          }}
+                            borderRadius: "50%",
+
+                        }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       )}
@@ -220,9 +224,11 @@ const ProductCategory = () => {
                         style={{
                           fontSize: "1.2rem",
                           color: "gray",
-                          cursor: "pointer",
-                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                           cursor: "pointer",
+                           padding:"2%",
+                           width:"150%",
+                           boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                          borderRadius: "50%",
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -235,7 +241,7 @@ const ProductCategory = () => {
                       src={product.image_url}
                       alt={product.name}
                       style={{
-                        width: "99%",
+                        width: "120%",
                         padding:"10px",
                         height: "170px",
                         objectFit: "cover",
