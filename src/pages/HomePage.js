@@ -217,10 +217,10 @@ const HomePage = () => {
                     >
                       <div style={{
                         position: "absolute",
-                        top: "9px",
-                        left: "91%",
-                        
-                        gap: "8px",
+                        top: "22px",
+                        left: "81%",                        
+                        gap: "11px",
+                        color: "#dae2d7",
                         alignItems: "center",
                         marginBottom: "100px",
                       }}>
@@ -230,10 +230,12 @@ const HomePage = () => {
                         <FaHeart
                         style={{
                           fontSize: "1.3rem",
+                          padding:"10%",
+                          width:"150%",
                             color: "red",
                             cursor: "pointer",
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                            borderRadius: "50%",
                         }}
                         onClick={(e) => handleWishlistClick(e, product)}
                         />
@@ -241,10 +243,12 @@ const HomePage = () => {
                         <FaRegHeart
                         style={{
                           fontSize: "1.2rem",
-                            color: "black",
+                          padding:"10%",                          
+                            color: "#575B5A",
                             cursor: "pointer",
+                            width:"150%",
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                            borderRadius: "50%",
                         }}
                         onClick={(e) => handleWishlistClick(e, product)}
                         />
@@ -254,8 +258,10 @@ const HomePage = () => {
                       fontSize: "1.2rem",
                      color: "gray",
                       cursor: "pointer",
+                      padding:"2%",
+                      width:"150%",
                       boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                            borderRadius: "50%",
                       }}
                        onClick={(e) => {
                        e.stopPropagation();
@@ -269,7 +275,7 @@ const HomePage = () => {
                         alt={product.name}
                         className="card-img-top img-fluid"
                         style={{
-                          width:"93%",
+                          width:"100%",
                         paddingTop:"10px",
                         height: '200px',
                         borderTopLeftRadius: '10px',
@@ -343,8 +349,8 @@ const HomePage = () => {
                   >
                       <div style={{
                         position: "absolute",
-                        top: "9px",
-                        left: "92%",                      
+                        top: "29px",
+                        left: "80%",                      
                         gap: "8px",
                         alignItems: "center",
                         marginBottom: "100px",
@@ -355,10 +361,12 @@ const HomePage = () => {
                         <FaHeart
                         style={{
                           fontSize: "1.3rem",
+                          padding:"10%",
+                          width:"150%",
                             color: "red",
                             cursor: "pointer",
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                            borderRadius: "50%",
                         }}
                         onClick={(e) => handleWishlistClick(e, product)}
                         />
@@ -366,21 +374,26 @@ const HomePage = () => {
                         <FaRegHeart
                         style={{
                           fontSize: "1.2rem",
-                            color: "black",
+                          padding:"10%",                          
+                            color: "#575B5A",
                             cursor: "pointer",
+                            width:"150%",
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                            borderRadius: "50%",
+
                         }}
                         onClick={(e) => handleWishlistClick(e, product)}
                         />
                       )}
                       <FaEye
                       style={{
-                      fontSize: "1.2rem",
-                     color: "gray",
-                      cursor: "pointer",
-                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "40%",
+                        fontSize: "1.2rem",
+                        color: "gray",
+                         cursor: "pointer",
+                         padding:"2%",
+                         width:"150%",
+                         boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                        borderRadius: "50%",
                       }}
                        onClick={(e) => {
                        e.stopPropagation();
@@ -394,7 +407,7 @@ const HomePage = () => {
                       alt={product.name}
                       className="card-img-top"
                       style={{
-                        width:"93%",
+                        width:"100%",
                         paddingTop:"10px",
                         height: '200px',
                         borderTopLeftRadius: '10px',

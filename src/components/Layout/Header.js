@@ -69,7 +69,7 @@ const Header = () => {
   };
 
   const handleProfile = () => {
-    navigate("/useraccountpage");
+    navigate("useraccountpage");
   };
   const handleSearch = (event) => {
     event.preventDefault();
