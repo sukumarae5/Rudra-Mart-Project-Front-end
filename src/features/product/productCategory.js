@@ -17,6 +17,7 @@ import { addToCart } from "../cart/cartActions";
 import { addToWishlist } from "../product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
+import axios from "axios";
 
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
@@ -67,15 +68,43 @@ const ProductCategory = () => {
     }
   };
 
-  const handleAddToCart = (event, product) => {
+  const handleAddToCart = async (event, product) => {
     event.stopPropagation();
 
     const isProductInCart = cartItems.some((item) => item.id === product.id);
 
     if (isProductInCart) {
       alert("This item is already in the cart.");
-    } else {
-      dispatch(addToCart(product));
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("userToken");
+
+      if (!token) {
+        alert("User token not found. Please log in.");
+        return;
+      }
+
+      const response = await axios.post(
+        "http://192.168.1.12:3000/api/cart/cartdata",
+        { product },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Product successfully added to cart.");
+        dispatch(addToCart(product));
+      } else {
+        alert("Failed to add product to the cart.");
+      }
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      alert("An error occurred while adding the product to the cart.");
     }
   };
 
@@ -100,16 +129,10 @@ const ProductCategory = () => {
       >
         <h2 style={{ color: "red", fontSize: "30px" }}>Product Category</h2>
         <div>
-          <button
-            className="btn btn-light"
-            onClick={() => scrollCategory("left")}
-          >
+          <button className="btn btn-light" onClick={() => scrollCategory("left")}>
             <ArrowBackIos />
           </button>
-          <button
-            className="btn btn-light"
-            onClick={() => scrollCategory("right")}
-          >
+          <button className="btn btn-light" onClick={() => scrollCategory("right")}>
             <ArrowForwardIos />
           </button>
         </div>
@@ -183,40 +206,35 @@ const ProductCategory = () => {
                     <div
                       style={{
                         position: "absolute",
-                        top: "29px",
-                        left: "73%",                      
+                        top: "7px",
+                        left: "90%",
                         gap: "8px",
                         alignItems: "center",
                         marginBottom: "100px",
                       }}
                     >
-                     
-
                       {clickedProducts.has(product.id) ? (
                         <FaHeart
-                        style={{
-                          fontSize: "1.3rem",
-                          padding:"5%",
-                          width:"150%",
+                          style={{
+                            fontSize: "1.3rem",
+                            padding: "10%",
+                            width: "150%",
                             color: "red",
                             cursor: "pointer",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
                             borderRadius: "50%",
-                        }}
+                          }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       ) : (
                         <FaRegHeart
-                        style={{
-                          fontSize: "1.2rem",
-                          padding:"10%",                          
-                            color: "#575B5A",
+                          style={{
+                            fontSize: "1.2rem",
+                            color: "black",
                             cursor: "pointer",
-                            width:"150%",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "50%",
-
-                        }}
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                            borderRadius: "40%",
+                          }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       )}
@@ -224,11 +242,9 @@ const ProductCategory = () => {
                         style={{
                           fontSize: "1.2rem",
                           color: "gray",
-                           cursor: "pointer",
-                           padding:"2%",
-                           width:"150%",
-                           boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                          borderRadius: "50%",
+                          cursor: "pointer",
+                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                          borderRadius: "40%",
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -241,15 +257,15 @@ const ProductCategory = () => {
                       src={product.image_url}
                       alt={product.name}
                       style={{
-                        width: "120%",
-                        padding:"10px",
+                        width: "99%",
+                        padding: "10px",
                         height: "170px",
                         objectFit: "cover",
                         borderRadius: "8px",
                         marginBottom: "10px",
                       }}
                     />
-                     
+
                     <div
                       style={{
                         position: "relative",
