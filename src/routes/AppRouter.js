@@ -16,7 +16,6 @@ import WishListpage from "../pages/UserAccontDetialsPage/WishListpage";
 const AppRouter = createBrowserRouter([
   {
     path: "/",
-    
     element: <AppLayout />,
     children: [
       {
@@ -25,12 +24,11 @@ const AppRouter = createBrowserRouter([
         index: true,
       },
       {
-        path:"/Conatctpage",
-        element:<Contactpage/>
-
+        path: "/contactpage",
+        element: <Contactpage />,
       },
       {
-        path: "/cartPage",
+        path: "/cartpage",
         element: <CartPage />,
       },
       {
@@ -50,38 +48,29 @@ const AppRouter = createBrowserRouter([
         element: <ProductPage />,
       },
       {
-
-        path:"/WishListpage",
-        element:<WishListpage/>
+        path: "/wishlistpage",
+        element: <WishListpage />,
       },
-
       {
-        path: "/useraccontpage",
+        path: "/useraccountpage",
         element: <UserAccontPage />,
         children: [
           {
-            path: "userprofile",  // Remove the leading slash
+            path: "userprofile",
             element: <UserProfile />,
           },
           {
-            path:"usercheckoutpage",
-            element:<UserCheckOutpage/>
+            path: "usercheckoutpage",
+            element: <UserCheckOutpage />,
           },
-          
         ],
       },
       {
         path: "/admin",
-        element: (
-            <AdminHeader />
-        ),
+        element: <AdminHeader />,
         children: AdminRoute,
       },
     ],
   },
-    
-  
- 
 ]);
-
 export default AppRouter;
