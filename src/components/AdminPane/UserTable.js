@@ -185,67 +185,67 @@ const UserTable = () => {
           </Col>
         </Row>
 
-         {/* Table */}
-      <Table striped bordered hover responsive className="mt-3 shadow-sm">
-        <thead className="bg-primary text-white">
-          <tr>
-            <th>
-              <Form.Check
-                type="checkbox"
-                onChange={(e) =>
-                  setSelectedUsers(
-                    e.target.checked ? currentUsers.map((user) => user.id) : []
-                  )
-                }
-                checked={
-                  selectedUsers.length === currentUsers.length &&
-                  currentUsers.length > 0
-                }
-              />
-            </th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Password</th>
-            <th>Phone Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentUsers.length > 0 ? (
-            currentUsers.map((user, index) => (
-              <tr key={user.id}>
-                <td>
-                  <Form.Check
-                    type="checkbox"
-                    checked={selectedUsers.includes(user.id)}
-                    onChange={() => handleCheckboxChange(user.id)}
-                  />
-                </td>
-                <td>{indexOfFirstUser + index + 1}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.password}</td>
-                <td>{user.phone_number}</td>
-              </tr>
-            ))
-          ) : (
+        {/* Table */}
+        <Table striped bordered hover responsive className="mt-3 shadow-sm">
+          <thead className="bg-primary text-white">
             <tr>
-              <td colSpan="7" className="text-center">
-                No users available.
-              </td>
+              <th>
+                <Form.Check
+                  type="checkbox"
+                  onChange={(e) =>
+                    setSelectedUsers(
+                      e.target.checked
+                        ? currentUsers.map((user) => user.id)
+                        : []
+                    )
+                  }
+                  checked={
+                    selectedUsers.length === currentUsers.length &&
+                    currentUsers.length > 0
+                  }
+                />
+              </th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Password</th>
+              <th>Phone Number</th>
             </tr>
-          )}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {currentUsers.length > 0 ? (
+              currentUsers.map((user, index) => (
+                <tr key={user.id}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={() => handleCheckboxChange(user.id)}
+                    />
+                  </td>
+                  <td>{indexOfFirstUser + index + 1}</td>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.password}</td>
+                  <td>{user.phone_number}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  No users available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
 
-      <PaginationComponent
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <PaginationComponent
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </Card>
-
-     
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchusersrequest, userlogindata } from "../features/user/userActions";
+import { fetchusersrequest } from "../features/user/userActions";
 import sideImage from "../../src/assets/images/cart.jpg";
 
 const Login = () => {
@@ -14,6 +14,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState("");
 
@@ -27,7 +28,7 @@ const Login = () => {
     dispatch(fetchusersrequest());
   }, [dispatch]);
 
-  const sub = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const matchingUser = users.find(
@@ -35,20 +36,24 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        const response = await fetch("http://192.168.1.6:3000/api/users/login", {
+        const response = await fetch("http://192.168.1.12:3000/api/users/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
 
         const data = await response.json();
-
+        console.log(data)
         if (data.token) {
           localStorage.setItem("authToken", data.token);
           localStorage.setItem("user", JSON.stringify(matchingUser));
 
-          navigate("/");
           alert(data.message);
+          navigate("/");
+
+          setTimeout(() => {
+            window.location.reload(); // Ensure one-time refresh for updates
+          }, 500);
         } else {
           setError("Login failed, invalid credentials");
         }
@@ -89,7 +94,7 @@ const Login = () => {
                   </h1>
                   <p className="text-muted mb-4">Enter your details below</p>
 
-                  <form onSubmit={sub} className="space-y-4 w-80">
+                  <form onSubmit={handleLogin} className="space-y-4 w-80">
                     <input
                       type="email"
                       placeholder="Email or Phone Number"

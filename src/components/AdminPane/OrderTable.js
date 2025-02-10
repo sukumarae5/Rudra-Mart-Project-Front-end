@@ -23,7 +23,7 @@ const OrderTable = () => {
 
   // Get orders state from Redux store
   const { orders, loading, error } = useSelector((state) => state.orders || {});
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +37,6 @@ const OrderTable = () => {
   const handleCheckboxChange = (orderId) => {
     setSelectedOrders((prevSelected) =>
       prevSelected.includes(orderId)
-    
         ? prevSelected.filter((id) => id !== orderId)
         : [...prevSelected, orderId]
     );
@@ -77,9 +76,22 @@ const OrderTable = () => {
         {/* Header Section */}
         <Row className="align-items-center mb-3">
           <Col xs={12} md={6}>
-            <h1 className="fw-bold" style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>Orders</h1>
+            <h1
+              className="fw-bold"
+              style={{
+                fontSize: "2rem",
+                color: " #131523",
+                fontWeight: "bold",
+              }}
+            >
+              Orders
+            </h1>
           </Col>
-          <Col xs={12} md={6} className="text-md-end d-flex justify-content-end">
+          <Col
+            xs={12}
+            md={6}
+            className="text-md-end d-flex justify-content-end"
+          >
             <Button
               onClick={() => navigate("/admin/addorder")}
               className="d-flex align-items-center btn-primary shadow"
@@ -137,7 +149,13 @@ const OrderTable = () => {
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : (
-          <Table striped bordered hover responsive className="rounded shadow-sm">
+          <Table
+            striped
+            bordered
+            hover
+            responsive
+            className="rounded shadow-sm"
+          >
             <thead className="bg-light">
               <tr>
                 <th>
@@ -187,8 +205,9 @@ const OrderTable = () => {
                     >
                       {order.status || "N/A"}
                     </td>
-                    <td className="fw-bold">${order.total_price?.toFixed(2) || "N/A"}</td>
-                    <td>{new Date(order.orderDate).toLocaleDateString()}</td>
+                    <td className="fw-bold">{order.total_price}</td>
+
+                    <td>{new Date(order.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))
               ) : (
