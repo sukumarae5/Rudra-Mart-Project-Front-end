@@ -36,14 +36,14 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        const response = await fetch("http://192.168.1.6:3000/api/users/login", {
+        const response = await fetch("http://192.168.1.12:3000/api/users/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
 
         const data = await response.json();
-
+        console.log(data)
         if (data.token) {
           localStorage.setItem("authToken", data.token);
           localStorage.setItem("user", JSON.stringify(matchingUser));

@@ -1,10 +1,13 @@
-// import React from "react";
-// import { Navigate, Outlet } from "react-router-dom";
+// import { Navigate } from "react-router-dom";
 
-// const ProtectedRoute = () => {
-//   const token = localStorage.getItem("authToken"); // Check if token exists
+// const PrivateRoute = ({ children, role }) => {
+//   const token = localStorage.getItem("authToken");
+//   const userRole = localStorage.getItem("userRole");
 
-//   return token ? <Outlet /> : <Navigate to="/login" replace />;
+//   if (!token) return <Navigate to="/login" />;
+//   if (role && userRole !== role) return <Navigate to="/" />; // Restrict access
+
+//   return children;
 // };
 
-// export default ProtectedRoute;
+// export default PrivateRoute;

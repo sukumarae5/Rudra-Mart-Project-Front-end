@@ -49,7 +49,7 @@ const Register = () => {
       console.log('User data being sent to the API:', newUser); 
 
       const response = await fetch(
-        'http://192.168.1.6:3000/api/users/register',
+        'http://192.168.1.12:3000/api/users/register',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

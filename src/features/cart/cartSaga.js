@@ -5,7 +5,7 @@ import {
 } from "./cartActions";
 const fetchTheApi = async () => {
     try {
-      const response = await fetch('http://192.168.1.6:3000/api/products/allproducts', {
+      const response = await fetch('http://192.168.1.12:3000/api/products/allproducts', {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // Replace with your actual token
