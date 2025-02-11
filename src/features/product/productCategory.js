@@ -67,18 +67,65 @@ const ProductCategory = () => {
     }
   };
 
-  const handleAddToCart = (event, product) => {
+  const handleAddToCart = async (event, product) => {
     event.stopPropagation();
+  
+    try {
+      const userToken = localStorage.getItem("authToken");
+      if (!userToken) {
+        alert("Session expired or user not authenticated. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      // Parse the user object from localStorage
+      const user = JSON.parse(localStorage.getItem("user"));
+      console.log(user.id)
+      console.log("User Token:", userToken);
 
-    const isProductInCart = cartItems.some((item) => item.id === product.id);
+  
+      if (!user || !user.id) {
+        alert("User information is missing or corrupted. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      const cartItem = {
+        user_id: user.id, // Correctly access the parsed user object
+        product_id: product.id,
+        quantity: 1,
+      };
+  
+      console.log("Payload:", cartItem);
+  
+      const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+        method: "POST",
+        headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${userToken}`,
+},
 
-    if (isProductInCart) {
-      alert("This item is already in the cart.");
-    } else {
-      dispatch(addToCart(product));
+        
+        body: JSON.stringify(cartItem),
+      });
+      
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error details:", errorData);
+        throw new Error(`Error: ${response.status} - ${errorData.message || response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log("Cart data added successfully:", data);
+      alert("Product successfully added to cart.");
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      alert(`Error: ${error.message}`);
     }
   };
-
+  
+  
   const categories = [
     { categoryicon: <CiMobile4 />, context: "Phone", categoryid: "1" },
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },
@@ -100,16 +147,10 @@ const ProductCategory = () => {
       >
         <h2 style={{ color: "red", fontSize: "30px" }}>Product Category</h2>
         <div>
-          <button
-            className="btn btn-light"
-            onClick={() => scrollCategory("left")}
-          >
+          <button className="btn btn-light" onClick={() => scrollCategory("left")}>
             <ArrowBackIos />
           </button>
-          <button
-            className="btn btn-light"
-            onClick={() => scrollCategory("right")}
-          >
+          <button className="btn btn-light" onClick={() => scrollCategory("right")}>
             <ArrowForwardIos />
           </button>
         </div>
@@ -183,40 +224,35 @@ const ProductCategory = () => {
                     <div
                       style={{
                         position: "absolute",
-                        top: "29px",
-                        left: "73%",                      
+                        top: "7px",
+                        left: "90%",
                         gap: "8px",
                         alignItems: "center",
                         marginBottom: "100px",
                       }}
                     >
-                     
-
                       {clickedProducts.has(product.id) ? (
                         <FaHeart
-                        style={{
-                          fontSize: "1.3rem",
-                          padding:"5%",
-                          width:"150%",
+                          style={{
+                            fontSize: "1.3rem",
+                            padding: "10%",
+                            width: "150%",
                             color: "red",
                             cursor: "pointer",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
                             borderRadius: "50%",
-                        }}
+                          }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       ) : (
                         <FaRegHeart
-                        style={{
-                          fontSize: "1.2rem",
-                          padding:"10%",                          
-                            color: "#575B5A",
+                          style={{
+                            fontSize: "1.2rem",
+                            color: "black",
                             cursor: "pointer",
-                            width:"150%",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "50%",
-
-                        }}
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                            borderRadius: "40%",
+                          }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       )}
@@ -224,11 +260,9 @@ const ProductCategory = () => {
                         style={{
                           fontSize: "1.2rem",
                           color: "gray",
-                           cursor: "pointer",
-                           padding:"2%",
-                           width:"150%",
-                           boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                          borderRadius: "50%",
+                          cursor: "pointer",
+                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                          borderRadius: "40%",
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -241,15 +275,15 @@ const ProductCategory = () => {
                       src={product.image_url}
                       alt={product.name}
                       style={{
-                        width: "120%",
-                        padding:"10px",
+                        width: "99%",
+                        padding: "10px",
                         height: "170px",
                         objectFit: "cover",
                         borderRadius: "8px",
                         marginBottom: "10px",
                       }}
                     />
-                     
+
                     <div
                       style={{
                         position: "relative",

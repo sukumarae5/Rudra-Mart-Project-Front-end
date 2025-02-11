@@ -1,170 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
-import { updateCartProductQuantity, removeFromCart } from "../features/cart/cartActions";
+import { fetchApiCartDataRequest } from "../features/cart/cartActions";
 
 const CartPage = () => {
-  const { cartProducts } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
-
-  const [couponCode, setCouponCode] = useState("");
-  const [discount, setDiscount] = useState(0);
-
-  const handleQuantityChange = (productId, quantity) => {
-    if (quantity < 1) {
-      alert("Quantity cannot be less than 1");
-      return;
-    }
-    dispatch(updateCartProductQuantity(productId, parseInt(quantity, 10)));
-  };
-
-  const handleRemoveProduct = (productId) => {
-    dispatch(removeFromCart(productId));
-    alert("Product removed from the cart.");
-  };
-
-  const totalCost = cartProducts.reduce(
-    (total, product) => total + parseFloat(product.price) * product.quantity,
-    0
-  );
-
-  const handleApplyCoupon = () => {
-    if (couponCode === "DISCOUNT10") {
-      setDiscount(0.10 * totalCost);
-      alert("Coupon applied successfully! 10% discount applied.");
-    } else if (couponCode === "FLAT50") {
-      setDiscount(50);
-      alert("Coupon applied successfully! ₹50 discount applied.");
-    } else {
-      alert("Invalid coupon code!");
-      setDiscount(0);
-    }
-  };
-
-  const finalCost = (totalCost - discount).toFixed(2);
+  const { cartItems = [], error } = useSelector((state) => state.cart);
+console.log(cartItems)
+  useEffect(() => {
+    dispatch(fetchApiCartDataRequest());
+  }, [dispatch]);
 
   return (
-    <Container className="mt-4" style={{ padding: "2%" }}>
-      <h1 className="text-center mb-4">Shopping Cart</h1>
-      {!cartProducts.length ? (
-        <h4 className="text-center text-muted">Your cart is empty.</h4>
+    <div>
+      <h2>Your Cart</h2>
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {cartItems.length > 0 ? (
+        <ul>
+          {cartItems.map((item) => (
+            <li key={item.id}>
+              {item.product_name} - Quantity: {item.quantity}
+            </li>
+          ))}
+        </ul>
       ) : (
-        <>
-          {/* Product Table */}
-          <Table bordered responsive className="mb-4">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartProducts.map((product) => (
-                <tr key={product.id}>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="me-2"
-                        style={{ width: "50px", height: "50px", objectFit: "cover" }}
-                      />
-                      <span>{product.name}</span>
-                    </div>
-                  </td>
-                  <td>₹{parseFloat(product.price).toFixed(2)}</td>
-                  <td>
-                    <Form.Control
-                      type="number"
-                      min="1"
-                      value={product.quantity}
-                      className="w-20"
-                      onChange={(e) => handleQuantityChange(product.id, e.target.value)}
-                    />
-                  </td>
-                  <td>₹{(parseFloat(product.price) * product.quantity).toFixed(2)}</td>
-                  <td>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleRemoveProduct(product.id)}
-                    >
-                      Remove
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-
-          {/* Actions Section */}
-          <Row className="mb-4 align-items-center">
-            <Col className="d-flex justify-content-start">
-              <Button variant="secondary">Return to Shop</Button>
-            </Col>
-            <Col className="d-flex justify-content-end">
-              <Button variant="primary">Update Cart</Button>
-            </Col>
-          </Row>
-
-          {/* Coupon and Cart Summary Section */}
-          <Row className="mb-4">
-            <Col md={6} className="d-flex align-items-center">
-              <Form className="w-100">
-                <Row className="align-items-center">
-                  <Col xs={8}>
-                    <Form.Group className="mb-0">
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col xs={4}>
-                    <Button variant="danger" onClick={handleApplyCoupon}>
-                      Apply Coupon
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Col>
-
-            <Col md={6}>
-              <div className="p-3 bg-light border rounded">
-                <h4 className="text-center">Cart Total</h4>
-                <div className="d-flex justify-content-between">
-                  <span>Subtotal:</span>
-                  <span>₹{totalCost.toFixed(2)}</span>
-                </div>
-                <hr />
-                <div className="d-flex justify-content-between">
-                  <span>Discount:</span>
-                  <span>₹{discount.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <span>Shipping:</span>
-                  <span>Free</span>
-                </div>
-                <hr />
-                <div className="d-flex justify-content-between">
-                  <strong>Total:</strong>
-                  <strong>₹{finalCost}</strong>
-                </div>
-                <div className="d-flex justify-content-center mt-3">
-                  <Button variant="danger" className="w-100">
-                    Proceed to Checkout
-                  </Button>
-                </div>
-              </div>
-            </Col>
-          </Row>
-        </>
+        <p>No items in the cart.</p>
       )}
-    </Container>
+    </div>
   );
 };
 
