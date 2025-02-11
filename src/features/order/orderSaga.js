@@ -5,7 +5,7 @@ import { fetchOrdersSuccess, fetchOrdersFailure } from '../order/orderActions';
 // Function to fetch orders from API
 const fetchOrdersApi = async () => {
   try {
-    const response = await fetch('http://192.168.1.6:3000/api/orders/allorders', {
+    const response = await fetch('http://192.168.1.12:3000/api/orders/allorders', {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // Replace with actual token
