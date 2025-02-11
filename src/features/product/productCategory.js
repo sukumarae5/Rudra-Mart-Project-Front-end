@@ -17,7 +17,6 @@ import { addToCart } from "../cart/cartActions";
 import { addToWishlist } from "../product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
-import axios from "axios";
 
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
@@ -70,44 +69,63 @@ const ProductCategory = () => {
 
   const handleAddToCart = async (event, product) => {
     event.stopPropagation();
-
-    const isProductInCart = cartItems.some((item) => item.id === product.id);
-
-    if (isProductInCart) {
-      alert("This item is already in the cart.");
-      return;
-    }
-
+  
     try {
-      const token = localStorage.getItem("userToken");
-
-      if (!token) {
-        alert("User token not found. Please log in.");
+      const userToken = localStorage.getItem("authToken");
+      if (!userToken) {
+        alert("Session expired or user not authenticated. Please log in.");
+        navigate("/login");
         return;
       }
+  
+      // Parse the user object from localStorage
+      const user = JSON.parse(localStorage.getItem("user"));
+      console.log(user.id)
+      console.log("User Token:", userToken);
 
-      const response = await axios.post(
-        "http://192.168.1.12:3000/api/cart/cartdata",
-        { product },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        alert("Product successfully added to cart.");
-        dispatch(addToCart(product));
-      } else {
-        alert("Failed to add product to the cart.");
+  
+      if (!user || !user.id) {
+        alert("User information is missing or corrupted. Please log in.");
+        navigate("/login");
+        return;
       }
+  
+      const cartItem = {
+        user_id: user.id, // Correctly access the parsed user object
+        product_id: product.id,
+        quantity: 1,
+      };
+  
+      console.log("Payload:", cartItem);
+  
+      const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+        method: "POST",
+        headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${userToken}`,
+},
+
+        
+        body: JSON.stringify(cartItem),
+      });
+      
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error details:", errorData);
+        throw new Error(`Error: ${response.status} - ${errorData.message || response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log("Cart data added successfully:", data);
+      alert("Product successfully added to cart.");
     } catch (error) {
       console.error("Error adding product to cart:", error);
-      alert("An error occurred while adding the product to the cart.");
+      alert(`Error: ${error.message}`);
     }
   };
-
+  
+  
   const categories = [
     { categoryicon: <CiMobile4 />, context: "Phone", categoryid: "1" },
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },

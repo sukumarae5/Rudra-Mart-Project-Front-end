@@ -17,47 +17,31 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data = {} } = useSelector((state) => state.users);
   const { addToWishlist = [] } = useSelector((state) => state.products);
-  const { cartProducts } = useSelector((state) => state.cart);
+  const { cartProducts = [] } = useSelector((state) => state.cart); // Default empty array
   const [user, setUser] = useState(null);
   const location = useLocation();
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+
   useEffect(() => {
     dispatch(fetchproductsrequest());
-  
+
     const checkUser = () => {
       const storedUser = localStorage.getItem("user");
-      console.log("Stored User:", storedUser);
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       } else {
         setUser(null);
       }
     };
-  
-    checkUser(); // Initial check
-  
+
+    checkUser();
     window.addEventListener("storage", checkUser);
-  
+
     return () => {
       window.removeEventListener("storage", checkUser);
     };
   }, [dispatch]);
-  
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []); // Only run once when component mounts
-  
-
-  const handleLogin = (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
-    window.dispatchEvent(new Event("storage")); // Sync for other tabs
-    window.location.reload(); // Refresh page after login
-  };
 
   const handleLogout = () => {
     dispatch(userlogoutdata());
@@ -65,12 +49,13 @@ const Header = () => {
     localStorage.removeItem("user");
     setUser(null);
     navigate("/login");
-    window.dispatchEvent(new Event("storage")); // Trigger update for all tabs
+    window.dispatchEvent(new Event("storage"));
   };
 
   const handleProfile = () => {
     navigate("useraccountpage");
   };
+
   const handleSearch = (event) => {
     event.preventDefault();
     if (searchQuery.length >= 3) {
@@ -80,6 +65,7 @@ const Header = () => {
       alert("Please enter at least 3 characters to search.");
     }
   };
+
   return (
     <div>
       <div className="bg-black text-white py-2 d-flex justify-content-between align-items-center px-3">
@@ -143,7 +129,7 @@ const Header = () => {
 
             {!isAuthPage && (
               <div className="d-flex align-items-center">
-                {user ? (
+                {user && (
                   <Dropdown align="end">
                     <Dropdown.Toggle variant="light" id="dropdown-basic" className="d-flex align-items-center border-0 bg-white">
                       <FaRegUserCircle size={24} className="me-2" />
@@ -153,7 +139,7 @@ const Header = () => {
                       <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
-                ) : null}
+                )}
 
                 {/* Display wishlist length */}
                 <div className="position-relative mx-3">

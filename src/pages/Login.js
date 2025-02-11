@@ -43,7 +43,7 @@ const Login = () => {
         });
 
         const data = await response.json();
-
+        console.log(data)
         if (data.token) {
           localStorage.setItem("authToken", data.token);
           localStorage.setItem("user", JSON.stringify(matchingUser));

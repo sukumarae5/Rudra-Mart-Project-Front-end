@@ -1,47 +1,21 @@
-import { ADD_TO_CART, REMOVE_FROM_CART, UPDATE_CART_PRODUCT_QUANTITY } from "./cartActions";
+import {
+  FETCH_API_CART_DATA_SUCCESS,
+  FETCH_API_CART_DATA_FAILURE,
+} from "../cart/cartActions";
 
 const initialState = {
-  cartProducts: [],
+  cartItems: [],
+  error: null,
 };
 
-const cartReducer = (state = initialState, action) => {
+export default function cartReducer(state = initialState, action) {
   switch (action.type) {
-    case ADD_TO_CART:
-      const existingProduct = state.cartProducts.find((item) => item.id === action.payload.id);
-      if (existingProduct) {
-        return {
-          ...state,
-          cartProducts: state.cartProducts.map((item) =>
-            item.id === action.payload.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
-        };
-      }
-      return {
-        ...state,
-        cartProducts: [...state.cartProducts, { ...action.payload, quantity: 1 }],
-      };
-
-    case REMOVE_FROM_CART:
-      return {
-        ...state,
-        cartProducts: state.cartProducts.filter((item) => item.id !== action.payload),
-      };
-
-    case UPDATE_CART_PRODUCT_QUANTITY:
-      return {
-        ...state,
-        cartProducts: state.cartProducts.map((item) =>
-          item.id === action.payload.productId
-            ? { ...item, quantity: action.payload.quantity }
-            : item
-        ),
-      };
-
+    case FETCH_API_CART_DATA_SUCCESS:
+      console.log(action.payload)
+      return { ...state, cartItems: action.payload, error: null };
+    case FETCH_API_CART_DATA_FAILURE:
+      return { ...state, error: action.payload };
     default:
       return state;
   }
-};
-
-export default cartReducer;
+}

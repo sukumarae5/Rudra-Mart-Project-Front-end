@@ -11,7 +11,7 @@ import image2 from '../assets/images/image16.png';
 import image3 from '../assets/images/image18.png';
 import image4 from '../assets/images/image17.png';
 import image5 from '../assets/images/image19.png';
-import { addToCart  } from '../features/cart/cartActions';
+import { fetchApiCartDataRequest  } from '../features/cart/cartActions';
 import { addToWishlist } from "../features/product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
@@ -79,17 +79,59 @@ const HomePage = () => {
     }
   };
 
-  const handleAddToCart = (product) => {
-    const isProductInCart = cartItems.some((item) => item.id === product.id);
+  const handleAddToCart = async (event, product) => {
+    event.stopPropagation();
   
-    if (isProductInCart) {
-      alert('This item is already in the cart.');
-    } else {
-      setCartItems((prevCartItems) => [...prevCartItems, product]);
-      dispatch(addToCart(product)); 
+    try {
+      const userToken = localStorage.getItem("authToken");
+      if (!userToken) {
+        alert("Session expired or user not authenticated. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.id) {
+        alert("User information is missing or corrupted. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      const cartItem = {
+        user_id: user.id,
+        product_id: product.id,
+        quantity: 1,
+      };
+  
+      const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify(cartItem),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        if (data.message && data.message.toLowerCase().includes("already in cart")) {
+          alert("Product is already in the cart.");
+        } else {
+          alert(`Error: ${data.message || response.statusText}`);
+        }
+        return;
+      }
+  
+      alert("Product successfully added to cart.");
+      dispatch(fetchApiCartDataRequest())
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      alert(`Error: ${error.message}`);
     }
   };
-
+  
+  
   const handleRating = (rating, productId) => {
     setRatings((prevRatings) => ({ ...prevRatings, [productId]: rating }));
   };
@@ -297,10 +339,7 @@ const HomePage = () => {
                             cursor: 'pointer',
                             opacity: 0.9,
                           }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToCart(product);
-                          }}
+                          onClick={(e) => handleAddToCart(e, product)}
                         >
                           Add to Cart
                         </div>
