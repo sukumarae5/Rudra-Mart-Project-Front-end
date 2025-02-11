@@ -9,7 +9,7 @@ const fetchCartDataApi = async () => {
   const userToken = localStorage.getItem("authToken"); // Assuming token is stored in localStorage
 
   if (!userToken) {
-    throw new Error("User is not authorized. Token is missing.");
+    throw new Error("User is not authorized. Token is missing ...");
   }
 
   const response = await fetch("http://192.168.1.12:3000/api/my-cart", {
