@@ -13,7 +13,7 @@ import { IoGiftOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { setSelectedProduct } from "./productActions";
 import { CiMobile4 } from "react-icons/ci";
-import { addToCart } from "../cart/cartActions";
+import { fetchApiCartDataRequest } from "../cart/cartActions";
 import { addToWishlist } from "../product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
@@ -28,6 +28,7 @@ const ProductCategory = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [clickedProducts, setClickedProducts] = useState(new Set());
+  
 
   const categoryCardClick = (categoryid) => {
     const filtered = products.filter(
@@ -78,52 +79,54 @@ const ProductCategory = () => {
         return;
       }
   
-      // Parse the user object from localStorage
       const user = JSON.parse(localStorage.getItem("user"));
-      console.log(user.id)
-      console.log("User Token:", userToken);
-
-  
       if (!user || !user.id) {
         alert("User information is missing or corrupted. Please log in.");
         navigate("/login");
         return;
       }
   
+      
+      const isProductInCart = cartItems.some(
+        (item) => item.user_id === user.id && item.product_id === product.id
+      );  
+      if (isProductInCart) {
+        alert("Product is already in the cart.");
+        return;
+      }
+      
       const cartItem = {
-        user_id: user.id, // Correctly access the parsed user object
+        user_id: user.id,
         product_id: product.id,
         quantity: 1,
       };
   
-      console.log("Payload:", cartItem);
-  
+      // API call to add product to cart
       const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
         method: "POST",
         headers: {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${userToken}`,
-},
-
-        
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
         body: JSON.stringify(cartItem),
       });
-      
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Server error details:", errorData);
-        throw new Error(`Error: ${response.status} - ${errorData.message || response.statusText}`);
-      }
   
       const data = await response.json();
-      console.log("Cart data added successfully:", data);
+  
+      if (!response.ok) {
+        alert(`Error: ${data.message || response.statusText}`);
+        return;
+      }
+  
       alert("Product successfully added to cart.");
+      dispatch(fetchApiCartDataRequest());
     } catch (error) {
       console.error("Error adding product to cart:", error);
       alert(`Error: ${error.message}`);
     }
   };
+  
+    
   
   
   const categories = [
