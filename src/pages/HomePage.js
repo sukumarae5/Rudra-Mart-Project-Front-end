@@ -38,13 +38,14 @@ const renderStars = (rating, onClick, productId) => {
 
 const HomePage = () => {
   const { products = [], error = null, loading = false } = useSelector((state) => state.products || {});
+    const { cartItems = [] } = useSelector((state) => state.cart || {});
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(3600); // 1 hour in seconds
   const [viewAll, setViewAll] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItem, setCartItems] = useState([]);
   const [ratings, setRatings] = useState({});
   const [clickedProducts, setClickedProducts] = useState(new Set()); // Initialize clickedProducts state
   
@@ -80,57 +81,63 @@ const HomePage = () => {
   };
 
   const handleAddToCart = async (event, product) => {
-    event.stopPropagation();
-  
-    try {
-      const userToken = localStorage.getItem("authToken");
-      if (!userToken) {
-        alert("Session expired or user not authenticated. Please log in.");
-        navigate("/login");
-        return;
-      }
-  
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.id) {
-        alert("User information is missing or corrupted. Please log in.");
-        navigate("/login");
-        return;
-      }
-  
-      const cartItem = {
-        user_id: user.id,
-        product_id: product.id,
-        quantity: 1,
-      };
-  
-      const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify(cartItem),
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        if (data.message && data.message.toLowerCase().includes("already in cart")) {
-          alert("Product is already in the cart.");
-        } else {
-          alert(`Error: ${data.message || response.statusText}`);
+      event.stopPropagation();
+    
+      try {
+        const userToken = localStorage.getItem("authToken");
+        if (!userToken) {
+          alert("Session expired or user not authenticated. Please log in.");
+          navigate("/login");
+          return;
         }
-        return;
+    
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.id) {
+          alert("User information is missing or corrupted. Please log in.");
+          navigate("/login");
+          return;
+        }
+    
+        
+        const isProductInCart = cartItems.some(
+          (item) => item.user_id === user.id && item.product_id === product.id
+        );  
+        if (isProductInCart) {
+          alert("Product is already in the cart.");
+          return;
+        }
+        
+        const cartItem = {
+          user_id: user.id,
+          product_id: product.id,
+          quantity: 1,
+        };
+    
+        // API call to add product to cart
+        const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify(cartItem),
+        });
+    
+        const data = await response.json();
+    
+        if (!response.ok) {
+          alert(`Error: ${data.message || response.statusText}`);
+          return;
+        }
+    
+        alert("Product successfully added to cart.");
+        dispatch(fetchApiCartDataRequest());
+      } catch (error) {
+        console.error("Error adding product to cart:", error);
+        alert(`Error: ${error.message}`);
       }
-  
-      alert("Product successfully added to cart.");
-      dispatch(fetchApiCartDataRequest())
-    } catch (error) {
-      console.error("Error adding product to cart:", error);
-      alert(`Error: ${error.message}`);
-    }
-  };
-  
+    };
+    
   
   const handleRating = (rating, productId) => {
     setRatings((prevRatings) => ({ ...prevRatings, [productId]: rating }));
