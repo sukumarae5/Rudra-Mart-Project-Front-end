@@ -20,8 +20,10 @@ const Header = () => {
   const { cartProducts = [] } = useSelector((state) => state.cart); // Default empty array
   const [user, setUser] = useState(null);
   const location = useLocation();
+    const { cartItems = [] } = useSelector((state) => state.cart || {});
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
@@ -171,7 +173,7 @@ const Header = () => {
                     style={{ cursor: "pointer" }}
                     onClick={() => navigate("/cartpage")}
                   />
-                  {cartProducts.length > 0 && (
+                  {cartItems.length > 0 && (
                     <Badge
                       pill
                       bg="danger"
@@ -182,7 +184,7 @@ const Header = () => {
                         fontSize: "0.7rem",
                       }}
                     >
-                      {cartProducts.length}
+                      {cartItems.length}
                     </Badge>
                   )}
                 </div>
