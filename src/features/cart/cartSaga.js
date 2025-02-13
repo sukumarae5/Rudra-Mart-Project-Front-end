@@ -6,36 +6,53 @@ import {
 } from "../cart/cartActions";
 
 const fetchCartDataApi = async () => {
-  const userToken = localStorage.getItem("authToken"); // Assuming token is stored in localStorage
+  const userToken = localStorage.getItem("authToken");
 
   if (!userToken) {
-    throw new Error("User is not authorized. Token is missing.");
+    console.error("User token is missing!"); 
+    throw new Error("User is not authorized.");
   }
 
-  const response = await fetch("http://192.168.1.12:3000/api/my-cart", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${userToken}`,
-    },
-  });
+  const apiUrl = "http://192.168.1.12:3000/api/cart/my-cart"; 
+  console.log("Fetching cart data from:", apiUrl);
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
+  try {
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${userToken}`
+
+      },
+    });
+
+    console.log("API Response Status:", response.status);
+
+    if (response.status === 404) {
+      throw new Error("Cart API route not found. Check the backend.");
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("API Fetch Error:", errorText);
+      throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Fetch Cart Data Error:", error.message);
+    throw error;
   }
-
-  return response.json();
 };
 
 function* fetchCartDataSaga() {
   try {
     const cartData = yield call(fetchCartDataApi);
-    console.log("Fetched Cart Data:", cartData); // Debugging log
-    yield put(fetchApiCartDataSuccess(cartData));
+    console.log("Fetched Cart Data:", cartData);
+    yield put(fetchApiCartDataSuccess(cartData)); 
   } catch (error) {
     console.error("Cart Data Fetch Error:", error.message);
-    yield put(fetchApiCartDataFailure(error.message));
+    yield put(fetchApiCartDataFailure(error.message)); 
   }
 }
 
