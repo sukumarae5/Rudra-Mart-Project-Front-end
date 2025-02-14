@@ -20,14 +20,14 @@ const orderSlice = (state = initialState, action) => {
       return { ...state, loading: true };
 
     case FETCH_ORDERS_SUCCESS:
-      console.log(action.payload);
+      console.log("Orders fetched:", action.payload);
       return { ...state, loading: false, orders: action.payload, error: null };
 
     case FETCH_ORDERS_FAILURE:
+      console.error("Order fetch error:", action.payload);
       return { ...state, loading: false, error: action.payload };
 
     case SET_SELECTED_ORDER:
-      console.log(action.payload);
       return { ...state, selectedOrder: action.payload };
 
     case GET_SEARCH_ORDER:

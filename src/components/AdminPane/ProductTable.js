@@ -14,14 +14,13 @@ import {
 } from "react-bootstrap";
 import PaginationComponent from "./Pagination";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
-import { IoMdSearch } from "react-icons/io";
 import { GoPlus } from "react-icons/go";
 
 const ProductTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const { products = [] } = useSelector((state) => state.products || {});
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,21 +36,15 @@ const ProductTable = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
+    if (!window.confirm("Are you sure you want to delete this product?"))
       return;
-    }
-
     try {
       const response = await fetch(
         `http://192.168.1.6:3000/api/products/deleteproduct/${productId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
+        { method: "DELETE", headers: { "Content-Type": "application/json" } }
       );
 
       const data = await response.json();
-
       if (!response.ok) {
         alert(`Error: ${data.error || "Failed to delete product"}`);
         return;
@@ -60,7 +53,6 @@ const ProductTable = () => {
       alert("Product deleted successfully!");
       dispatch(fetchproductsrequest());
     } catch (error) {
-      console.error("Error deleting product:", error);
       alert("Error: Could not delete product");
     }
   };
@@ -77,191 +69,183 @@ const ProductTable = () => {
   const indexOfLastProduct = currentPage * itemsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearchQuery =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return filterOption === "All"
-      ? matchesSearchQuery
-      : matchesSearchQuery && product.category === filterOption;
-  });
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const currentProducts = filteredProducts.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const addProductDetails = () => {
-    navigate("/admin/addproducts");
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedProducts.length === 0) {
-      alert("Please select at least one product to delete.");
-      return;
-    }
-    selectedProducts.forEach(async (productId) => {
-      await handleDeleteProduct(productId);
-    });
-  };
-
   return (
-    <div className="container-fluid">
+    <div className="container-fluid px-4">
       {/* Header Section */}
       <Row className="align-items-center mb-3">
-        <Col xs={12} md={6} className="text-md-start text-center">
-          <h1 style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>
+        <Col>
+          <h1
+            style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}
+          >
             Products
           </h1>
         </Col>
-        <Col xs={12} md={6} className="text-md-end d-flex justify-content-end mt-2 mt-md-0">
+        <Col xs={12} md="auto" className="text-end">
           <Button
-            onClick={addProductDetails}
-            className="d-flex align-items-center mx-auto mx-md-0"
+            onClick={() => navigate("/admin/addproducts")}
+            className="d-flex align-items-center"
             style={{
-              fontSize: "1.1rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: " #1E5EFF",
+              backgroundColor: "#1E5EFF",
               border: "none",
+              padding: "10px 20px",
             }}
           >
-            <GoPlus style={{ marginRight: "8px", fontSize: "1.5rem" }} />
-            Add Product Details
+            <GoPlus size={22} style={{ marginRight: "8px" }} />
+            Add Product
           </Button>
         </Col>
       </Row>
 
-      {/* Filters and Search */}
-      <Row className="align-items-center mb-3">
-        <Col xs={12} md={6} className="d-flex justify-content-start mb-2 mb-md-0">
+      {/* Search & Filters */}
+      <Row className="mb-3">
+        <Col md={6} className="d-flex">
           <DropdownButton
-            variant="light"
+            variant="outline-primary"
             title={`Filter: ${filterOption}`}
             onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
-            style={{ border: "1px solid #1E5EFF", color: " #1E5EFF" }}
           >
             <Dropdown.Item eventKey="All">All</Dropdown.Item>
             <Dropdown.Item eventKey="Category1">Category 1</Dropdown.Item>
             <Dropdown.Item eventKey="Category2">Category 2</Dropdown.Item>
           </DropdownButton>
-
-          <InputGroup style={{ width: "300px", marginLeft: "10px" }}>
-            
+          <InputGroup className="ms-3" style={{ maxWidth: "300px" }}>
             <Form.Control
               type="text"
-              placeholder="Search products..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            
           </InputGroup>
         </Col>
 
         {/* Bulk Actions */}
-        <Col xs={12} md={6} className="d-flex justify-content-end gap-2">
-          {/* Disable edit button if no product is selected */}
+        <Col md={6} className="text-end">
           <Button
-            variant="link"
+            variant="outline-primary"
             size="sm"
+            disabled={selectedProducts.length !== 1}
             onClick={() => {
-              if (selectedProducts.length === 1) {
-                const product = products.find((prod) => prod.id === selectedProducts[0]);
-                handleEditProduct (product);
-              } else {
-                alert("Please select one product to edit.");
-              }
+              const product = products.find(
+                (p) => p.id === selectedProducts[0]
+              );
+              if (product) handleEditProduct(product);
             }}
-            style={{ border: "1px solid #1E5EFF" }}
           >
-            <MdModeEditOutline  style={{ color: " #1E5EFF" }}/>
+            <MdModeEditOutline size={20} />
           </Button>
           <Button
-            variant="light"
+            variant="outline-danger"
             size="sm"
-            onClick={handleBulkDelete}
-            style={{ border: "1px solid #1E5EFF" }}
+            className="ms-2"
+            disabled={selectedProducts.length === 0}
+            onClick={() => selectedProducts.forEach(handleDeleteProduct)}
           >
-            <MdOutlineDeleteOutline style={{ color: " #1E5EFF" }} />
+            <MdOutlineDeleteOutline size={20} />
           </Button>
         </Col>
       </Row>
 
       {/* Table */}
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>
-              <Form.Check
-                type="checkbox"
-                onChange={(e) =>
-                  setSelectedProducts(
-                    e.target.checked ? currentProducts.map((prod) => prod.id) : []
-                  )
-                }
-                checked={
-                  selectedProducts.length === currentProducts.length &&
-                  currentProducts.length > 0
-                }
-              />
-            </th>
-            <th>Id</th>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Stock</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentProducts.length > 0 ? (
-            currentProducts.map((product, index) => (
-              <tr key={product.id}>
-                <td>
-                  <Form.Check
-                    type="checkbox"
-                    checked={selectedProducts.includes(product.id)}
-                    onChange={() => handleCheckboxChange(product.id)}
-                  />
-                </td>
-                <td>{indexOfFirstProduct + index + 1}</td>
-                <td>
-                  {product.image_url ? (
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    'N/A'
-                  )}
-                </td>
-                <td>{product.name || "N/A"}</td>
-                <td>{product.description || "N/A"}</td>
-                <td>{product.price || "N/A"}</td>
-                <td>{product.stock || "N/A"}</td>
-              </tr>
-            ))
-          ) : (
+      <div className="table-responsive">
+        <Table striped bordered hover className="custom-table">
+          <thead>
             <tr>
-              <td colSpan="7" className="text-center">
-                No products available.
-              </td>
+              <th>
+                <Form.Check
+                  type="checkbox"
+                  onChange={(e) =>
+                    setSelectedProducts(
+                      e.target.checked ? currentProducts.map((p) => p.id) : []
+                    )
+                  }
+                  checked={
+                    selectedProducts.length === currentProducts.length &&
+                    currentProducts.length > 0
+                  }
+                />
+              </th>
+              <th>ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Price ($)</th>
+              <th>Stock</th>
             </tr>
-          )}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {currentProducts.length > 0 ? (
+              currentProducts.map((product, index) => (
+                <tr key={product.id}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={selectedProducts.includes(product.id)}
+                      onChange={() => handleCheckboxChange(product.id)}
+                    />
+                  </td>
+                  <td>{indexOfFirstProduct + index + 1}</td>
+                  <td>
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="product-img"
+                      />
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
+                  <td>{product.name || "N/A"}</td>
+                  <td>{product.description || "N/A"}</td>
+                  <td>{product.price || "N/A"}</td>
+                  <td>{product.stock || "N/A"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  No products available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      </div>
 
       {/* Pagination */}
       <PaginationComponent
         currentPage={currentPage}
         totalPages={totalPages}
-        onPageChange={handlePageChange}
+        onPageChange={setCurrentPage}
       />
+
+      {/* Custom Styles */}
+      <style>
+        {`
+          .custom-table th {
+            background-color: #f8f9fa;
+            text-align: center;
+          }
+          .custom-table tbody tr:hover {
+            background-color: #f1f3f5;
+          }
+          .product-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+          }
+        `}
+      </style>
     </div>
   );
 };

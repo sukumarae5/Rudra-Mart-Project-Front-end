@@ -1,8 +1,6 @@
-
 const initialState = {
   users: [], // Default to empty array
   data:[],
-  
   error: null, // Default to null
 };
 
@@ -15,7 +13,8 @@ const userReducer = (state = initialState, action) => {
   console.log("Updating Users State:", action.payload);
   return {
     ...state,
-    users:  action.payload , // Ensure users is an array
+    users:  action.payload ,
+     // Ensure users is an array
     error: null,
   };
     case 'FETCH_USERS_FAILURE':
@@ -25,7 +24,7 @@ const userReducer = (state = initialState, action) => {
       return{...state,data:action.payload};
     case 'USER_LOGOUT_DATA':
       console.log(action.payload)
-      return{...state,data:action.payload}
+      return{...state,data:null}
     default:
      return state;
   }

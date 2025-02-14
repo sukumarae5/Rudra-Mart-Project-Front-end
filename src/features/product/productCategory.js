@@ -7,23 +7,27 @@ import { IoBookOutline } from "react-icons/io5";
 import { BsSmartwatch } from "react-icons/bs";
 import { CiCamera } from "react-icons/ci";
 import { GiLighter } from "react-icons/gi";
-import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
+import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { IoHeadsetOutline } from "react-icons/io5";
 import { IoGiftOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { setSelectedProduct } from "./productActions";
 import { CiMobile4 } from "react-icons/ci";
-import { addToCart } from '../cart/cartActions';
+import { addToCart } from "../cart/cartActions";
+import { addToWishlist } from "../product/productActions";
+import { FaEye } from "react-icons/fa";
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
-  const { cartItems = [] } = useSelector((state) => state.cart || {}); // Get cartItems from Redux
+  const { cartItems = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [clickedProducts, setClickedProducts] = useState(new Set());
 
   const categoryCardClick = (categoryid) => {
     const filtered = products.filter(
@@ -44,24 +48,86 @@ const ProductCategory = () => {
   };
 
   const handleCardClick = (productId, product) => {
-    dispatch(setSelectedProduct(product));   
-    navigate('/productpage');
+    dispatch(setSelectedProduct(product));
+    navigate("/productpage");
   };
 
-  const handleAddToCart = (event, product) => {
-    event.stopPropagation();  // Prevents event from bubbling up to parent elements
-
-    const isProductInCart = cartItems.some((item) => item.id === product.id);
-
-    if (isProductInCart) {
-      alert('This item is already in the cart.');
+  const handleWishlistClick = (e, product) => {
+    e.stopPropagation();
+    const isClicked = clickedProducts.has(product.id);
+    if (isClicked) {
+      setClickedProducts((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(product.id);
+        return newSet;
+      });
     } else {
-      dispatch(addToCart(product));
+      setClickedProducts((prev) => new Set(prev).add(product.id));
+      dispatch(addToWishlist(product));
     }
   };
 
+  const handleAddToCart = async (event, product) => {
+    event.stopPropagation();
+  
+    try {
+      const userToken = localStorage.getItem("authToken");
+      if (!userToken) {
+        alert("Session expired or user not authenticated. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      // Parse the user object from localStorage
+      const user = JSON.parse(localStorage.getItem("user"));
+      console.log(user.id)
+      console.log("User Token:", userToken);
+
+  
+      if (!user || !user.id) {
+        alert("User information is missing or corrupted. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      const cartItem = {
+        user_id: user.id, // Correctly access the parsed user object
+        product_id: product.id,
+        quantity: 1,
+      };
+  
+      console.log("Payload:", cartItem);
+  
+      const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+        method: "POST",
+        headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${userToken}`,
+},
+
+        
+        body: JSON.stringify(cartItem),
+      });
+      
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error details:", errorData);
+        throw new Error(`Error: ${response.status} - ${errorData.message || response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log("Cart data added successfully:", data);
+      alert("Product successfully added to cart.");
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+  
+  
   const categories = [
-    { categoryicon: <CiMobile4 /> , context: "Phone", categoryid: "1" },
+    { categoryicon: <CiMobile4 />, context: "Phone", categoryid: "1" },
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },
     { categoryicon: <BsSmartwatch />, context: "Smartwatch", categoryid: "5" },
     { categoryicon: <CiCamera />, context: "Camera", categoryid: "3" },
@@ -75,10 +141,11 @@ const ProductCategory = () => {
   return (
     <div>
       <hr />
-      <div className="d-flex justify-content-between align-items-center" style={{paddingLeft:"3%"}}>
-        <div>
-          <h2 style={{ color: 'red', fontSize: '30px' }}>Product Category</h2>
-        </div>
+      <div
+        className="d-flex justify-content-between align-items-center"
+        style={{ paddingLeft: "3%" }}
+      >
+        <h2 style={{ color: "red", fontSize: "30px" }}>Product Category</h2>
         <div>
           <button className="btn btn-light" onClick={() => scrollCategory("left")}>
             <ArrowBackIos />
@@ -88,20 +155,19 @@ const ProductCategory = () => {
           </button>
         </div>
       </div>
-      <br />
       <Container>
         <Row>
           <Col>
             <div
               id="scroll-category-product"
-              className="d-flex overflow-auto"
               style={{
                 display: "flex",
                 gap: "10px",
                 justifyContent: "flex-start",
-                scrollBehavior: 'smooth',
-                padding: '0 20px',
-                whiteSpace: 'nowrap',
+                scrollBehavior: "smooth",
+                padding: "0 20px",
+                whiteSpace: "nowrap",
+                overflowX: "auto",
               }}
             >
               {categories.map((category, index) => (
@@ -120,13 +186,7 @@ const ProductCategory = () => {
                   }}
                   onClick={() => categoryCardClick(category.categoryid)}
                 >
-                  <span
-                    style={{
-                      fontSize: "40px",
-                      display: "block",
-                      padding: "10px",
-                    }}
-                  >
+                  <span style={{ fontSize: "40px", padding: "15px" }}>
                     {category.categoryicon}
                   </span>
                   <p style={{ margin: 0 }}>{category.context}</p>
@@ -136,9 +196,6 @@ const ProductCategory = () => {
           </Col>
         </Row>
 
-        <br />
-        <br />
-
         <Row>
           <Col>
             {filteredProducts.length > 0 ? (
@@ -146,7 +203,7 @@ const ProductCategory = () => {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: "10px",
+                  gap: "20px",
                 }}
               >
                 {filteredProducts.map((product, index) => (
@@ -154,44 +211,97 @@ const ProductCategory = () => {
                     key={index}
                     onMouseEnter={() => setHoveredCard(product.id)}
                     onMouseLeave={() => setHoveredCard(null)}
-                    onClick={() => handleCardClick(product.id, product)} 
+                    onClick={() => handleCardClick(product.id, product)}
                     style={{
-                      padding: "10px",
+                      padding: "15px",
                       border: "1px solid #ccc",
                       borderRadius: "8px",
                       background: "#f9f9f9",
                       textAlign: "center",
+                      position: "relative",
                     }}
                   >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "7px",
+                        left: "90%",
+                        gap: "8px",
+                        alignItems: "center",
+                        marginBottom: "100px",
+                      }}
+                    >
+                      {clickedProducts.has(product.id) ? (
+                        <FaHeart
+                          style={{
+                            fontSize: "1.3rem",
+                            padding: "10%",
+                            width: "150%",
+                            color: "red",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                            borderRadius: "50%",
+                          }}
+                          onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      ) : (
+                        <FaRegHeart
+                          style={{
+                            fontSize: "1.2rem",
+                            color: "black",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                            borderRadius: "40%",
+                          }}
+                          onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      )}
+                      <FaEye
+                        style={{
+                          fontSize: "1.2rem",
+                          color: "gray",
+                          cursor: "pointer",
+                          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                          borderRadius: "40%",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(product.id, product);
+                        }}
+                      />
+                    </div>
+
                     <img
                       src={product.image_url}
                       alt={product.name}
                       style={{
-                        width: "100%",
-                        height: "150px",
+                        width: "99%",
+                        padding: "10px",
+                        height: "170px",
                         objectFit: "cover",
-                        borderRadius: "4px",
+                        borderRadius: "8px",
+                        marginBottom: "10px",
                       }}
                     />
+
                     <div
-                      className="add-to-cart-btn"
                       style={{
-                        position: 'relative',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        backgroundColor: 'black',
-                        color: 'white',
-                        textAlign: 'center',
-                        padding: '10px 0',
-                        display: hoveredCard === product.id ? 'block' : 'none',
-                        cursor: 'pointer',
+                        position: "relative",
+                        textAlign: "center",
+                        top: "0",
+                        left: "0",
+                        width: "100%",
+                        backgroundColor: "black",
+                        color: "white",
+                        padding: "12px 0",
+                        display: hoveredCard === product.id ? "block" : "none",
+                        cursor: "pointer",
                       }}
-                      onClick={(e) => handleAddToCart(e, product)} // Pass event to stop propagation
+                      onClick={(e) => handleAddToCart(e, product)}
                     >
                       Add to Cart
                     </div>
-                    <h5>{product.name}</h5>
+                    <h5 style={{ margin: "10px 0" }}>{product.name}</h5>
                     <p>Price: ${product.price}</p>
                   </div>
                 ))}

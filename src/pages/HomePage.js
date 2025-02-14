@@ -11,7 +11,10 @@ import image2 from '../assets/images/image16.png';
 import image3 from '../assets/images/image18.png';
 import image4 from '../assets/images/image17.png';
 import image5 from '../assets/images/image19.png';
-import { addToCart  } from '../features/cart/cartActions';
+import { fetchApiCartDataRequest  } from '../features/cart/cartActions';
+import { addToWishlist } from "../features/product/productActions";
+import { FaEye } from "react-icons/fa";
+import { FaRegHeart, FaHeart } from "react-icons/fa";
 
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
@@ -35,7 +38,7 @@ const renderStars = (rating, onClick, productId) => {
 
 const HomePage = () => {
   const { products = [], error = null, loading = false } = useSelector((state) => state.products || {});
-    
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(3600); // 1 hour in seconds
@@ -43,14 +46,12 @@ const HomePage = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [ratings, setRatings] = useState({});
-
+  const [clickedProducts, setClickedProducts] = useState(new Set()); // Initialize clickedProducts state
   
-  
-    
   useEffect(() => {
     dispatch(fetchproductsrequest());
   }, [dispatch]);
-
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -78,35 +79,88 @@ const HomePage = () => {
     }
   };
 
-  const handleAddToCart = (product) => {
-    // Check if the product is already in the cart
-    const isProductInCart = cartItems.some((item) => item.id === product.id);
+  const handleAddToCart = async (event, product) => {
+    event.stopPropagation();
   
-    if (isProductInCart) {
-      alert('This item is already in the cart.');
-    } else {
-      // Add the product to the cart if it's not already there
-      setCartItems((prevCartItems) => [...prevCartItems, product]);
-      dispatch(addToCart(product)); // Correctly dispatch the Redux action
+    try {
+      const userToken = localStorage.getItem("authToken");
+      if (!userToken) {
+        alert("Session expired or user not authenticated. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.id) {
+        alert("User information is missing or corrupted. Please log in.");
+        navigate("/login");
+        return;
+      }
+  
+      const cartItem = {
+        user_id: user.id,
+        product_id: product.id,
+        quantity: 1,
+      };
+  
+      const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify(cartItem),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        if (data.message && data.message.toLowerCase().includes("already in cart")) {
+          alert("Product is already in the cart.");
+        } else {
+          alert(`Error: ${data.message || response.statusText}`);
+        }
+        return;
+      }
+  
+      alert("Product successfully added to cart.");
+      dispatch(fetchApiCartDataRequest())
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      alert(`Error: ${error.message}`);
     }
   };
+  
+  
   const handleRating = (rating, productId) => {
     setRatings((prevRatings) => ({ ...prevRatings, [productId]: rating }));
   };
 
   const handleCardClick = (productId, product) => {
-    console.log(product); // Debugging: Check if product is being passed correctly
-    dispatch(setSelectedProduct(product)); // Pass the full product object
-    
-    // Navigate to the product detail page
+    dispatch(setSelectedProduct(product)); 
     navigate('/productpage');
+  };
+
+  const handleWishlistClick = (e, product) => {
+    e.stopPropagation(); // Prevent card click navigation
+    const isClicked = clickedProducts.has(product.id);
+    if (isClicked) {
+      setClickedProducts((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(product.id);
+        return newSet;
+      });
+    } else {
+      setClickedProducts((prev) => new Set(prev).add(product.id));
+      dispatch(addToWishlist(product));
+    }
   };
 
   return (
     <div>
       <Container fluid className="mt-4 mb-4">
         <Row>
-          <Col md={3} className="bg-gray-100 p-12">
+        <Col md={3} className="bg-gray-100 p-12">
             <ul className="list-none space-y-2">
               {[{ label: "Women's Fashion", path: '/womens-fashion' },
                 { label: "Men's Fashion", path: '/mens-fashion' },
@@ -170,85 +224,145 @@ const HomePage = () => {
               </button>
             </Col>
           </Row>
-        </Container> <Container fluid className="py-4">
-      <Row className="justify-content-center">
-        <Col lg={12} md={12}>
-          <div
-            id="product-scroll-container"
-            className="d-flex overflow-auto gap-3"
-            style={{ scrollBehavior: 'smooth', whiteSpace: 'nowrap' }}
-          >
-            {loading ? (
-              <div className="text-center w-100">Loading products...</div>
-            ) : error ? (
-              <div className="text-center w-100">{error}</div>
-            ) : products.length > 0 ? (
-              products.map((product) => (
-                <div
-                  key={product.id}
-                  className="card col-lg-2 col-md-3 col-sm-4 col-6 p-2"
-                  style={{
-                    minWidth: '250px',
-                    maxWidth: '300px',
-                    minHeight: '400px',
-                    borderRadius: '10px',
-                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-                    position: 'relative',
-                    display: 'inline-block',
-                    transition: 'transform 0.3s ease',
-                  }}
-                  onMouseEnter={() => setHoveredCard(product.id)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  onClick={() => handleCardClick(product.id, product)}
-                >
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="card-img-top img-fluid"
-                    style={{ height: '200px', objectFit: 'cover', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}
-                  />
-                  {hoveredCard === product.id && (
-                    <div
-                      className="add-to-cart-btn"
-                      style={{
-                        position: 'relative',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        backgroundColor: 'black',
-                        color: 'white',
-                        textAlign: 'center',
-                        padding: '10px 0',
-                        cursor: 'pointer',
-                        opacity: 0.9,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                    >
-                      Add to Cart
-                    </div>
-                  )}
-                  <div className="card-body">
-                    <h5 className="card-title">{product.name}</h5>
-                    <p className="card-text">{product.description}</p>
-                    <p className="card-text">
-                      <strong>Price:</strong> ₹{product.price}
-                    </p>
-                    <div className="d-flex justify-content-start">
-                      {renderStars(ratings[product.id] || 0, handleRating, product.id)}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center w-100">No products available.</div>
-            )}
-          </div>
-        </Col>
-      </Row>
+        </Container>
 
+        <Container fluid className="py-4">
+          <Row className="justify-content-center">
+            <Col lg={12} md={12}>
+              <div
+                id="product-scroll-container"
+                className="d-flex overflow-auto gap-3"
+                style={{ scrollBehavior: 'smooth', whiteSpace: 'nowrap' }}
+              >
+                {loading ? (
+                  <div className="text-center w-100">Loading products...</div>
+                ) : error ? (
+                  <div className="text-center w-100">{error}</div>
+                ) : products.length > 0 ? (
+                  products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="card col-lg-2 col-md-3 col-sm-4 col-6 p-2"
+                      style={{
+                        minWidth: '250px',
+                        maxWidth: '300px',
+                        minHeight: '400px',
+                        borderRadius: '10px',
+                        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+                        position: 'relative',
+                        display: 'inline-block',
+                        transition: 'transform 0.3s ease',
+                      }}
+                      onMouseEnter={() => setHoveredCard(product.id)}
+                      onMouseLeave={() => setHoveredCard(null)}
+                      onClick={() => handleCardClick(product.id, product)}
+                    >
+                      <div style={{
+                        position: "absolute",
+                        top: "22px",
+                        left: "81%",                        
+                        gap: "11px",
+                        color: "#dae2d7",
+                        alignItems: "center",
+                        marginBottom: "100px",
+                      }}>
+
+                      {clickedProducts.has(product.id) ? (
+                        
+                        <FaHeart
+                        style={{
+                          fontSize: "1.3rem",
+                          padding:"10%",
+                          width:"150%",
+                            color: "red",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "50%",
+                        }}
+                        onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      ) : (
+                        <FaRegHeart
+                        style={{
+                          fontSize: "1.2rem",
+                          padding:"10%",                          
+                            color: "#575B5A",
+                            cursor: "pointer",
+                            width:"150%",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "50%",
+                        }}
+                        onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      )}
+                      <FaEye
+                      style={{
+                      fontSize: "1.2rem",
+                     color: "gray",
+                      cursor: "pointer",
+                      padding:"2%",
+                      width:"150%",
+                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "50%",
+                      }}
+                       onClick={(e) => {
+                       e.stopPropagation();
+                      handleCardClick(product.id, product);
+                        }}
+                        />
+                      
+                      </div>
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="card-img-top img-fluid"
+                        style={{
+                          width:"100%",
+                        paddingTop:"10px",
+                        height: '200px',
+                        borderTopLeftRadius: '10px',
+                        borderTopRightRadius: '10px',                       
+                                              }}
+                      />
+                      {hoveredCard === product.id && (
+                        <div
+                          className="add-to-cart-btn"
+                          style={{
+                            position: 'relative',
+                            top: '0',
+                            left: '0',
+                            width: '100%',
+                            backgroundColor: 'black',
+                            color: 'white',
+                            textAlign: 'center',
+                            padding: '10px 0',
+                            cursor: 'pointer',
+                            opacity: 0.9,
+                          }}
+                          onClick={(e) => handleAddToCart(e, product)}
+                        >
+                          Add to Cart
+                        </div>
+                      )}
+                      <div className="card-body">
+                        <h5 className="card-title">{product.name}</h5>
+                        <p className="card-text">{product.description}</p>
+                        <p className="card-text">
+                          <strong>Price:</strong> ₹{product.price}
+                        </p>
+                        <div className="d-flex justify-content-start">
+                          {renderStars(ratings[product.id] || 0, handleRating, product.id)}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center w-100">No products available.</div>
+                )}
+              </div>
+            </Col>
+          </Row>
+          {/* View All Button */}
           <Row className="mt-4">
             <Col md={12} className="text-center">
               <button className="btn btn-danger" onClick={() => setViewAll((prev) => !prev)}>
@@ -256,7 +370,6 @@ const HomePage = () => {
               </button>
             </Col>
           </Row>
-
           {viewAll && (
             <Row className="mt-4 col-lg-12 col-md-6">
               {products.map((product) => (
@@ -271,13 +384,74 @@ const HomePage = () => {
                     }}
                     onMouseEnter={() => setHoveredCard(product.id)}
                     onMouseLeave={() => setHoveredCard(null)}
-                    onClick={() => handleCardClick(product.id, product)} 
+                    onClick={() => handleCardClick(product.id, product)}
                   >
+                      <div style={{
+                        position: "absolute",
+                        top: "29px",
+                        left: "80%",                      
+                        gap: "8px",
+                        alignItems: "center",
+                        marginBottom: "100px",
+                      }}>
+
+                      {clickedProducts.has(product.id) ? (
+                        
+                        <FaHeart
+                        style={{
+                          fontSize: "1.3rem",
+                          padding:"10%",
+                          width:"150%",
+                            color: "red",
+                            cursor: "pointer",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "50%",
+                        }}
+                        onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      ) : (
+                        <FaRegHeart
+                        style={{
+                          fontSize: "1.2rem",
+                          padding:"10%",                          
+                            color: "#575B5A",
+                            cursor: "pointer",
+                            width:"150%",
+                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                            borderRadius: "50%",
+
+                        }}
+                        onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      )}
+                      <FaEye
+                      style={{
+                        fontSize: "1.2rem",
+                        color: "gray",
+                         cursor: "pointer",
+                         padding:"2%",
+                         width:"150%",
+                         boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
+                        borderRadius: "50%",
+                      }}
+                       onClick={(e) => {
+                       e.stopPropagation();
+                      handleCardClick(product.id, product);
+                        }}
+                        />
+                      
+                      </div>
                     <img
                       src={product.image_url}
                       alt={product.name}
                       className="card-img-top"
-                      style={{ height: '200px', borderTopLeftRadius: '10px', borderTopRightRadius: '10px' }}
+                      style={{
+                        width:"100%",
+                        paddingTop:"10px",
+                        height: '200px',
+                        borderTopLeftRadius: '10px',
+                        borderTopRightRadius: '10px',
+                      }}
                     />
                     <div
                       className="add-to-cart-btn"
@@ -294,8 +468,8 @@ const HomePage = () => {
                         cursor: 'pointer',
                       }}
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent card click navigation
-                        handleAddToCart(product); // Use the correctly named function
+                        e.stopPropagation();
+                        handleAddToCart(product);
                       }}
                     >
                       Add to Cart
@@ -314,12 +488,9 @@ const HomePage = () => {
           )}
         </Container>
       </Container>
-      <div>        
-      </div>
-      
       <ProductCategory />
-      <br></br>
-          </div>
+      <br />
+    </div>
   );
 };
 
