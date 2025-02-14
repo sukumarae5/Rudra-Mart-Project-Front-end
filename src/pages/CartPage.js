@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
 import { fetchApiCartDataRequest, removeCartItemRequest, updateCartItemQuantityRequest } from "../features/cart/cartActions";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const dispatch = useDispatch();
   const { cartItems = [], error } = useSelector((state) => state.cart);
   const { products = [] } = useSelector((state) => state.products || {});
-
+const navigate=useNavigate()
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
@@ -150,7 +151,7 @@ const CartPage = () => {
                   <strong>₹{finalCost}</strong>
                 </div>
                 <div className="d-flex justify-content-center mt-3">
-                  <Button variant="danger" className="w-100">
+                  <Button variant="danger" className="w-100" onClick={()=>navigate("/Checkoutpage")}>
                     Proceed to Checkout
                   </Button>
                 </div>
