@@ -24,7 +24,6 @@ const Header = () => {
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
-  const checkout=location.pathname.includes("/CheckoutPage")
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
@@ -85,21 +84,16 @@ const Header = () => {
           </select>
         </div>
       </div>
-      
 
-        
-        <Navbar bg="white" expand="lg" className="shadow-sm">
+      <Navbar bg="white" expand="lg" className="shadow-sm">
         <Container>
           <Navbar.Brand as={Link} to="/" className="text-dark fw-bold">
             Light Up
           </Navbar.Brand>
-        
-            <Navbar.Toggle aria-controls="navbarNav" />
-          
-            <Navbar.Collapse id="navbarNav">
-                <Nav className="mx-auto">
-   
-   <Nav.Link as={Link} to="/" className="text-dark">
+          <Navbar.Toggle aria-controls="navbarNav" />
+          <Navbar.Collapse id="navbarNav">
+            <Nav className="mx-auto">
+              <Nav.Link as={Link} to="/" className="text-dark">
                 Home
               </Nav.Link>
               <Nav.Link as={Link} to="/cartpage" className="text-dark">
@@ -110,16 +104,16 @@ const Header = () => {
               </Nav.Link>
               {user ? (
                 <Nav.Link onClick={handleLogout} className="text-dark">
-                Logout
+                  Logout
                 </Nav.Link>
               ) : (
                 <Nav.Link as={Link} to="/signup" className="text-dark">
-                Signup
+                  Signup
                 </Nav.Link>
               )}
-              </Nav>
-              
-              <Form className="d-flex position-relative me-3" onSubmit={handleSearch}>
+            </Nav>
+
+            <Form className="d-flex position-relative me-3" onSubmit={handleSearch}>
               <Form.Control
                 type="text"
                 placeholder="What are you looking for?"
@@ -145,8 +139,8 @@ const Header = () => {
                     <Dropdown.Menu>
                       <Dropdown.Item onClick={handleProfile}>Profile</Dropdown.Item>
                       <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-                      </Dropdown.Menu>
-                      </Dropdown>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 )}
 
                 {/* Display wishlist length */}
@@ -155,32 +149,9 @@ const Header = () => {
                     onClick={() => navigate("/WishListpage")}
                     className="text-dark"
                     style={{ cursor: "pointer" }}
-                    />
+                  />
                   {addToWishlist.length > 0 && (
                     <Badge
-                    pill
-                    bg="danger"
-                    style={{
-                      position: "absolute",
-                      top: "-5px",
-                      right: "-10px",
-                      fontSize: "0.7rem",
-                    }}
-                    >
-                      {addToWishlist.length}
-                      </Badge>
-                    )}
-                    </div>
-                    
-                    {/* Display cart products length */}
-                    <div className="position-relative mx-3">
-                    <ShoppingCartIcon
-                    className="text-dark"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate("/cartpage")}
-                    />
-                    {cartItems.length > 0 && (
-                      <Badge
                       pill
                       bg="danger"
                       style={{
@@ -189,24 +160,42 @@ const Header = () => {
                         right: "-10px",
                         fontSize: "0.7rem",
                       }}
-                      >
-                      {cartItems.length}
-                      </Badge>
-                    )}
-                    </div>
-                    </div>
+                    >
+                      {addToWishlist.length}
+                    </Badge>
                   )}
-                  </Navbar.Collapse>
-      
+                </div>
+
+                {/* Display cart products length */}
+                <div className="position-relative mx-3">
+                  <ShoppingCartIcon
+                    className="text-dark"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/cartpage")}
+                  />
+                  {cartItems.length > 0 && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-10px",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {cartItems.length}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </Navbar.Collapse>
         </Container>
       </Navbar>
-                    
 
       <Outlet />
-      {checkout ? <Footer /> : ""}
-
-      
-      
+      <Footer />
     </div>
   );
 };
