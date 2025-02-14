@@ -13,8 +13,11 @@ import AdminHeader from "../components/AdminPane/AdminHeader";
 import AdminRoute from "./AdminRoute";
 import Contactpage from "../pages/Contactpage";
 import WishListpage from "../pages/UserAccontDetialsPage/WishListpage";
+import Checkoutpage from"../pages/CheckoutPage"
 const AppRouter = createBrowserRouter([
-  {
+
+  { 
+        
     path: "/",
     element: <AppLayout />,
     children: [
@@ -22,6 +25,9 @@ const AppRouter = createBrowserRouter([
         path: "/",
         element: <HomePage />,
         index: true,
+      },{
+        path:"/Checkoutpage",
+        element:<Checkoutpage/>
       },
       {
         path: "/contactpage",
@@ -47,6 +53,7 @@ const AppRouter = createBrowserRouter([
         path: "/productpage",
         element: <ProductPage />,
       },
+      
       {
         path: "/wishlistpage",
         element: <WishListpage />,
@@ -63,14 +70,17 @@ const AppRouter = createBrowserRouter([
             path: "usercheckoutpage",
             element: <UserCheckOutpage />,
           },
+          
         ],
       },
+
       {
         path: "/admin",
         element: <AdminHeader />,
         children: AdminRoute,
       },
     ],
+    
   },
 ]);
 export default AppRouter;

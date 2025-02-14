@@ -4,7 +4,7 @@ import { FETCH_ORDERS_REQUEST, fetchOrdersSuccess, fetchOrdersFailure } from "./
 // Function to fetch orders from API without authentication
 const fetchOrdersApi = async () => {
   try {
-    const response = await fetch("http://192.168.1.12:3000/api/orders", {
+    const response = await fetch("http://192.168.1.12:3000/api/orders/all", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
