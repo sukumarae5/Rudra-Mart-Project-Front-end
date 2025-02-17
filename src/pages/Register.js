@@ -13,9 +13,9 @@ const Register = () => {
     role: "",
   });
 
-  const [message, setMessage] = useState(null); // Success message
-  const [error, setError] = useState(""); // Error message
-  const [loading, setLoading] = useState(false); // Loading state
+  const [message, setMessage] = useState(null); 
+  const [error, setError] = useState(""); 
+  const [loading, setLoading] = useState(false); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,7 +26,6 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Password validation: must contain at least one uppercase letter
     if (!/[A-Z]/.test(formData.password)) {
       setLoading(false);
       setError("Password must contain at least one uppercase letter");
