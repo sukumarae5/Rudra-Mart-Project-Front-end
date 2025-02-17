@@ -8,10 +8,12 @@ import {
   UPDATE_CART_ITEM_QUANTITY_REQUEST,
   UPDATE_CART_ITEM_QUANTITY_SUCCESS,
   UPDATE_CART_ITEM_QUANTITY_FAILURE,
+  FETCH_CHECKEOUTPAGE_DATA,
 } from "../cart/cartActions";
 
 const initialState = {
   cartItems: [],
+  checkoutData: [],  // Store checkout data
   loading: false,
   error: null,
 };
@@ -48,12 +50,21 @@ const cartReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         cartItems: state.cartItems.map((item) =>
-          item.id === action.payload.cartItemId ? { ...item, quantity: action.payload.quantity } : item
+          item.id === action.payload.cartItemId
+            ? { ...item, quantity: action.payload.quantity }
+            : item
         ),
       };
 
     case UPDATE_CART_ITEM_QUANTITY_FAILURE:
       return { ...state, loading: false, error: action.payload };
+
+    
+    case FETCH_CHECKEOUTPAGE_DATA:
+      return {
+        ...state,
+        checkoutData: action.payload, 
+      };
 
     default:
       return state;

@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Container, Row, Col, Form, Button, Card, Image, Table } from "react-bootstrap";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { Container, Row, Col, Form, Button, Card, Image } from "react-bootstrap";
 import { FaMapMarkerAlt, FaRegCreditCard } from "react-icons/fa";
 
 const CheckoutPage = () => {
-  const dispatch = useDispatch();
-  const { cartItems = [] } = useSelector((state) => state.cart || {});
-  const { products = [] } = useSelector((state) => state.products || {});
-  console.log({ cartItems, products });
+  const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  console.log("Checkout Data:", checkoutData); // Ensure checkout data is available
 
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -16,21 +14,17 @@ const CheckoutPage = () => {
 
   const handleAddAddress = () => {
     const newAddr = { id: savedAddresses.length + 1, ...formData };
-    setSavedAddresses([newAddr]);
+    setSavedAddresses([...savedAddresses, newAddr]);
     setSelectedAddress(newAddr);
     setNewAddress(false);
   };
 
-  const filteredCartItems = cartItems.map((cartItem) => {
-    const product = products.find((prod) => prod.id === cartItem.product_id);
-    return product ? { ...product, quantity: cartItem.quantity } : null;
-  }).filter(Boolean);
-  
-  const totalCost = filteredCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalCost = checkoutData.reduce((total, item) => total + item.productPrice * item.quantity, 0);
 
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
       <Row>
+        {/* Address Section */}
         <Col md={6} style={{ background: "white", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)" }}>
           <h3 className="text-blue-700 font-semibold mb-4 flex items-center">
             <FaMapMarkerAlt className="mr-2" /> Delivery Address
@@ -69,7 +63,9 @@ const CheckoutPage = () => {
           )}
         </Col>
 
+        {/* Payment and Order Summary Section */}
         <Col md={6}>
+          {/* Payment Details */}
           <Card className="p-4 border rounded-lg shadow-lg mb-4">
             <h3 className="text-lg font-semibold text-green-700 flex items-center">
               <FaRegCreditCard className="mr-2" /> Payment Details
@@ -97,23 +93,25 @@ const CheckoutPage = () => {
             </Form>
           </Card>
 
+          {/* Order Summary */}
           <Card className="p-4 border rounded-lg shadow-lg">
             <h3 className="text-lg font-semibold text-red-700">Order Summary</h3>
-            {filteredCartItems.length > 0 ? (
-              filteredCartItems.map((item) => (
+            {checkoutData.length > 0 ? (
+              checkoutData.map((item) => (
                 <Row key={item.id} className="mb-3">
                   <Col xs={3}>
-                    <Image src={item.image_url} rounded style={{ width: '50px', height: '50px' }} />
+                    <Image src={item.productImage
+} rounded style={{ width: '50px', height: '50px' }} />
                   </Col>
                   <Col>
-                    <p>Product: <strong>{item.name}</strong></p>
-                    <p>Price: <strong>₹{item.price}</strong></p>
+                    <p>Product: <strong>{item.productName}</strong></p>
+                    <p>Price: <strong>₹{item.productPrice}</strong></p>
                     <p>Quantity: <strong>{item.quantity}</strong></p>
-                                  </Col>
+                  </Col>
                 </Row>
               ))
             ) : (
-              <p className="text-muted">No matching products in cart.</p>
+              <p className="text-muted">No products available in checkout.</p>
             )}
             <hr />
             <h4>Total: ₹{totalCost.toFixed(2)}</h4>
