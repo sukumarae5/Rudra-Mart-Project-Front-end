@@ -10,10 +10,7 @@ const CheckoutPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch(); // To dispatch actions
 
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [newAddress, setNewAddress] = useState(false);
-  const [formData, setFormData] = useState({ name: "", phone: "", address: "" });
+  
   const [paymentMethod, setPaymentMethod] = useState("creditCard"); // Default payment method
   const [cardDetails, setCardDetails] = useState({
     cardNumber: "",
@@ -21,13 +18,8 @@ const CheckoutPage = () => {
     cvv: ""
   });
 
-  const handleAddAddress = () => {
-    const newAddr = { id: savedAddresses.length + 1, ...formData };
-    setSavedAddresses([...savedAddresses, newAddr]);
-    setSelectedAddress(newAddr);
-    setNewAddress(false);
     
-  };
+  
 
   const handleIncreaseQuantity = (productId) => {
     dispatch(increaseQuantity(productId)); // Dispatch the action to increase quantity
@@ -55,42 +47,7 @@ const CheckoutPage = () => {
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
       <Row>
         {/* Address and Payment Section */}
-        <Col md={6} style={{ background: "white", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)" }}>
-          <h3 className="text-blue-700 font-semibold mb-4 flex items-center">
-            <FaMapMarkerAlt className="mr-2" /> Delivery Address
-          </h3>
-          {savedAddresses.length > 0 ? (
-            savedAddresses.map((addr) => (
-              <div key={addr.id} className="border p-2 rounded-lg mb-2 cursor-pointer hover:bg-blue-50" onClick={() => setSelectedAddress(addr)}>
-                <input type="radio" name="address" checked={selectedAddress?.id === addr.id} readOnly className="mr-2" />
-                <span className="font-semibold">{addr.name}</span> ({addr.phone}) <br />
-                <span>{addr.address}</span>
-              </div>
-            ))
-          ) : (
-            <p className="text-muted">No saved addresses. Please add a new address.</p>
-          )}
-          <Button variant="link" className="text-blue-500" onClick={() => setNewAddress(true)}>+ Add New Address</Button>
-          {newAddress && (
-            <div className="border p-4 rounded-lg mt-3">
-              <h3 className="text-lg font-semibold text-blue-700">Enter New Address</h3>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Phone</Form.Label>
-                  <Form.Control type="text" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Address</Form.Label>
-                  <Form.Control type="text" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-                </Form.Group>
-                <Button variant="primary" onClick={handleAddAddress}>Save Address</Button>
-              </Form>
-            </div>
-          )}
+              <Col>
         </Col>
 
         {/* Order Summary */}
