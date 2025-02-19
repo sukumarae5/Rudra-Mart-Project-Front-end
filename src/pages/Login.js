@@ -41,13 +41,11 @@ const Login = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-
         const data = await response.json();
         console.log(data)
         if (data.token) {
           localStorage.setItem("authToken", data.token);
           localStorage.setItem("user", JSON.stringify(matchingUser));
-
           alert(data.message);
           navigate("/");
 
@@ -114,7 +112,7 @@ const Login = () => {
                     <div className="d-flex justify-content-between align-items-center mt-4">
                       <button
                         type="submit"
-                        className="py-2 px-4 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 focus:outline-none"
+                        className="py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none"
                       >
                         Login
                       </button>
