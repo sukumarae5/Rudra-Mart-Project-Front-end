@@ -74,10 +74,10 @@ const Register = () => {
     }
   };
 
-  const handleGoogleSignUp = () => {
-    console.log("Google Sign Up clicked");
-    // Google Sign Up logic here
-  };
+  // const handleGoogleSignUp = () => {
+  //   console.log("Google Sign Up clicked");
+  //   // Google Sign Up logic here
+  // };
 
   return (
     <div className="container py-5">
@@ -120,7 +120,7 @@ const Register = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 focus:outline-none"
+                className="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-violet-600 focus:outline-none"
                 disabled={loading}
               >
                 {loading ? <span className="spinner-border spinner-border-sm"></span> : "Create Account"}

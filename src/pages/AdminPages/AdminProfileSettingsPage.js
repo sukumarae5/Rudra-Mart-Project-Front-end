@@ -11,9 +11,13 @@ export default function AdminProfileSettingPage() {
     }
   };
 
+  const handleRemoveImage = () => {
+    setProfileImage(null); // Clear the profile image
+  };
+
   const styles = {
     container: {
-      maxWidth: "700px",
+      maxWidth: "1000px",
       margin: "40px auto",
       padding: "20px",
       fontFamily: "Arial, sans-serif",
@@ -127,6 +131,11 @@ export default function AdminProfileSettingPage() {
             <label htmlFor="fileUpload" style={{ ...styles.button(true), cursor: "pointer" }}>
               Add File
             </label>
+            {profileImage && (
+              <button onClick={handleRemoveImage} style={styles.button(false)}>
+                Remove Image
+              </button>
+            )}
           </div>
 
           <div style={styles.inputGroup}>
