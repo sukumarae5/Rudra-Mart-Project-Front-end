@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import sideImage from "../../src/assets/images/cart.jpg";
-
+import { GoogleLogin } from "@react-oauth/google";
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -127,14 +127,15 @@ const Register = () => {
               </button>
             </form>
 
-            <button
+            {/* <button
               onClick={handleGoogleSignUp}
               className="w-full d-flex align-items-center justify-content-center mt-3 py-2 px-4 border border-gray-300 rounded-lg"
             >
-              <FcGoogle className="me-2" size={20} />
+              <FcGoogle className="me-2" size={20}
+               />
               Sign Up with Google
-            </button>
-
+            </button> */}
+<GoogleLogin className="me-2"/>
             <p className="text-muted mt-4">
               Already have an account?{" "}
               <Link to="/login" className="text-black">

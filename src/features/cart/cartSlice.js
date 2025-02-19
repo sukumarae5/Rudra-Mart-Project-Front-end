@@ -9,11 +9,14 @@ import {
   UPDATE_CART_ITEM_QUANTITY_SUCCESS,
   UPDATE_CART_ITEM_QUANTITY_FAILURE,
   FETCH_CHECKEOUTPAGE_DATA,
+  INCREASE_QUANTITY,
+  REMOVE_PRODUCT,
+  DECREASE_QUANTITY
 } from "../cart/cartActions";
 
 const initialState = {
   cartItems: [],
-  checkoutData: [],  // Store checkout data
+  checkoutData: [],
   loading: false,
   error: null,
 };
@@ -59,11 +62,35 @@ const cartReducer = (state = initialState, action) => {
     case UPDATE_CART_ITEM_QUANTITY_FAILURE:
       return { ...state, loading: false, error: action.payload };
 
-    
+    // ONLY UPDATE checkoutData when increasing quantity
+    case INCREASE_QUANTITY:
+      return {
+        ...state,
+        checkoutData: state.checkoutData.map((item) =>
+          item.productId === action.payload.productId
+            ? { ...item, quantity: item.quantity + 1 }  // Increase quantity in checkoutData
+            : item
+        ),
+      };
+      case DECREASE_QUANTITY:
+        return {
+          ...state,
+          checkoutData:state.checkoutData.map((item)=>
+          item.productId===action.payload.productId && item.quantity>1?
+          {...item,quantity:item.quantity-1}:item
+),
+        };
+    // ONLY REMOVE PRODUCT FROM checkoutData
+    case REMOVE_PRODUCT:
+      return {
+        ...state,
+        checkoutData: state.checkoutData.filter((item) => item.productId !== action.payload),
+      };
+
     case FETCH_CHECKEOUTPAGE_DATA:
       return {
         ...state,
-        checkoutData: action.payload, 
+        checkoutData: action.payload,  // Set checkoutData from action payload
       };
 
     default:
