@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { Container, Row, Col, Form, Button,  Spinner, Alert } from "react-bootstrap";
-import { FaMapMarkerAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; 
+import { Spinner, Alert } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Container, Row, Col, Form, Button, Card, Image } from "react-bootstrap";
+import { FaMapMarkerAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
+import Accordion from "react-bootstrap/Accordion";
+import { decreaseQuantity, increaseQuantity, removeProduct } from "../features/cart/cartActions"; // Import actions
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 const CheckoutPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  const dispatch = useDispatch(); // To dispatch actions
   const navigate = useNavigate();
 
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -23,6 +28,14 @@ const CheckoutPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Payment-related states
+  const [paymentMethod, setPaymentMethod] = useState("creditCard"); // Default payment method
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+  });
 
   // Fetch saved addresses
   useEffect(() => {
@@ -61,36 +74,36 @@ const CheckoutPage = () => {
   const handleAddressSubmit = async () => {
     const token = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id;  // Safely get the id
-  
+    const userId = user?.id; // Safely get the id
+
     if (!token) {
       alert("You need to log in first.");
       navigate("/login");
       return;
     }
-  
+
     if (!userId) {
       alert("User ID is not available.");
       return;
     }
-  
+
     // Check if all form fields are filled out
     for (const [key, value] of Object.entries(formData)) {
       if (!value) {
-        alert(`Please fill in the ${key.replace('_', ' ')}`);
+        alert(`Please fill in the ${key.replace("_", " ")}`);
         return;
       }
     }
-  
+
     setLoading(true);
     try {
       // URL for the API call depending on whether it's an update or add
       const url = selectedAddress
-        ? `http://192.168.1.12:3000/api/address/update/${selectedAddress.id}`  // Include the address ID in the URL for update
-        : "http://192.168.1.12:3000/api/address/add";  // Add new address if no address is selected
-  
+        ? `http://192.168.1.12:3000/api/address/update/${selectedAddress.id}` // Include the address ID in the URL for update
+        : "http://192.168.1.12:3000/api/address/add"; // Add new address if no address is selected
+
       const method = selectedAddress ? "PUT" : "POST";
-  
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -99,22 +112,22 @@ const CheckoutPage = () => {
         },
         body: JSON.stringify({
           ...formData,
-          userId: userId,  // Include userId in the request body
+          userId: userId, // Include userId in the request body
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok && data.success) {
         alert(selectedAddress ? "Address updated successfully!" : "Address added successfully!");
-  
+
         // Update the saved addresses
         setSavedAddresses((prev) =>
           selectedAddress
             ? prev.map((addr) => (addr.id === selectedAddress.id ? data.address : addr))
             : [...prev, data.address]
         );
-  
+
         // Reset form and selection state after successful operation
         setNewAddress(false);
         setSelectedAddress(null);
@@ -136,7 +149,6 @@ const CheckoutPage = () => {
       setLoading(false);
     }
   };
-
 
   // Handle address edit
   const handleEditAddress = (address) => {
@@ -194,11 +206,32 @@ const CheckoutPage = () => {
     setSelectedAddress(address);
   };
 
+  const handleIncreaseQuantity = (productId) => {
+    dispatch(increaseQuantity(productId)); // Dispatch the action to increase quantity
+  };
+
+  const handleDecreaseQuantity = (productId) => {
+    dispatch(decreaseQuantity(productId));
+  };
+
+  const handleRemoveProduct = (productId) => {
+    dispatch(removeProduct(productId)); // Dispatch the action to remove product
+  };
+
+  const handlePaymentMethodChange = (e) => {
+    setPaymentMethod(e.target.value);
+  };
+
+  const handleCardDetailChange = (e) => {
+    setCardDetails({ ...cardDetails, [e.target.name]: e.target.value });
+  };
+
+  const totalCost = checkoutData.reduce((total, item) => total + item.productPrice * item.quantity, 0);
 
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
       <Row>
-        {/* Address Section */}
+        {/* Address and Payment Section */}
         <Col md={6} style={{ background: "white", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)" }}>
           <h3 className="text-blue-700 font-semibold mb-4 flex items-center">
             <FaMapMarkerAlt className="mr-2" /> Delivery Address
@@ -208,12 +241,24 @@ const CheckoutPage = () => {
           {savedAddresses.length > 0 ? (
             savedAddresses.map((addr) => (
               <div key={addr.id} className="border p-2 rounded-lg mb-2 cursor-pointer hover:bg-blue-50">
-                <input type="radio" name="address" checked={selectedAddress?.id === addr.id} onChange={() => handleSelectAddressForPayment(addr)} className="mr-2" />
+                <input
+                  type="radio"
+                  name="address"
+                  checked={selectedAddress?.id === addr.id}
+                  onChange={() => handleSelectAddressForPayment(addr)}
+                  className="mr-2"
+                />
                 <span className="font-semibold">{addr.full_name}</span> ({addr.phone_number}) <br />
-                <span>{addr.street_address}, {addr.city}, {addr.state}, {addr.postal_code}, {addr.country}</span>
+                <span>
+                  {addr.street_address}, {addr.city}, {addr.state}, {addr.postal_code}, {addr.country}
+                </span>
                 <div className="d-flex mt-2">
-                  <Button variant="warning" onClick={() => handleEditAddress(addr)} className="mr-2">Edit</Button>
-                  <Button variant="danger" onClick={() => handleDeleteAddress(addr.id)}>Delete</Button>
+                  <Button variant="warning" onClick={() => handleEditAddress(addr)} className="mr-2">
+                    Edit
+                  </Button>
+                  <Button variant="danger" onClick={() => handleDeleteAddress(addr.id)}>
+                    Delete
+                  </Button>
                 </div>
               </div>
             ))
@@ -221,7 +266,9 @@ const CheckoutPage = () => {
             <p className="text-muted">No saved addresses. Please add a new address.</p>
           )}
 
-          <Button variant="link" className="text-blue-500" onClick={() => setNewAddress(true)}>+ Add New Address</Button>
+          <Button variant="link" className="text-blue-500" onClick={() => setNewAddress(true)}>
+            + Add New Address
+          </Button>
 
           {/* Form for adding new address */}
           {newAddress && !selectedAddress && (
@@ -231,7 +278,13 @@ const CheckoutPage = () => {
                 {Object.keys(formData).map((key) => (
                   <Form.Group className="mb-3" key={key}>
                     <Form.Label>{key.replace("_", " ")}</Form.Label>
-                    <Form.Control type="text" name={key} value={formData[key]} onChange={handleChange} required />
+                    <Form.Control
+                      type="text"
+                      name={key}
+                      value={formData[key]}
+                      onChange={handleChange}
+                      required
+                    />
                   </Form.Group>
                 ))}
                 <Button variant="primary" onClick={handleAddressSubmit} disabled={loading}>
@@ -249,7 +302,13 @@ const CheckoutPage = () => {
                 {Object.keys(formData).map((key) => (
                   <Form.Group className="mb-3" key={key}>
                     <Form.Label>{key.replace("_", " ")}</Form.Label>
-                    <Form.Control type="text" name={key} value={formData[key]} onChange={handleChange} required />
+                    <Form.Control
+                      type="text"
+                      name={key}
+                      value={formData[key]}
+                      onChange={handleChange}
+                      required
+                    />
                   </Form.Group>
                 ))}
                 <Button variant="primary" onClick={handleAddressSubmit} disabled={loading}>
@@ -260,9 +319,154 @@ const CheckoutPage = () => {
           )}
         </Col>
 
-        {/* Payment Section */}
+        {/* Order Summary */}
         <Col md={6}>
-          
+          <Accordion defaultActiveKey="0" flush>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Payment Method</Accordion.Header>
+              <Accordion.Body>
+                <Card className="p-4 border rounded-lg shadow-lg mb-4">
+                  <h3 className="text-lg font-semibold text-green-700 flex items-center">
+                    <FaRegCreditCard className="mr-2" /> Payment Details
+                  </h3>
+                  <Form>
+                    <Form.Check
+                      type="radio"
+                      label="Credit Card"
+                      value="creditCard"
+                      checked={paymentMethod === "creditCard"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="PayPal"
+                      value="paypal"
+                      checked={paymentMethod === "paypal"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="Cash on Delivery"
+                      value="cod"
+                      checked={paymentMethod === "cod"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                  </Form>
+                  <Accordion>
+                    {paymentMethod === "creditCard" && (
+                      <Accordion.Item eventKey="1">
+                        <Accordion.Header>Credit Card Details</Accordion.Header>
+                        <Accordion.Body>
+                          <div className="mt-4">
+                            <Form.Group className="mb-3">
+                              <Form.Label>Card Number</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="cardNumber"
+                                value={cardDetails.cardNumber}
+                                onChange={handleCardDetailChange}
+                                placeholder="XXXX XXXX XXXX XXXX"
+                              />
+                            </Form.Group>
+                            <Row>
+                              <Col md={6}>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Expiry Date</Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    name="expiryDate"
+                                    value={cardDetails.expiryDate}
+                                    onChange={handleCardDetailChange}
+                                    placeholder="MM/YY"
+                                  />
+                                </Form.Group>
+                              </Col>
+                              <Col md={6}>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>CVV</Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    name="cvv"
+                                    value={cardDetails.cvv}
+                                    onChange={handleCardDetailChange}
+                                    placeholder="CVV"
+                                  />
+                                </Form.Group>
+                              </Col>
+                            </Row>
+                          </div>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    )}
+                  </Accordion>
+                  <Button variant="success" className="w-full">
+                    Place Order
+                  </Button>
+                </Card>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+
+          <Card className="p-4 border rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold text-red-700">Order Summary</h3>
+            {checkoutData.length > 0 ? (
+              checkoutData.map((item) => (
+                <Row key={item.id} className="mb-3">
+                  <Col xs={3}>
+                    <Image src={item.productImage} rounded style={{ width: "100px", height: "auto" }} />
+                  </Col>
+                  <Col>
+                    <div>
+                      <Button
+                        variant="drk"
+                        style={{ paddingLeft: "300px" }}
+                        onClick={() => handleRemoveProduct(item.productId)}
+                      >
+                        <a>
+                          <DeleteOutlineOutlinedIcon />
+                        </a>
+                      </Button>
+                      <p>
+                        Product: <strong>{item.productName}</strong>
+                      </p>
+                      <p>
+                        Price: <strong>₹{item.productPrice}</strong>
+                      </p>
+                      <p>
+                        Quantity: <strong>{item.quantity}</strong>
+                      </p>
+                      <p>
+                        Subtotal: <strong>₹{(item.productPrice * item.quantity).toFixed(2)}</strong>
+                      </p>
+                    </div>
+
+                    <div className="d-flex justifycontent-between">
+                      <div>
+                        <Button
+                          variant="primary"
+                          className="mr-1"
+                          onClick={() => handleIncreaseQuantity(item.productId)}
+                        >
+                          +
+                        </Button>
+                        <Button
+                          variant="primary"
+                          className="mr-1"
+                          onClick={() => handleDecreaseQuantity(item.productId)}
+                        >
+                          -
+                        </Button>
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+              ))
+            ) : (
+              <p className="text-muted">No products available in checkout.</p>
+            )}
+            <hr />
+            <h4 style={{ marginLeft: "80%" }}>Total: ₹{totalCost.toFixed(2)}</h4>
+          </Card>
         </Col>
       </Row>
     </Container>
