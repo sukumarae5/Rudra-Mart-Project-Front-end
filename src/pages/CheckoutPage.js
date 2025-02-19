@@ -1,36 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Row, Col, Form, Button, Card, Image, Table } from "react-bootstrap";
-import { FaMapMarkerAlt, FaRegCreditCard } from "react-icons/fa";
+import { Container, Row, Col, Form, Button, Card, Image } from "react-bootstrap";
+import { FaMapMarkerAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
+import Accordion from 'react-bootstrap/Accordion';
+import { decreaseQuantity, increaseQuantity, removeProduct } from '../features/cart/cartActions'; // Import actions
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 const CheckoutPage = () => {
-  const dispatch = useDispatch();
-  const { cartItems = [] } = useSelector((state) => state.cart || {});
-  const { products = [] } = useSelector((state) => state.products || {});
-  console.log({ cartItems, products });
+  const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  const dispatch = useDispatch(); // To dispatch actions
 
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [newAddress, setNewAddress] = useState(false);
   const [formData, setFormData] = useState({ name: "", phone: "", address: "" });
+  const [paymentMethod, setPaymentMethod] = useState("creditCard"); // Default payment method
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: ""
+  });
 
   const handleAddAddress = () => {
     const newAddr = { id: savedAddresses.length + 1, ...formData };
-    setSavedAddresses([newAddr]);
+    setSavedAddresses([...savedAddresses, newAddr]);
     setSelectedAddress(newAddr);
     setNewAddress(false);
+    
   };
 
-  const filteredCartItems = cartItems.map((cartItem) => {
-    const product = products.find((prod) => prod.id === cartItem.product_id);
-    return product ? { ...product, quantity: cartItem.quantity } : null;
-  }).filter(Boolean);
-  
-  const totalCost = filteredCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const handleIncreaseQuantity = (productId) => {
+    dispatch(increaseQuantity(productId)); // Dispatch the action to increase quantity
+  };
+
+  const handleDecreaseQuantity = (productId) => {
+    dispatch(decreaseQuantity(productId));
+  };
+
+  const handleRemoveProduct = (productId) => {
+    dispatch(removeProduct(productId)); // Dispatch the action to remove product
+  };
+
+  const handlePaymentMethodChange = (e) => {
+    setPaymentMethod(e.target.value);
+  };
+
+  const handleCardDetailChange = (e) => {
+    setCardDetails({ ...cardDetails, [e.target.name]: e.target.value });
+  };
+
+  const totalCost = checkoutData.reduce((total, item) => total + item.productPrice * item.quantity, 0);
 
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
       <Row>
+        {/* Address and Payment Section */}
         <Col md={6} style={{ background: "white", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)" }}>
           <h3 className="text-blue-700 font-semibold mb-4 flex items-center">
             <FaMapMarkerAlt className="mr-2" /> Delivery Address
@@ -53,15 +77,15 @@ const CheckoutPage = () => {
               <Form>
                 <Form.Group className="mb-3">
                   <Form.Label>Name</Form.Label>
-                  <Form.Control type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                  <Form.Control type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Phone</Form.Label>
-                  <Form.Control type="text" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                  <Form.Control type="text" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Address</Form.Label>
-                  <Form.Control type="text" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
+                  <Form.Control type="text" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
                 </Form.Group>
                 <Button variant="primary" onClick={handleAddAddress}>Save Address</Button>
               </Form>
@@ -69,54 +93,133 @@ const CheckoutPage = () => {
           )}
         </Col>
 
+        {/* Order Summary */}
         <Col md={6}>
-          <Card className="p-4 border rounded-lg shadow-lg mb-4">
-            <h3 className="text-lg font-semibold text-green-700 flex items-center">
-              <FaRegCreditCard className="mr-2" /> Payment Details
-            </h3>
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Card Number</Form.Label>
-                <Form.Control type="text" placeholder="XXXX-XXXX-XXXX-XXXX" />
-              </Form.Group>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Expiry Date</Form.Label>
-                    <Form.Control type="text" placeholder="MM/YY" />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>CVV</Form.Label>
-                    <Form.Control type="text" placeholder="XXX" />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Button variant="success" className="w-full">Place Order</Button>
-            </Form>
-          </Card>
+          <Accordion defaultActiveKey="0" flush>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Payment Method</Accordion.Header>
+              <Accordion.Body>
+                <Card className="p-4 border rounded-lg shadow-lg mb-4">
+                  <h3 className="text-lg font-semibold text-green-700 flex items-center">
+                    <FaRegCreditCard className="mr-2" /> Payment Details
+                  </h3>
+                  <Form>
+                    <Form.Check
+                      type="radio"
+                      label="Credit Card"
+                      value="creditCard"
+                      checked={paymentMethod === "creditCard"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="PayPal"
+                      value="paypal"
+                      checked={paymentMethod === "paypal"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="Cash on Delivery"
+                      value="cod"
+                      checked={paymentMethod === "cod"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                  </Form>
+                  <Accordion>
+                    {paymentMethod === "creditCard" && (
+                      <Accordion.Item eventKey="1">
+                        <Accordion.Header>Credit Card Details</Accordion.Header>
+                        <Accordion.Body>
+                          <div className="mt-4">
+                            <Form.Group className="mb-3">
+                              <Form.Label>Card Number</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="cardNumber"
+                                value={cardDetails.cardNumber}
+                                onChange={handleCardDetailChange}
+                                placeholder="XXXX XXXX XXXX XXXX"
+                              />
+                            </Form.Group>
+                            <Row>
+                              <Col md={6}>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Expiry Date</Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    name="expiryDate"
+                                    value={cardDetails.expiryDate}
+                                    onChange={handleCardDetailChange}
+                                    placeholder="MM/YY"
+                                  />
+                                </Form.Group>
+                              </Col>
+                              <Col md={6}>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>CVV</Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    name="cvv"
+                                    value={cardDetails.cvv}
+                                    onChange={handleCardDetailChange}
+                                    placeholder="CVV"
+                                  />
+                                </Form.Group>
+                              </Col>
+                            </Row>
+                          </div>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    )}
+                  </Accordion>
+                  <Button variant="success" className="w-full">Place Order</Button>
+                </Card>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
 
           <Card className="p-4 border rounded-lg shadow-lg">
             <h3 className="text-lg font-semibold text-red-700">Order Summary</h3>
-            {filteredCartItems.length > 0 ? (
-              filteredCartItems.map((item) => (
+            {checkoutData.length > 0 ? (
+              checkoutData.map((item) => (
                 <Row key={item.id} className="mb-3">
                   <Col xs={3}>
-                    <Image src={item.image_url} rounded style={{ width: '50px', height: '50px' }} />
+                    <Image src={item.productImage} rounded style={{ width: '100px', height: 'auto' }} />
                   </Col>
                   <Col>
-                    <p>Product: <strong>{item.name}</strong></p>
-                    <p>Price: <strong>₹{item.price}</strong></p>
+
+                   <div> 
+                   <Button variant="drk" style={{paddingLeft:"300px"}}   onClick={() => handleRemoveProduct(item.productId)}>
+                    <a><DeleteOutlineOutlinedIcon /></a>
+
+                    </Button>
+                    <p>Product: <strong>{item.productName}</strong></p>
+                    <p>Price: <strong>₹{item.productPrice}</strong></p>
                     <p>Quantity: <strong>{item.quantity}</strong></p>
-                                  </Col>
+                    <p>Subtotal: <strong>₹{(item.productPrice * item.quantity).toFixed(2)}</strong></p>
+</div>
+                   
+                    <div className="d-flex justifycontent-between">
+                     
+                    <div>
+                    <Button variant="primary" className="mr-1" onClick={() => handleIncreaseQuantity(item.productId)}>
+                      +
+                    </Button>
+                    <Button variant="primary" className="mr-1" onClick={() => handleDecreaseQuantity(item.productId)}>
+                      -
+                    </Button>
+                    
+                    </div>
+                    </div>
+                  </Col>
                 </Row>
               ))
             ) : (
-              <p className="text-muted">No matching products in cart.</p>
+              <p className="text-muted">No products available in checkout.</p>
             )}
             <hr />
-            <h4>Total: ₹{totalCost.toFixed(2)}</h4>
+            <h4 style={{marginLeft:"80%"}}>Total: ₹{totalCost.toFixed(2)}</h4>
           </Card>
         </Col>
       </Row>

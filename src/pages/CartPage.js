@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
-import { fetchApiCartDataRequest, removeCartItemRequest, updateCartItemQuantityRequest } from "../features/cart/cartActions";
+import { fetchApiCartDataRequest, fetcheckeoutpagedata, removeCartItemRequest, updateCartItemQuantityRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
+// import CheckoutPage from "./CheckoutPage";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -33,7 +34,11 @@ const navigate=useNavigate()
     const price = parseFloat(product?.price || cartItem.price || 0);
     return total + price * cartItem.quantity;
   }, 0);
+// const CheckoutPagedata=()=>{
+//   dispatch(fetcheckeoutpagedata())
 
+//   navigate("/CheckoutPage")
+// }
   const handleApplyCoupon = () => {
     if (couponCode === "DISCOUNT10") {
       setDiscount(0.1 * totalCost);
@@ -43,6 +48,8 @@ const navigate=useNavigate()
       alert("Coupon applied successfully! ₹50 discount applied.");
     } else {
       alert("Invalid coupon code!");
+      
+
       setDiscount(0);
     }
   };
@@ -151,7 +158,24 @@ const navigate=useNavigate()
                   <strong>₹{finalCost}</strong>
                 </div>
                 <div className="d-flex justify-content-center mt-3">
-                  <Button variant="danger" className="w-100" onClick={()=>navigate("/Checkoutpage")}>
+                  <Button variant="danger" className="w-100" onClick={()=>{
+                       const checkoutData = cartItems.map((cartItem) => {
+                        const product = products.find((p) => p.id === cartItem.product_id);
+                        return {
+                          userId: cartItem.user_id,
+                          productId: cartItem.product_id,
+                          productName: product?.name || "Unknown",
+                          productImage: product?.image_url || "",
+                          productPrice: parseFloat(product?.price || 0),
+                          quantity: cartItem.quantity,
+                          totalPrice: parseFloat(product?.price || 0) * cartItem.quantity,
+                        };
+                      });
+                  
+  dispatch(fetcheckeoutpagedata(checkoutData))
+
+  navigate("/CheckoutPage")
+}}>
                     Proceed to Checkout
                   </Button>
                 </div>
