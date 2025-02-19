@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
-import { FaMapMarkerAlt, FaRegCreditCard } from "react-icons/fa";
+import { Container, Row, Col, Form, Button,  Spinner, Alert } from "react-bootstrap";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; 
 
 const CheckoutPage = () => {
@@ -194,7 +194,6 @@ const CheckoutPage = () => {
     setSelectedAddress(address);
   };
 
-  const totalCost = checkoutData.reduce((total, item) => total + item.productPrice * item.quantity, 0);
 
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
@@ -263,26 +262,7 @@ const CheckoutPage = () => {
 
         {/* Payment Section */}
         <Col md={6}>
-          <Card className="p-4 border rounded-lg shadow-lg mb-4">
-            <h3 className="text-lg font-semibold text-green-700 flex items-center">
-              <FaRegCreditCard className="mr-2" /> Payment Details
-            </h3>
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Card Number</Form.Label>
-                <Form.Control type="text" placeholder="XXXX-XXXX-XXXX-XXXX" required />
-              </Form.Group>
-              <Row>
-                <Col md={6}><Form.Group className="mb-3"><Form.Label>Expiry Date</Form.Label><Form.Control type="text" placeholder="MM/YY" required /></Form.Group></Col>
-                <Col md={6}><Form.Group className="mb-3"><Form.Label>CVV</Form.Label><Form.Control type="text" placeholder="XXX" required /></Form.Group></Col>
-              </Row>
-              <Button variant="success" className="w-full">Place Order</Button>
-            </Form>
-          </Card>
-          <Card className="p-4 border rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold text-red-700">Order Summary</h3>
-            <h4>Total: ₹{totalCost.toFixed(2)}</h4>
-          </Card>
+          
         </Col>
       </Row>
     </Container>

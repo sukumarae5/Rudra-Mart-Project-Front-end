@@ -48,6 +48,8 @@ const navigate=useNavigate()
       alert("Coupon applied successfully! ₹50 discount applied.");
     } else {
       alert("Invalid coupon code!");
+      
+
       setDiscount(0);
     }
   };

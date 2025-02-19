@@ -85,6 +85,7 @@ const updateCartItemQuantityApi = async ({cartItemId, quantity }) => {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${userToken}`,
+    
     },
     body: JSON.stringify({ quantity }),
   });

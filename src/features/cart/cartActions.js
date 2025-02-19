@@ -12,6 +12,9 @@ export const UPDATE_CART_ITEM_QUANTITY_SUCCESS = "UPDATE_CART_ITEM_QUANTITY_SUCC
 export const UPDATE_CART_ITEM_QUANTITY_FAILURE = "UPDATE_CART_ITEM_QUANTITY_FAILURE";
 
 export const FETCH_CHECKEOUTPAGE_DATA="FETCH_CHECKEOUTPAGE_DATA"
+export const INCREASE_QUANTITY = 'INCREASE_QUANTITY';
+export const DECREASE_QUANTITY ="DECREASE_QUANTITY"
+export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
 // Fetch Cart Data Actions
 export const fetchApiCartDataRequest = () => ({
   type: FETCH_API_CART_DATA_REQUEST,
@@ -68,3 +71,19 @@ export const fetcheckeoutpagedata=(Checkoutdata)=>({
 })
 
 
+export const increaseQuantity = (productId) => ({
+
+  type:INCREASE_QUANTITY,
+  payload:{productId},
+})
+export const decreaseQuantity=(productId)=>({
+  type:DECREASE_QUANTITY,
+  payload:{productId}
+
+})
+
+// Action to remove a product
+export const removeProduct = (productId) => ({
+  type: REMOVE_PRODUCT,
+  payload: productId,
+});
