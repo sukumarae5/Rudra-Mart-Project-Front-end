@@ -1,70 +1,267 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Container, Row, Col, Form, Button, Card, Image } from 'react-bootstrap';
-import { FaMapMarkerAlt, FaRegCreditCard } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { Container, Row, Col, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
+import { FaMapMarkerAlt, FaRegCreditCard } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; 
 
 const CheckoutPage = () => {
-  const dispatch = useDispatch();
-  const { cartItems = [] } = useSelector((state) => state.cart);
-  const { products = [] } = useSelector((state) => state.products || {});
-  console.log({ cartItems, products });
-  
+  const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  const navigate = useNavigate();
+
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [newAddress, setNewAddress] = useState(false);
-  const [formData, setFormData] = useState({ name: '', phone: '', address: '' });
+  const [formData, setFormData] = useState({
+    full_name: "",
+    phone_number: "",
+    address: "",
+    city: "",
+    state: "",
+    postalcode: "",
+    country: "",
+  });
 
-  const handleAddAddress = () => {
-    const newAddr = { id: savedAddresses.length + 1, ...formData };
-    setSavedAddresses([newAddr]);
-    setSelectedAddress(newAddr);
-    setNewAddress(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch saved addresses
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      alert("You need to log in first.");
+      navigate("/login");
+      return;
+    }
+
+    const fetchSavedAddresses = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://192.168.1.12:3000/api/address/get", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setSavedAddresses(data.addresses);
+        } else {
+          setError(data.message || "Failed to fetch saved addresses.");
+        }
+      } catch (error) {
+        setError("An error occurred while fetching saved addresses.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSavedAddresses();
+  }, [navigate]);
+
+  // Handle new address submission
+  const handleAddressSubmit = async () => {
+    const token = localStorage.getItem("authToken");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;  // Safely get the id
+  
+    if (!token) {
+      alert("You need to log in first.");
+      navigate("/login");
+      return;
+    }
+  
+    if (!userId) {
+      alert("User ID is not available.");
+      return;
+    }
+  
+    // Check if all form fields are filled out
+    for (const [key, value] of Object.entries(formData)) {
+      if (!value) {
+        alert(`Please fill in the ${key.replace('_', ' ')}`);
+        return;
+      }
+    }
+  
+    setLoading(true);
+    try {
+      // URL for the API call depending on whether it's an update or add
+      const url = selectedAddress
+        ? `http://192.168.1.12:3000/api/address/update/${selectedAddress.id}`  // Include the address ID in the URL for update
+        : "http://192.168.1.12:3000/api/address/add";  // Add new address if no address is selected
+  
+      const method = selectedAddress ? "PUT" : "POST";
+  
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          userId: userId,  // Include userId in the request body
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok && data.success) {
+        alert(selectedAddress ? "Address updated successfully!" : "Address added successfully!");
+  
+        // Update the saved addresses
+        setSavedAddresses((prev) =>
+          selectedAddress
+            ? prev.map((addr) => (addr.id === selectedAddress.id ? data.address : addr))
+            : [...prev, data.address]
+        );
+  
+        // Reset form and selection state after successful operation
+        setNewAddress(false);
+        setSelectedAddress(null);
+        setFormData({
+          full_name: "",
+          phone_number: "",
+          street_address: "",
+          city: "",
+          state: "",
+          postal_code: "",
+          country: "",
+        });
+      } else {
+        alert(data.message || "Failed to save address.");
+      }
+    } catch (error) {
+      alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredCartItems = cartItems.filter(cartItem => products.some(product => product.id === cartItem.product_id));
-  const totalCost = filteredCartItems.reduce((total, cartItem) => total + cartItem.price * cartItem.quantity, 0);
+
+  // Handle address edit
+  const handleEditAddress = (address) => {
+    setSelectedAddress(address);
+    setFormData({
+      full_name: address.full_name,
+      phone_number: address.phone_number,
+      address: address.street_address,
+      city: address.city,
+      state: address.state,
+      postalcode: address.postal_code,
+      country: address.country,
+    });
+    setNewAddress(true);
+  };
+
+  // Handle address delete
+  const handleDeleteAddress = async (addressId) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      alert("You need to log in first.");
+      navigate("/login");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this address?");
+    if (confirmDelete) {
+      setLoading(true);
+      try {
+        const response = await fetch(`http://192.168.1.12:3000/api/address/delete/${addressId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          alert("Address deleted successfully!");
+          setSavedAddresses((prev) => prev.filter((address) => address.id !== addressId));
+        } else {
+          alert(data.message || "Failed to delete address.");
+        }
+      } catch (error) {
+        alert("An error occurred. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectAddressForPayment = (address) => {
+    setSelectedAddress(address);
+  };
+
+  const totalCost = checkoutData.reduce((total, item) => total + item.productPrice * item.quantity, 0);
 
   return (
-    <Container fluid className="min-h-screen bg-gradient-to-r from-blue-100 to-blue-300 p-10">
+    <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
       <Row>
-        <Col md={6} className="bg-white p-6 rounded-lg shadow-lg">
+        {/* Address Section */}
+        <Col md={6} style={{ background: "white", padding: "30px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)" }}>
           <h3 className="text-blue-700 font-semibold mb-4 flex items-center">
             <FaMapMarkerAlt className="mr-2" /> Delivery Address
           </h3>
+          {loading && <Spinner animation="border" />}
+          {error && <Alert variant="danger">{error}</Alert>}
           {savedAddresses.length > 0 ? (
             savedAddresses.map((addr) => (
-              <div key={addr.id} className="border p-2 rounded-lg mb-2 cursor-pointer hover:bg-blue-50" onClick={() => setSelectedAddress(addr)}>
-                <input type="radio" name="address" checked={selectedAddress?.id === addr.id} readOnly className="mr-2" />
-                <span className="font-semibold">{addr.name}</span> ({addr.phone}) <br />
-                <span>{addr.address}</span>
+              <div key={addr.id} className="border p-2 rounded-lg mb-2 cursor-pointer hover:bg-blue-50">
+                <input type="radio" name="address" checked={selectedAddress?.id === addr.id} onChange={() => handleSelectAddressForPayment(addr)} className="mr-2" />
+                <span className="font-semibold">{addr.full_name}</span> ({addr.phone_number}) <br />
+                <span>{addr.street_address}, {addr.city}, {addr.state}, {addr.postal_code}, {addr.country}</span>
+                <div className="d-flex mt-2">
+                  <Button variant="warning" onClick={() => handleEditAddress(addr)} className="mr-2">Edit</Button>
+                  <Button variant="danger" onClick={() => handleDeleteAddress(addr.id)}>Delete</Button>
+                </div>
               </div>
             ))
           ) : (
             <p className="text-muted">No saved addresses. Please add a new address.</p>
           )}
+
           <Button variant="link" className="text-blue-500" onClick={() => setNewAddress(true)}>+ Add New Address</Button>
-          {newAddress && (
+
+          {/* Form for adding new address */}
+          {newAddress && !selectedAddress && (
             <div className="border p-4 rounded-lg mt-3">
               <h3 className="text-lg font-semibold text-blue-700">Enter New Address</h3>
               <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Phone</Form.Label>
-                  <Form.Control type="text" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Address</Form.Label>
-                  <Form.Control type="text" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
-                </Form.Group>
-                <Button variant="primary" onClick={handleAddAddress}>Save Address</Button>
+                {Object.keys(formData).map((key) => (
+                  <Form.Group className="mb-3" key={key}>
+                    <Form.Label>{key.replace("_", " ")}</Form.Label>
+                    <Form.Control type="text" name={key} value={formData[key]} onChange={handleChange} required />
+                  </Form.Group>
+                ))}
+                <Button variant="primary" onClick={handleAddressSubmit} disabled={loading}>
+                  {loading ? "Saving..." : "Save Address"}
+                </Button>
               </Form>
             </div>
-          )}      r
+          )}
+
+          {/* Form for editing an existing address */}
+          {newAddress && selectedAddress && (
+            <div className="border p-4 rounded-lg mt-3">
+              <h3 className="text-lg font-semibold text-blue-700">Edit Address</h3>
+              <Form>
+                {Object.keys(formData).map((key) => (
+                  <Form.Group className="mb-3" key={key}>
+                    <Form.Label>{key.replace("_", " ")}</Form.Label>
+                    <Form.Control type="text" name={key} value={formData[key]} onChange={handleChange} required />
+                  </Form.Group>
+                ))}
+                <Button variant="primary" onClick={handleAddressSubmit} disabled={loading}>
+                  {loading ? "Updating..." : "Update Address"}
+                </Button>
+              </Form>
+            </div>
+          )}
         </Col>
 
+        {/* Payment Section */}
         <Col md={6}>
           <Card className="p-4 border rounded-lg shadow-lg mb-4">
             <h3 className="text-lg font-semibold text-green-700 flex items-center">
@@ -73,47 +270,17 @@ const CheckoutPage = () => {
             <Form>
               <Form.Group className="mb-3">
                 <Form.Label>Card Number</Form.Label>
-                <Form.Control type="text" placeholder="XXXX-XXXX-XXXX-XXXX" />
+                <Form.Control type="text" placeholder="XXXX-XXXX-XXXX-XXXX" required />
               </Form.Group>
               <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Expiry Date</Form.Label>
-                    <Form.Control type="text" placeholder="MM/YY" />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>CVV</Form.Label>
-                    <Form.Control type="text" placeholder="XXX" />
-                  </Form.Group>
-                </Col>
+                <Col md={6}><Form.Group className="mb-3"><Form.Label>Expiry Date</Form.Label><Form.Control type="text" placeholder="MM/YY" required /></Form.Group></Col>
+                <Col md={6}><Form.Group className="mb-3"><Form.Label>CVV</Form.Label><Form.Control type="text" placeholder="XXX" required /></Form.Group></Col>
               </Row>
               <Button variant="success" className="w-full">Place Order</Button>
             </Form>
           </Card>
-          
           <Card className="p-4 border rounded-lg shadow-lg">
             <h3 className="text-lg font-semibold text-red-700">Order Summary</h3>
-            {filteredCartItems.length > 0 ? (
-              filteredCartItems.map((cartItem) => (
-          
-                <Row key={cartItem.id} className="mb-3">
-                  <Col xs={3}>
-                    <Image src={cartItem.image_url} rounded style={{ width: '50px', height: '50px' }} />
-                  </Col>
-                  <Col>
-                    <p>Product: <strong>{cartItem.product_name}</strong></p>
-                    <p>Price: <strong>₹{cartItem.price}</strong></p>
-                    <p>Quantity: <strong>{cartItem.quantity}</strong></p>
-                    <p>Subtotal: <strong>₹{(cartItem.price * cartItem.quantity).toFixed(2)}</strong></p>
-                  </Col>
-                </Row>
-              ))
-            ) : (
-              <p className="text-muted">No matching products in cart.</p>
-            )}
-            <hr />
             <h4>Total: ₹{totalCost.toFixed(2)}</h4>
           </Card>
         </Col>

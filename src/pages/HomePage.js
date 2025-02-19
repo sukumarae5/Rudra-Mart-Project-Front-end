@@ -378,7 +378,7 @@ const HomePage = () => {
             </Col>
           </Row>
           {viewAll && (
-            <Row className="mt-4 col-lg-12 col-md-6">
+            <Row className="mt-4 col-lg-12 col-md-12">
               {products.map((product) => (
                 <Col key={product.id} md={3} className="mb-4">
                   <div
