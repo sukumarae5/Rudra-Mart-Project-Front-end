@@ -5,7 +5,7 @@ import { FaEdit } from "react-icons/fa";
 import { BsPlusCircleFill } from "react-icons/bs";
 
 // API URL
-const API_URL = "http://192.168.1.17:3000/api/categories";
+const API_URL = "http://192.168.1.7:3000/api/categories";
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -127,7 +127,7 @@ const AdminCategories = () => {
                 <div className="position-relative">
                   <Card.Img
                     variant="top"
-                    src={`http://192.168.1.17:3000/uploads/${category.image}`}
+                    src={`http://192.168.1.7:3000/uploads/${category.image}`}
                     alt={category.name}
                     className="category-image"
                   />

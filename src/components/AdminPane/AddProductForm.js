@@ -64,7 +64,7 @@ const AddProductForm = () => {
       console.log("Product data being sent to API:", newProduct);
 
       const response = await fetch(
-        "http://192.168.1.17:3000/api/products/productregister",
+        "http://192.168.1.7:3000/api/products/productregister",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

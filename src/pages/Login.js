@@ -36,7 +36,7 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        const response = await fetch("http://192.168.1.17:3000/api/users/login", {
+        const response = await fetch("http://192.168.1.7:3000/api/users/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
