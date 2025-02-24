@@ -125,7 +125,7 @@ const menuItems = [
   { path: "/admin/adminusers", icon: <FaUser />, label: "Customers" },
   { path: "/admin/reports", icon: <HiOutlineDocumentReport />, label: "Reports" },
   { path: "/admin/inbox", icon: <IoMdMail />, label: "Inbox" },
-  { path: "/admin/settings", icon: <FaUser />, label: "Personal Settings" },
+  { path: "/admin/adminprofile", icon: <FaUser />, label: "Personal Settings" },
   { path: "/login", icon: <FaUser />, label: "Logout" },
 ];
 

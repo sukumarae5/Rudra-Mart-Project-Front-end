@@ -461,26 +461,24 @@ const HomePage = () => {
                       }}
                     />
                     <div
-                      className="add-to-cart-btn"
-                      style={{
-                        position: 'relative',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        backgroundColor: 'black',
-                        color: 'white',
-                        textAlign: 'center',
-                        padding: '10px 0',
-                        display: hoveredCard === product.id ? 'block' : 'none',
-                        cursor: 'pointer',
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(product);
-                      }}
-                    >
-                      Add to Cart
-                    </div>
+                          className="add-to-cart-btn"
+                          style={{
+                            position: 'relative',
+                            top: '0',
+                            left: '0',
+                            width: '100%',
+                            backgroundColor: 'black',
+                            color: 'white',
+                            textAlign: 'center',
+                            padding: '10px 0',
+                            cursor: 'pointer',
+                            opacity: 0.9,
+                          }}
+                          onClick={(e) => handleAddToCart(e, product)}
+                        >
+                          Add to Cart
+                        </div>
+                      
                     <div className="card-body">
                       <h5 className="card-title">{product.name}</h5>
                       <p className="card-text">Price: ₹{product.price}</p>

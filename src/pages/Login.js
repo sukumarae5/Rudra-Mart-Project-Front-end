@@ -112,7 +112,7 @@ const Login = () => {
                     <div className="d-flex justify-content-between align-items-center mt-4">
                       <button
                         type="submit"
-                        className="py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-green-600 focus:outline-none"
+                        className="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none"
                       >
                         Login
                       </button>
