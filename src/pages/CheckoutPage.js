@@ -134,6 +134,7 @@ const CheckoutPage = () => {
       };
 
       const response = await fetch("http://192.168.1.17:3000/api/address/add", {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -194,6 +195,7 @@ const CheckoutPage = () => {
       };
       const response = await fetch(
         `http://192.168.1.17:3000/api/address/update/${selectedAddress.id}`,
+
         {
           method: "PUT",
           headers: {

@@ -128,6 +128,7 @@ const AdminCategories = () => {
                   <Card.Img
                     variant="top"
                     src={`http://192.168.1.17:3000/uploads/${category.image}`}
+
                     alt={category.name}
                     className="category-image"
                   />
