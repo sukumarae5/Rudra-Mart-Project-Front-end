@@ -48,7 +48,7 @@ const SearchPage = () => {
         quantity: 1,
       };
 
-      const response = await fetch("http://192.168.1.7:3000/api/cart/add", {
+      const response = await fetch("http://192.168.1.11:3000/api/cart/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

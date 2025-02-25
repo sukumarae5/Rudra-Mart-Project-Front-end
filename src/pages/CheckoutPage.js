@@ -50,6 +50,12 @@ const CheckoutPage = () => {
     cvv: "",
   });
 
+  useEffect(() => {
+    if (savedAddresses.length > 0 && !selectedAddress) {
+      setSelectedAddress(savedAddresses[0]);
+    }
+  }, [savedAddresses, selectedAddress]);
+
   // Reusable function to fetch saved addresses
   const fetchSavedAddresses = async () => {
     const token = localStorage.getItem("authToken");
@@ -60,7 +66,7 @@ const CheckoutPage = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.17:3000/api/address/get", {
+      const response = await fetch("http://192.168.1.11:3000/api/address/get", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -133,7 +139,7 @@ const CheckoutPage = () => {
         userId: userId,
       };
 
-      const response = await fetch("http://192.168.1.7:3000/api/address/add", {
+      const response = await fetch("http://192.168.1.11:3000/api/address/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -193,7 +199,7 @@ const CheckoutPage = () => {
         country: formData.country,
       };
       const response = await fetch(
-        `http://192.168.1.7:3000/api/address/update/${selectedAddress.id}`,
+        `http://192.168.1.11:3000/api/address/update/${selectedAddress.id}`,
         {
           method: "PUT",
           headers: {
@@ -231,7 +237,7 @@ const CheckoutPage = () => {
     if (confirmDelete) {
       setLoading(true);
       try {
-        const response = await fetch(`http://192.168.1.7:3000/api/address/delete/${addressId}`, {
+        const response = await fetch(`http://192.168.1.11:3000/api/address/delete/${addressId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -298,6 +304,25 @@ const CheckoutPage = () => {
     (total, item) => total + item.productPrice * item.quantity,
     0
   );
+
+  const handlePlaceOrder = () => {
+    if (!selectedAddress) {
+      alert("Please select a delivery address before proceeding to payment.");
+      return;
+    }
+    // For this example, if the payment method is PayPal, we simply redirect to the backend endpoint.
+    // You might pass additional information (e.g., selectedAddress details) in a real app.
+    if (paymentMethod === "paypal") {
+      // Redirect to the payment endpoint (backend should handle session or token authentication)
+      window.location.href = "http://localhost:3000/payment";
+    } else if (paymentMethod === "creditCard") {
+      alert("Credit card payment processing is not implemented in this example.");
+    } else if (paymentMethod === "cod") {
+      alert("Cash on Delivery selected. Proceed with order confirmation.");
+      // Implement order confirmation logic for COD here.
+    }
+  };
+
 
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
@@ -375,7 +400,7 @@ const CheckoutPage = () => {
           </Button>
 
           {/* Form for Adding a New Address */}
-          {newAddress && !selectedAddress && (
+          {newAddress && selectedAddress && (
             <Card className="mt-3">
               <Card.Body>
                 <h4 className="text-primary mb-3">Add New Address</h4>
@@ -627,7 +652,7 @@ const CheckoutPage = () => {
                       </Row>
                     </Card>
                   )}
-                  <Button variant="success" className="mt-3 w-100">
+                  <Button variant="success"onClick={handlePlaceOrder} className="mt-3 w-100">
                     Place Order
                   </Button>
                 </Card>
