@@ -5,7 +5,7 @@ import { FaEdit } from "react-icons/fa";
 import { BsPlusCircleFill } from "react-icons/bs";
 
 // API URL
-const API_URL = "http://192.168.1.7:3000/api/categories";
+const API_URL = "http://192.168.1.4:3000/api/categories";
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);

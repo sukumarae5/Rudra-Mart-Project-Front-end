@@ -102,7 +102,7 @@ const ProductCategory = () => {
       };
   
       // API call to add product to cart
-      const response = await fetch("http://192.168.1.7:3000/api/cart/add", {
+      const response = await fetch("http://192.168.1.11:3000/api/cart/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

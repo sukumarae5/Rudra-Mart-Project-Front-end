@@ -14,6 +14,8 @@ import AdminRoute from "./AdminRoute";
 import Contactpage from "../pages/Contactpage";
 import WishListpage from "../pages/UserAccontDetialsPage/WishListpage";
 import Checkoutpage from"../pages/CheckoutPage"
+import OrderPlacedSuccessfullyPage from "../pages/OrderPlacedSuccessfullyPage";
+import PaymentPage from "../pages/PaymentPage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -30,8 +32,17 @@ const AppRouter = createBrowserRouter([
         element:<Checkoutpage/>
       },
       {
+        path:"/PaymentPage",
+        element:<PaymentPage/>
+      },
+      {
         path: "/contactpage",
         element: <Contactpage />,
+      },
+      {
+        path:"/OrderPlacedSuccessfullyPage",
+        element:<OrderPlacedSuccessfullyPage/>
+
       },
       {
         path: "/cartpage",
