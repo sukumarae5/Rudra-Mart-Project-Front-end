@@ -7,9 +7,9 @@ import { Provider } from 'react-redux';  // Corrected the casing of "Provider"
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 const root = ReactDOM.createRoot(document.getElementById('root'));
-const GOOGLE_CLINTE_ID="321525660137-216f6sc1sdatko2n3setl2m07b2f32f7.apps.googleusercontent.com"
+
 root.render(
-  <GoogleOAuthProvider clientId='GOOGLE_CLINTE_ID' >
+  <GoogleOAuthProvider clientId='321525660137-216f6sc1sdatko2n3setl2m07b2f32f7.apps.googleusercontent.com' >
 
   <Provider store={store}>  {/* Corrected here */}
     <React.StrictMode>
