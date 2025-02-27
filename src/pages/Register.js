@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import sideImage from "../../src/assets/images/cart.jpg";
 import { GoogleLogin } from "@react-oauth/google";
+import jwt_decode from "jwt-decode"; // ✅ Correct for jwt-decode@3.x.x
+
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -21,24 +22,20 @@ const Register = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     if (!/[A-Z]/.test(formData.password)) {
       setLoading(false);
       setError("Password must contain at least one uppercase letter");
       return;
     }
-
     // Role validation
     if (formData.role !== "customer" && formData.role !== "admin") {
       setLoading(false);
       setError("Role must be either 'customer' or 'admin'");
       return;
     }
-
     try {
       const newUser = {
         name: formData.name,
@@ -49,7 +46,7 @@ const Register = () => {
       };
 
       const response = await fetch(
-        "http://192.168.1.11:3000/api/users/register",
+        "http://192.168.1.12:3000/api/users/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -73,16 +70,20 @@ const Register = () => {
     }
   };
 
-  // const handleGoogleSignUp = () => {
-  //   console.log("Google Sign Up clicked");
-  //   // Google Sign Up logic here
-  // };
- const handleGooglesuccess=(response)=>{
-   console.log(response)
 
- }
-
-  return (
+  const handleGoogleSuccess = async (response) => {    
+      const { credential } = response;  
+      if (!credential) {
+        console.error("Google login failed: No credential received");
+        return;
+      }
+      const decodedToken = jwt_decode(credential);
+      console.log("Decoded Token:", decodedToken);  
+    }   
+  const handleGoogleFailure = (error) => {
+    console.error("Google login failed:", error);
+  };
+    return (
     <div className="container py-5">
       <div className="row align-items-center">
         <div className="col-md-6 text-center">
@@ -141,8 +142,8 @@ const Register = () => {
             <div className="text-center mt-3">
 
 <GoogleLogin className="me-2" 
-// onSuccess={handleGooglesuccess}
-// onError={handleGooglfailer}
+onSuccess={handleGoogleSuccess}
+onError={handleGoogleFailure}
 />
             </div>
             <p className="text-muted mt-4">

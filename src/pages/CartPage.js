@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
 import { fetchApiCartDataRequest, fetcheckeoutpagedata, removeCartItemRequest, updateCartItemQuantityRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
-// import CheckoutPage from "./CheckoutPage";
 
 const CartPage = () => {
   const dispatch = useDispatch();
   const { cartItems = [], error } = useSelector((state) => state.cart);
   const { products = [] } = useSelector((state) => state.products || {});
-const navigate=useNavigate()
+  const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
@@ -24,8 +23,6 @@ const navigate=useNavigate()
   const handleQuantityChange = (cartItemId, quantity) => {
     if (quantity > 0) {
       dispatch(updateCartItemQuantityRequest(cartItemId, quantity));
-      console.log(cartItemId)
-      
     }
   };
 
@@ -34,11 +31,7 @@ const navigate=useNavigate()
     const price = parseFloat(product?.price || cartItem.price || 0);
     return total + price * cartItem.quantity;
   }, 0);
-// const CheckoutPagedata=()=>{
-//   dispatch(fetcheckeoutpagedata())
 
-//   navigate("/CheckoutPage")
-// }
   const handleApplyCoupon = () => {
     if (couponCode === "DISCOUNT10") {
       setDiscount(0.1 * totalCost);
@@ -48,8 +41,6 @@ const navigate=useNavigate()
       alert("Coupon applied successfully! ₹50 discount applied.");
     } else {
       alert("Invalid coupon code!");
-      
-
       setDiscount(0);
     }
   };
@@ -57,15 +48,15 @@ const navigate=useNavigate()
   const finalCost = (totalCost - discount).toFixed(2);
 
   return (
-    <Container className="mt-4" style={{ padding: "2%" }}>
-      <h1 className="text-center mb-4">Shopping Cart</h1>
+    <Container className="mt-4" style={{ padding: "2%", backgroundColor: "#f8f9fa", borderRadius: "10px" }}>
+      <h1 className="text-center mb-4 text-danger">Shopping Cart</h1>
       {error && <p style={{ color: "red" }}>Error: {error}</p>}
       {!cartItems.length ? (
         <h4 className="text-center text-muted">Your cart is empty.</h4>
       ) : (
         <>
-          <Table bordered responsive className="mb-4">
-            <thead>
+          <Table bordered responsive className="mb-4" style={{ backgroundColor: "white", borderRadius: "8px" }}>
+            <thead style={{ backgroundColor: "#343a40", color: "white" }}>
               <tr>
                 <th>Product</th>
                 <th>Price</th>
@@ -86,22 +77,22 @@ const navigate=useNavigate()
                           src={product?.image_url}
                           alt={product?.name || cartItem.product_name}
                           className="me-2"
-                          style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                          style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "5px" }}
                         />
-                        <span>{product?.name || cartItem.product_name}</span>
+                        <span className="fw-bold text-dark">{product?.name || cartItem.product_name}</span>
                       </div>
                     </td>
-                    <td>₹{price.toFixed(2)}</td>
+                    <td className="text-primary">₹{price.toFixed(2)}</td>
                     <td>
                       <Form.Control
                         type="number"
                         min="1"
                         value={cartItem.quantity}
-                        onChange={(e) => handleQuantityChange(cartItem.id, (e.target.value))}
+                        onChange={(e) => handleQuantityChange(cartItem.id, e.target.value)}
                         style={{ width: "60px" }}
                       />
                     </td>
-                    <td>₹{(price * cartItem.quantity).toFixed(2)}</td>
+                    <td className="text-success">₹{(price * cartItem.quantity).toFixed(2)}</td>
                     <td>
                       <Button variant="danger" onClick={() => handleRemoveItem(cartItem.id)}>
                         Remove
@@ -128,7 +119,7 @@ const navigate=useNavigate()
                     </Form.Group>
                   </Col>
                   <Col xs={4}>
-                    <Button variant="danger" onClick={handleApplyCoupon}>
+                    <Button variant="danger" style={{ background: "linear-gradient(45deg,rgb(131, 218, 240), #ff6f61)" }} onClick={handleApplyCoupon}>
                       Apply Coupon
                     </Button>
                   </Col>
@@ -138,7 +129,7 @@ const navigate=useNavigate()
 
             <Col md={6}>
               <div className="p-3 bg-light border rounded">
-                <h4 className="text-center">Cart Total</h4>
+                <h4 className="text-center text-primary">Cart Total</h4>
                 <div className="d-flex justify-content-between">
                   <span>Subtotal:</span>
                   <span>₹{totalCost.toFixed(2)}</span>
@@ -146,36 +137,34 @@ const navigate=useNavigate()
                 <hr />
                 <div className="d-flex justify-content-between">
                   <span>Discount:</span>
-                  <span>₹{discount.toFixed(2)}</span>
+                  <span className="text-danger">₹{discount.toFixed(2)}</span>
                 </div>
                 <div className="d-flex justify-content-between">
                   <span>Shipping:</span>
-                  <span>Free</span>
+                  <span className="text-success">Free</span>
                 </div>
                 <hr />
                 <div className="d-flex justify-content-between">
                   <strong>Total:</strong>
-                  <strong>₹{finalCost}</strong>
+                  <strong className="text-success">₹{finalCost}</strong>
                 </div>
                 <div className="d-flex justify-content-center mt-3">
-                  <Button variant="danger" className="w-100" onClick={()=>{
-                       const checkoutData = cartItems.map((cartItem) => {
-                        const product = products.find((p) => p.id === cartItem.product_id);
-                        return {
-                          userId: cartItem.user_id,
-                          productId: cartItem.product_id,
-                          productName: product?.name || "Unknown",
-                          productImage: product?.image_url || "",
-                          productPrice: parseFloat(product?.price || 0),
-                          quantity: cartItem.quantity,
-                          totalPrice: parseFloat(product?.price || 0) * cartItem.quantity,
-                        };
-                      });
-                  
-  dispatch(fetcheckeoutpagedata(checkoutData))
-
-  navigate("/CheckoutPage")
-}}>
+                <Button className="w-100" style={{ background: "linear-gradient(45deg,rgb(247, 122, 153), #ff6f61)", border: "none", fontWeight: "bold" }} onClick={() => {
+                    const checkoutData = cartItems.map((cartItem) => {
+                      const product = products.find((p) => p.id === cartItem.product_id);
+                      return {
+                        userId: cartItem.user_id,
+                        productId: cartItem.product_id,
+                        productName: product?.name || "Unknown",
+                        productImage: product?.image_url || "",
+                        productPrice: parseFloat(product?.price || 0),
+                        quantity: cartItem.quantity,
+                        totalPrice: parseFloat(product?.price || 0) * cartItem.quantity,
+                      };
+                    });
+                    dispatch(fetcheckeoutpagedata(checkoutData));
+                    navigate("/CheckoutPage");
+                  }}>
                     Proceed to Checkout
                   </Button>
                 </div>
