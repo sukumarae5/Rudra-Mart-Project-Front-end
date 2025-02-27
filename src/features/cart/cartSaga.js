@@ -46,7 +46,7 @@ const removeCartItemApi = async (cartItemId) => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User not authenticated. Please log in.");
 
-  const response = await fetch(`http://192.168.1.4:3000/api/cart/${cartItemId}`, {
+  const response = await fetch(`http://192.168.1.11:3000/api/cart/${cartItemId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${userToken}`,
@@ -84,8 +84,7 @@ const updateCartItemQuantityApi = async ({cartItemId, quantity }) => {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${userToken}`,
-    
+      Authorization: `Bearer ${userToken}`,    
     },
     body: JSON.stringify({ quantity }),
   });

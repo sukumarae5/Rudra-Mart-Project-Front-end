@@ -77,6 +77,10 @@ const Register = () => {
   //   console.log("Google Sign Up clicked");
   //   // Google Sign Up logic here
   // };
+ const handleGooglesuccess=(response)=>{
+   console.log(response)
+
+ }
 
   return (
     <div className="container py-5">
@@ -134,7 +138,13 @@ const Register = () => {
                />
               Sign Up with Google
             </button> */}
-<GoogleLogin className="me-2"/>
+            <div className="text-center mt-3">
+
+<GoogleLogin className="me-2" 
+// onSuccess={handleGooglesuccess}
+// onError={handleGooglfailer}
+/>
+            </div>
             <p className="text-muted mt-4">
               Already have an account?{" "}
               <Link to="/login" className="text-black">

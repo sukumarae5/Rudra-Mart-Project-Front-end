@@ -1,35 +1,17 @@
 import React, { useState, useEffect } from "react";
-import {
-  Spinner,
-  Alert,
-  Container,
-  Row,
-  Col,
-  Form,
-  Button,
-  Card,
-  Image,
-} from "react-bootstrap";
+import {  Spinner,Alert,Container,Row,Col,Form,Button,Card,Image,} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaMapMarkerAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
 import Accordion from "react-bootstrap/Accordion";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import {
-  decreaseQuantity,
-  increaseQuantity,
-  removeProduct,
-} from "../features/cart/cartActions";
-
+import PaymentPage from "./PaymentPage";
 const CheckoutPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [newAddress, setNewAddress] = useState(false);
-  // Local form fields
   const [formData, setFormData] = useState({
     full_name: "",
     phone_number: "",
@@ -41,22 +23,13 @@ const CheckoutPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   // Payment-related states (unchanged)
-  const [paymentMethod, setPaymentMethod] = useState("creditCard");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [cardDetails, setCardDetails] = useState({
     cardNumber: "",
     expiryDate: "",
     cvv: "",
-  });
-
-  useEffect(() => {
-    if (savedAddresses.length > 0 && !selectedAddress) {
-      setSelectedAddress(savedAddresses[0]);
-    }
-  }, [savedAddresses, selectedAddress]);
-
-  // Reusable function to fetch saved addresses
+  }); // Reusable function to fetch saved addresses
   const fetchSavedAddresses = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -82,11 +55,9 @@ const CheckoutPage = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchSavedAddresses();
   }, [navigate]);
-
   // Cancel handler for both Add and Edit forms
   const handleCancel = () => {
     setNewAddress(false);
@@ -101,7 +72,6 @@ const CheckoutPage = () => {
       country: "",
     });
   };
-
   // Handler for adding a new address (POST)
   const handleAddAddress = async (e) => {
     e.preventDefault();
@@ -125,8 +95,7 @@ const CheckoutPage = () => {
       }
     }
     setLoading(true);
-    try {
-      // Build payload with keys expected by backend:
+    try {// Build payload with keys expected by backend:
       // Map street_address → address and postal_code → postalcode.
       const payload = {
         full_name: formData.full_name,
@@ -138,7 +107,6 @@ const CheckoutPage = () => {
         country: formData.country,
         userId: userId,
       };
-
       const response = await fetch("http://192.168.1.11:3000/api/address/add", {
         method: "POST",
         headers: {
@@ -161,9 +129,7 @@ const CheckoutPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Handler for updating an existing address (PUT)
+  };// Handler for updating an existing address (PUT)
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("authToken");
@@ -224,7 +190,6 @@ const CheckoutPage = () => {
       setLoading(false);
     }
   };
-
   // Handler for deleting an address
   const handleDeleteAddress = async (addressId) => {
     const token = localStorage.getItem("authToken");
@@ -255,7 +220,6 @@ const CheckoutPage = () => {
       }
     }
   };
-
   // When editing, populate the form with the address data.
   const handleEditAddress = (address) => {
     setSelectedAddress(address);
@@ -270,66 +234,29 @@ const CheckoutPage = () => {
     });
     setNewAddress(true);
   };
-
-  // Update form state when an input changes.
+// Update form state when an input changes.
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   // (Optional) Select an address for payment.
   const handleSelectAddressForPayment = (address) => {
     setSelectedAddress(address);
-  };
-
-  // Cart actions.
-  const handleIncreaseQuantity = (productId) => {
-    dispatch(increaseQuantity(productId));
-  };
-  const handleDecreaseQuantity = (productId) => {
-    dispatch(decreaseQuantity(productId));
-  };
-  const handleRemoveProduct = (productId) => {
-    dispatch(removeProduct(productId));
-  };
-
-  // Payment method handlers.
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-  };
-  const handleCardDetailChange = (e) => {
-    setCardDetails({ ...cardDetails, [e.target.name]: e.target.value });
-  };
-
-  const totalCost = checkoutData.reduce(
-    (total, item) => total + item.productPrice * item.quantity,
-    0
-  );
-
-  const handlePlaceOrder = () => {
-    if (!selectedAddress) {
-      alert("Please select a delivery address before proceeding to payment.");
-      return;
-    }
-    // For this example, if the payment method is PayPal, we simply redirect to the backend endpoint.
-    // You might pass additional information (e.g., selectedAddress details) in a real app.
-    if (paymentMethod === "paypal") {
-      // Redirect to the payment endpoint (backend should handle session or token authentication)
-      window.location.href = "http://localhost:3000/payment";
-    } else if (paymentMethod === "creditCard") {
-      alert("Credit card payment processing is not implemented in this example.");
-    } else if (paymentMethod === "cod") {
-      alert("Cash on Delivery selected. Proceed with order confirmation.");
-      // Implement order confirmation logic for COD here.
-    }
-  };
-
-
+  };  
+ useEffect(() => {
+    if (savedAddresses.length > 0) {
+      setSelectedAddress(savedAddresses[0]); 
+       }
+  }, [savedAddresses]);
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
       <Row>
+      <Accordion defaultActiveKey="0" flush>
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>Select The Address</Accordion.Header>
+                <Accordion.Body>
         {/* Address Section */}
         <Col
-          md={6}
+          md={12}
           style={{
             background: "white",
             padding: "30px",
@@ -337,14 +264,18 @@ const CheckoutPage = () => {
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
             marginBottom: "20px",
           }}
-        >
+          >
           <h3 className="text-primary mb-4 d-flex align-items-center">
             <FaMapMarkerAlt className="mr-2" /> Delivery Address
-          </h3>
+          </h3>          
           {loading && <Spinner animation="border" />}
           {error && <Alert variant="danger">{error}</Alert>}
           {savedAddresses.length > 0 ? (
-            savedAddresses.map((addr) => (
+            savedAddresses.map((addr) => (  
+                 <div>
+                              
+
+
               <Card key={addr.id} className="mb-3">
                 <Card.Body>
                   <div className="d-flex justify-content-between align-items-center">
@@ -359,10 +290,10 @@ const CheckoutPage = () => {
                             <strong>{addr.full_name}</strong> ({addr.phone_number})
                             <br />
                             {addr.street_address}, {addr.city}, {addr.state},{" "}
-                            {addr.postal_code}, {addr.country}
+                            {addr.postal_code}, {addr.country},                                          {handleSelectAddressForPayment}
                           </>
                         }
-                      />
+                        />
                     </div>
                     <div>
                       <Button variant="warning" size="sm" onClick={() => handleEditAddress(addr)} className="mr-2">
@@ -375,16 +306,14 @@ const CheckoutPage = () => {
                   </div>
                 </Card.Body>
               </Card>
+
+             </div>       
             ))
           ) : (
             <p className="text-muted">No saved addresses. Please add a new address.</p>
           )}
-          <Button
-            variant="link"
-            className="text-primary"
-            onClick={() => {
-              setNewAddress(true);
-              setSelectedAddress(null);
+          <Button variant="link" className="text-primary" onClick={() => {
+              setNewAddress(true); setSelectedAddress(null);
               setFormData({
                 full_name: "",
                 phone_number: "",
@@ -398,9 +327,8 @@ const CheckoutPage = () => {
           >
             + Add New Address
           </Button>
-
           {/* Form for Adding a New Address */}
-          {newAddress && selectedAddress && (
+          {newAddress && !selectedAddress && (
             <Card className="mt-3">
               <Card.Body>
                 <h4 className="text-primary mb-3">Add New Address</h4>
@@ -486,9 +414,7 @@ const CheckoutPage = () => {
                 </Form>
               </Card.Body>
             </Card>
-          )}
-
-          {/* Form for Editing an Address */}
+          )}{/* Form for Editing an Address */}
           {newAddress && selectedAddress && (
             <Card className="mt-3">
               <Card.Body>
@@ -577,127 +503,14 @@ const CheckoutPage = () => {
             </Card>
           )}
         </Col>
-
         {/* Order Summary & Payment Section */}
-        <Col md={6}>
-          <Accordion defaultActiveKey="0" flush>
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>Payment Method</Accordion.Header>
-              <Accordion.Body>
-                <Card className="p-4 mb-4 shadow-sm">
-                  <h4 className="text-success d-flex align-items-center">
-                    <FaRegCreditCard className="mr-2" /> Payment Details
-                  </h4>
-                  <Form>
-                    <Form.Check
-                      type="radio"
-                      label="Credit Card"
-                      value="creditCard"
-                      checked={paymentMethod === "creditCard"}
-                      onChange={handlePaymentMethodChange}
-                    />
-                    <Form.Check
-                      type="radio"
-                      label="PayPal"
-                      value="paypal"
-                      checked={paymentMethod === "paypal"}
-                      onChange={handlePaymentMethodChange}
-                    />
-                    <Form.Check
-                      type="radio"
-                      label="Cash on Delivery"
-                      value="cod"
-                      checked={paymentMethod === "cod"}
-                      onChange={handlePaymentMethodChange}
-                    />
-                  </Form>
-                  {paymentMethod === "creditCard" && (
-                    <Card className="mt-3 p-3">
-                      <h5>Credit Card Details</h5>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Card Number</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="cardNumber"
-                          value={cardDetails.cardNumber}
-                          onChange={handleCardDetailChange}
-                          placeholder="XXXX XXXX XXXX XXXX"
-                        />
-                      </Form.Group>
-                      <Row>
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Expiry Date</Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="expiryDate"
-                              value={cardDetails.expiryDate}
-                              onChange={handleCardDetailChange}
-                              placeholder="MM/YY"
-                            />
-                          </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>CVV</Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="cvv"
-                              value={cardDetails.cvv}
-                              onChange={handleCardDetailChange}
-                              placeholder="CVV"
-                            />
-                          </Form.Group>
-                        </Col>
-                      </Row>
-                    </Card>
-                  )}
-                  <Button variant="success"onClick={handlePlaceOrder} className="mt-3 w-100">
-                    Place Order
-                  </Button>
-                </Card>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-
-          <Card className="p-4 shadow-sm">
-            <h4 className="text-danger">Order Summary</h4>
-            {checkoutData.length > 0 ? (
-              checkoutData.map((item) => (
-                <Row key={item.id} className="mb-3">
-                  <Col xs={3}>
-                    <Image src={item.productImage} rounded style={{ width: "100px" }} />
-                  </Col>
-                  <Col>
-                    <div>
-                      <Button variant="link" className="p-0" onClick={() => handleRemoveProduct(item.productId)}>
-                        <DeleteOutlineOutlinedIcon />
-                      </Button>
-                      <p>
-                        <strong>{item.productName}</strong>
-                      </p>
-                      <p>Price: ₹{item.productPrice}</p>
-                      <p>Quantity: {item.quantity}</p>
-                      <p>Subtotal: ₹{(item.productPrice * item.quantity).toFixed(2)}</p>
-                    </div>
-                    <div className="d-flex">
-                      <Button variant="primary" className="mr-2" onClick={() => handleIncreaseQuantity(item.productId)}>
-                        +
-                      </Button>
-                      <Button variant="primary" onClick={() => handleDecreaseQuantity(item.productId)}>
-                        -
-                      </Button>
-                    </div>
-                  </Col>
-                </Row>
-              ))
-            ) : (
-              <p className="text-muted">No products available in checkout.</p>
-            )}
-            <hr />
-            <h5 className="text-right">Total: ₹{totalCost.toFixed(2)}</h5>
-          </Card>
-        </Col>
+      
+        </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+            <Col>
+            <PaymentPage/>
+            </Col>
       </Row>
     </Container>
   );
