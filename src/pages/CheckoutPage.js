@@ -39,7 +39,7 @@ const CheckoutPage = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.11:3000/api/address/get", {
+      const response = await fetch("http://192.168.1.12:3000/api/address/get", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -107,7 +107,7 @@ const CheckoutPage = () => {
         country: formData.country,
         userId: userId,
       };
-      const response = await fetch("http://192.168.1.11:3000/api/address/add", {
+      const response = await fetch("http://192.168.1.12:3000/api/address/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,7 +165,7 @@ const CheckoutPage = () => {
         country: formData.country,
       };
       const response = await fetch(
-        `http://192.168.1.11:3000/api/address/update/${selectedAddress.id}`,
+        `http://192.168.1.12:3000/api/address/update/${selectedAddress.id}`,
         {
           method: "PUT",
           headers: {
@@ -202,7 +202,7 @@ const CheckoutPage = () => {
     if (confirmDelete) {
       setLoading(true);
       try {
-        const response = await fetch(`http://192.168.1.11:3000/api/address/delete/${addressId}`, {
+        const response = await fetch(`http://192.168.1.12:3000/api/address/delete/${addressId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -504,7 +504,7 @@ const CheckoutPage = () => {
           )}
         </Col>
         {/* Order Summary & Payment Section */}
-      
+        
         </Accordion.Body>
               </Accordion.Item>
             </Accordion>
