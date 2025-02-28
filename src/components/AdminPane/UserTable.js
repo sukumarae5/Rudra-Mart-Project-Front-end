@@ -60,7 +60,7 @@ const UserTable = () => {
       await Promise.all(
         selectedUsers.map(async (userId) => {
           const response = await fetch(
-            `http://192.168.1.7:3000/api/users/delete/${userId}`,
+            `http://192.168.1.12:3000/api/users/delete/${userId}`,
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
@@ -78,6 +78,7 @@ const UserTable = () => {
       dispatch(fetchusersrequest());
       setSelectedUsers([]);
     } catch (error) {
+
       console.error("Error deleting users:", error);
       alert("Error: Could not delete users");
     }
