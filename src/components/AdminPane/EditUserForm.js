@@ -57,7 +57,7 @@ const EditUserForm = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.1.11:3000/api/users/update/${user.id}`,
+        `http://192.168.1.12:3000/api/users/update/${user.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

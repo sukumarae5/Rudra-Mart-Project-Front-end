@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaMapMarkerAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
 import Accordion from "react-bootstrap/Accordion";
 import PaymentPage from "./PaymentPage";
+import { FaHome } from "react-icons/fa";
+
+
 const CheckoutPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
@@ -249,10 +252,10 @@ const CheckoutPage = () => {
   }, [savedAddresses]);
   return (
     <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
-      <Row>
+      <Row className="justify-content-center my-2" >
       <Accordion defaultActiveKey="0" flush>
               <Accordion.Item eventKey="0">
-                <Accordion.Header>Select The Address</Accordion.Header>
+                <Accordion.Header><FaHome/>Select The Address</Accordion.Header>
                 <Accordion.Body>
         {/* Address Section */}
         <Col
