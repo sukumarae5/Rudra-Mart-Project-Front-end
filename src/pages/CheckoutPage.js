@@ -248,9 +248,9 @@ const CheckoutPage = () => {
        }
   }, [savedAddresses]);
   return (
-    <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
+    <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", paddingTop: "50px" }}>
       <Row>
-      <Accordion defaultActiveKey="0" flush>
+      <Accordion defaultActiveKey="0" flush style={{paddingLeft:"3%"}}>
               <Accordion.Item eventKey="0">
                 <Accordion.Header>Select The Address</Accordion.Header>
                 <Accordion.Body>

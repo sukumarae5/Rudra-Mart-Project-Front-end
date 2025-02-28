@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import sideImage from "../../src/assets/images/cart.jpg";
 import { GoogleLogin } from "@react-oauth/google";
-import jwt_decode from "jwt-decode"; // ✅ Correct for jwt-decode@3.x.x
+import jwt_decode from "jwt-decode"; 
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,7 +13,12 @@ const Register = () => {
     password: "",
     role: "",
   });
+  const [googledata,setGoogleData]=useState({
+    name:"",
+    email:""
 
+  })
+  console.log(setGoogleData)
   const [message, setMessage] = useState(null); 
   const [error, setError] = useState(""); 
   const [loading, setLoading] = useState(false); 
@@ -78,10 +83,18 @@ const Register = () => {
         return;
       }
       const decodedToken = jwt_decode(credential);
+      setGoogleData({ name: decodedToken.name, email: decodedToken.email });
+      setFormData((prev) => ({
+      ...prev,
+      name: decodedToken.name,
+      email: decodedToken.email,
+    }));
       console.log("Decoded Token:", decodedToken);  
-    }   
+    } 
+    
   const handleGoogleFailure = (error) => {
     console.error("Google login failed:", error);
+
   };
     return (
     <div className="container py-5">
