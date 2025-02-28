@@ -194,6 +194,8 @@ const PaymentPage = () => {
                     )}
 
                     {paymentMethod === "upi" && (
+
+                      
                       <div className="mt-3 text-center">
                         <Button variant="success" className="w-100 mb-3" onClick={() => window.location.assign(upiUrl)}>
                           Pay via UPI
