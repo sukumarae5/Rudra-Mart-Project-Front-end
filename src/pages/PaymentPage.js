@@ -1,9 +1,22 @@
 import React, { useState } from "react";
-import { Accordion, Card, Form, Row, Col, Button, Image } from "react-bootstrap";
+import {
+  Accordion,
+  Card,
+  Form,
+  Row,
+  Col,
+  Button,
+  Image,
+} from "react-bootstrap";
 import { FaRegCreditCard } from "react-icons/fa";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { decreaseQuantity, increaseQuantity, removeProduct } from "../features/cart/cartActions";
+import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
+
+import {
+  decreaseQuantity,
+  increaseQuantity,
+  removeProduct,
+} from "../features/cart/cartActions";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +33,19 @@ const PaymentPage = () => {
 
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
+  };
+
+  const fororder = () => {
+    if (checkoutData.length === 0) {
+      alert(
+        "There are no items in your order. Please select an item to proceed."
+      );
+      return;
+    }
+    const paymentSection = document.getElementById("payment-section");
+    if (paymentSection) {
+      paymentSection.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const handleCardDetailChange = (e) => {
@@ -54,49 +80,101 @@ const PaymentPage = () => {
   };
 
   return (
-    <PayPalScriptProvider options={{ "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || "" }}>
+    <PayPalScriptProvider
+      options={{ "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || "" }}
+    >
       <div className="container mt-4">
-        <Row>
-          <Col md={12}>
+        <Row id="order-section" className="justify-content-center my-2">
+          <Col>
             <Accordion defaultActiveKey="0">
               <Accordion.Item eventKey="0">
-                <Accordion.Header>Order Summary</Accordion.Header>
+                <Accordion.Header>
+                  <h5 className="mb-0 fw-bold">🛒 Order Summary</h5>
+                </Accordion.Header>
                 <Accordion.Body>
-                  <Card className="p-4 shadow-sm border-danger">
-                    <h4 className="text-danger">Order Summary</h4>
+                  <Card className="p-4 shadow-lg border-0 rounded-4">
                     {checkoutData.length > 0 ? (
                       checkoutData.map((item) => (
-                        <Row key={item.id} className="mb-3">
-                          <Col xs={3}>
-                            <Image src={item.productImage} rounded style={{ width: "100px" }} />
+                        <Row
+                          key={item.id}
+                          className="align-items-center p-3 border-bottom"
+                        >
+                          {/* Product Image */}
+                          <Col xs={3} className="text-center">
+                            <Image
+                              src={item.productImage}
+                              rounded
+                              fluid
+                              style={{
+                                width: "200px",
+                                height: "200px",
+                                objectFit: "cover",
+                              }}
+                            />
                           </Col>
-                          <Col>
-                            <div>
+
+                          {/* Product Details */}
+                          <Col xs={6}>
+                            <h1 className="fw-bold">{item.productName}</h1>
+                            <p className="text-muted m-0">
+                              Price: ₹{item.productPrice}
+                            </p>
+                            <p className="fw-bold">
+                              Subtotal: ₹
+                              {(item.productPrice * item.quantity).toFixed(2)}
+                            </p>
+                          </Col>
+
+                          {/* Action Buttons (Aligned to Right) */}
+                          <Col xs={2} className="text-end">
+                            <div className="d-flex justify-content-end align-items-center gap-2">
                               <Button
-                                variant="danger"
-                                className="p-0"
-                                onClick={() => handleRemoveProduct(item.productId)}
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() =>
+                                  handleDecreaseQuantity(item.productId)
+                                }
                               >
-                                <DeleteOutlineOutlinedIcon />
+                                <FaMinus />
                               </Button>
-                              <p><strong>{item.productName}</strong></p>
-                              <p>Price: ₹{item.productPrice}</p>
-                              <p>Quantity: {item.quantity}</p>
-                              <p>Subtotal: ₹{(item.productPrice * item.quantity).toFixed(2)}</p>
+                              <span className="fw-bold">{item.quantity}</span>
+                              <Button
+                                variant="outline-success"
+                                size="sm"
+                                onClick={() =>
+                                  handleIncreaseQuantity(item.productId)
+                                }
+                              >
+                                <FaPlus />
+                              </Button>
                             </div>
-                            <div className="d-flex">
-                              <Button variant="success" className="mr-2" onClick={() => handleIncreaseQuantity(item.productId)}>+</Button>
-                              <Button variant="warning" onClick={() => handleDecreaseQuantity(item.productId)}>-</Button>
-                            </div>
+                            <br></br>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() =>
+                                handleRemoveProduct(item.productId)
+                              }
+                            >
+                              <FaTrash />
+                            </Button>
                           </Col>
                         </Row>
                       ))
                     ) : (
-                      <p className="text-muted">No products available in checkout.</p>
+                      <p className="text-muted text-center">
+                        No products available in checkout.
+                      </p>
                     )}
                     <hr />
-                    <h5 className="text-right">Total: ₹{totalCost.toFixed(2)}</h5>
-                    <Button variant="primary" className="mt-3 w-100">Place Order</Button>
+                    <div className="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded shadow-sm">
+                      <h5 className="text-danger fw-bold">
+                        Total: ₹{totalCost}
+                      </h5>
+                      <Button variant="success" onClick={fororder} className="px-4 py-2 fw-bold">
+                        Confirm Order
+                      </Button>
+                    </div>
                   </Card>
                 </Accordion.Body>
               </Accordion.Item>
@@ -104,8 +182,8 @@ const PaymentPage = () => {
           </Col>
         </Row>
 
-        <Row>
-          <Col style={{ paddingTop: "3%" }}>
+        <Row id="payment-section" className="justify-content-center my-2">
+          <Col>
             <Accordion defaultActiveKey="0" flush>
               <Accordion.Item eventKey="0">
                 <Accordion.Header>Payment Method</Accordion.Header>
