@@ -203,7 +203,7 @@ const Header = () => {
                     
 
       <Outlet />
-      {checkout ? <Footer /> : ""}
+<Footer /> 
 
       
       
