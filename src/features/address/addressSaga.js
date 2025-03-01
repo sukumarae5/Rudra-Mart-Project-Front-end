@@ -42,7 +42,7 @@ const apiCall = async (url, method = "GET", data = null) => {
 // 1️⃣ Fetch Addresses Saga (GET)
 function* fetchAddressesSaga() {
   try {
-    const data = yield call(apiCall, "http://192.168.1.11:3000/api/address/get", "GET");
+    const data = yield call(apiCall, "http://192.168.1.12/api/address/get", "GET");
     yield put(fetchAddressesSuccess(data.addresses));
   } catch (error) {
     yield put(fetchAddressesFailure(error.message));
@@ -52,7 +52,7 @@ function* fetchAddressesSaga() {
 // 2️⃣ Add Address Saga (POST)
 function* addAddressSaga(action) {
   try {
-    const data = yield call(apiCall, "http://192.168.1.11:3000/api/address/add", "POST", action.payload);
+    const data = yield call(apiCall, "http://192.168.1.12/api/address/add", "POST", action.payload);
     yield put(addAddressSuccess(data.address));
   } catch (error) {
     yield put(addAddressFailure(error.message));
@@ -63,7 +63,7 @@ function* addAddressSaga(action) {
 function* updateAddressSaga(action) {
   try {
     const { addressId, updatedAddress } = action.payload;
-    const data = yield call(apiCall, `http://192.168.1.11:3000/api/address/update/${addressId}`, "PUT", updatedAddress);
+    const data = yield call(apiCall, `http://192.168.1.12:8081/api/address/update/${addressId}`, "PUT", updatedAddress);
     yield put(updateAddressSuccess(data.updatedAddress));
   } catch (error) {
     yield put(updateAddressFailure(error.message));
@@ -74,7 +74,7 @@ function* updateAddressSaga(action) {
 function* deleteAddressSaga(action) {
   try {
     const addressId = action.payload;
-    yield call(apiCall, `http://192.168.1.11:3000/api/address/delete/${addressId}`, "DELETE");
+    yield call(apiCall, `http://192.168.1.12:8081/api/address/delete/${addressId}`, "DELETE");
     yield put(deleteAddressSuccess(addressId));
   } catch (error) {
     yield put(deleteAddressFailure(error.message));
