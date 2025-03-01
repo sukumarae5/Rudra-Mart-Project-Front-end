@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
-import { fetchApiCartDataRequest, fetcheckeoutpagedata } from '../features/cart/cartActions';
+import { fetchApiCartDataRequest } from '../features/cart/cartActions';
 
 const SearchPage = () => {
   const { products = [] } = useSelector((state) => state.products);
@@ -56,7 +56,7 @@ const SearchPage = () => {
           };
       
           // API call to add product to cart
-          const response = await fetch("http://192.168.1.12:3000/api/cart/add", {
+          const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
