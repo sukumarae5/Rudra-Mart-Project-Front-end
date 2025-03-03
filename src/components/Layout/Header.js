@@ -6,7 +6,10 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchproductsrequest, searchquryproduct } from "../../features/product/productActions";
+import {
+  fetchproductsrequest,
+  searchquryproduct,
+} from "../../features/product/productActions";
 import { FaRegUserCircle } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
 import { userlogoutdata } from "../../features/user/userActions";
@@ -20,11 +23,12 @@ const Header = () => {
   const { cartProducts = [] } = useSelector((state) => state.cart); // Default empty array
   const [user, setUser] = useState(null);
   const location = useLocation();
-    const { cartItems = [] } = useSelector((state) => state.cart || {});
+  const { cartItems = [] } = useSelector((state) => state.cart || {});
 
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/signup";
 
-  const checkout=location.pathname.includes("/CheckoutPage")
+  const checkout = location.pathname.includes("/CheckoutPage");
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
@@ -73,8 +77,13 @@ const Header = () => {
     <div>
       <div className="bg-black text-white py-2 d-flex justify-content-between align-items-center px-3">
         <div className="text-center flex-grow-1">
-          <span>Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!</span>
-          <a href="https://example.com" className="text-decoration-underline text-white ms-2">
+          <span>
+            Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!
+          </span>
+          <a
+            href="https://example.com"
+            className="text-decoration-underline text-white ms-2"
+          >
             Shop Now
           </a>
         </div>
@@ -85,21 +94,18 @@ const Header = () => {
           </select>
         </div>
       </div>
-      
 
-        
-        <Navbar bg="white" expand="lg" className="shadow-sm">
+      <Navbar bg="white" expand="lg" className="shadow-sm">
         <Container>
           <Navbar.Brand as={Link} to="/" className="text-dark fw-bold">
             Light Up
           </Navbar.Brand>
-        
-            <Navbar.Toggle aria-controls="navbarNav" />
-          
-            <Navbar.Collapse id="navbarNav">
-                <Nav className="mx-auto">
-   
-   <Nav.Link as={Link} to="/" className="text-dark">
+
+          <Navbar.Toggle aria-controls="navbarNav" />
+
+          <Navbar.Collapse id="navbarNav">
+            <Nav className="mx-auto">
+              <Nav.Link as={Link} to="/" className="text-dark">
                 Home
               </Nav.Link>
               <Nav.Link as={Link} to="/PaymentPage" className="text-dark">
@@ -110,16 +116,19 @@ const Header = () => {
               </Nav.Link>
               {user ? (
                 <Nav.Link onClick={handleLogout} className="text-dark">
-                Logout
+                  Logout
                 </Nav.Link>
               ) : (
                 <Nav.Link as={Link} to="/signup" className="text-dark">
-                Signup
+                  Signup
                 </Nav.Link>
               )}
-              </Nav>
-              
-              <Form className="d-flex position-relative me-3" onSubmit={handleSearch}>
+            </Nav>
+
+            <Form
+              className="d-flex position-relative me-3"
+              onSubmit={handleSearch}
+            >
               <Form.Control
                 type="text"
                 placeholder="What are you looking for?"
@@ -139,14 +148,22 @@ const Header = () => {
               <div className="d-flex align-items-center">
                 {user && (
                   <Dropdown align="end">
-                    <Dropdown.Toggle variant="light" id="dropdown-basic" className="d-flex align-items-center border-0 bg-white">
+                    <Dropdown.Toggle
+                      variant="light"
+                      id="dropdown-basic"
+                      className="d-flex align-items-center border-0 bg-white"
+                    >
                       <FaRegUserCircle size={24} className="me-2" />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item onClick={handleProfile}>Profile</Dropdown.Item>
-                      <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-                      </Dropdown.Menu>
-                      </Dropdown>
+                      <Dropdown.Item onClick={handleProfile}>
+                        Profile
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={handleLogout}>
+                        Logout
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 )}
 
                 {/* Display wishlist length */}
@@ -155,32 +172,9 @@ const Header = () => {
                     onClick={() => navigate("/WishListpage")}
                     className="text-dark"
                     style={{ cursor: "pointer" }}
-                    />
+                  />
                   {addToWishlist.length > 0 && (
                     <Badge
-                    pill
-                    bg="danger"
-                    style={{
-                      position: "absolute",
-                      top: "-5px",
-                      right: "-10px",
-                      fontSize: "0.7rem",
-                    }}
-                    >
-                      {addToWishlist.length}
-                      </Badge>
-                    )}
-                    </div>
-                    
-                    {/* Display cart products length */}
-                    <div className="position-relative mx-3">
-                    <ShoppingCartIcon
-                    className="text-dark"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => navigate("/cartpage")}
-                    />
-                    {cartItems.length > 0 && (
-                      <Badge
                       pill
                       bg="danger"
                       style={{
@@ -189,24 +183,42 @@ const Header = () => {
                         right: "-10px",
                         fontSize: "0.7rem",
                       }}
-                      >
-                      {cartItems.length}
-                      </Badge>
-                    )}
-                    </div>
-                    </div>
+                    >
+                      {addToWishlist.length}
+                    </Badge>
                   )}
-                  </Navbar.Collapse>
-      
+                </div>
+
+                {/* Display cart products length */}
+                <div className="position-relative mx-3">
+                  <ShoppingCartIcon
+                    className="text-dark"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/cartpage")}
+                  />
+                  {cartItems.length > 0 && (
+                    <Badge
+                      pill
+                      bg="danger"
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        right: "-10px",
+                        fontSize: "0.7rem",
+                      }}
+                    >
+                      {cartItems.length}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </Navbar.Collapse>
         </Container>
       </Navbar>
-                    
 
       <Outlet />
-<Footer /> 
-
-      
-      
+      <Footer />
     </div>
   );
 };

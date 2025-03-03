@@ -57,7 +57,7 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
       };
 
       const response = await axios.post(
-        "http://192.168.1.12:8081/api/orders/orders",
+        "http://192.168.1.2:8081/api/orders/orders",
         orderData
       );
 
