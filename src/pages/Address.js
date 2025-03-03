@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {  Spinner,Alert,Container,Row,Col,Form,Button,Card,Image,} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaMapMarkerAlt, FaRegCreditCard, FaPaypal } from "react-icons/fa";
 import Accordion from "react-bootstrap/Accordion";
+import PaymentPage from "./PaymentPage";
 import { FaHome } from "react-icons/fa";
+import { addAddress } from "../features/address/addressActions";
 
 
-const Address = ({ scrollToOrderSummary }) => {
+const Address = ({scrollToOrderSummary}) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -22,9 +25,11 @@ const Address = ({ scrollToOrderSummary }) => {
     postal_code: "",
     country: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   // Payment-related states (unchanged)
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [cardDetails, setCardDetails] = useState({
     cardNumber: "",
     expiryDate: "",
@@ -39,7 +44,7 @@ const Address = ({ scrollToOrderSummary }) => {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.12:8081/api/address/get", {
+      const response = await fetch("http://192.168.1.2:8081/api/address/get", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -78,6 +83,7 @@ const Address = ({ scrollToOrderSummary }) => {
     const token = localStorage.getItem("authAuthToken") || localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
+    console.log(userId)
     if (!token) {
       alert("You need to log in first.");
       navigate("/login");
@@ -107,7 +113,7 @@ const Address = ({ scrollToOrderSummary }) => {
         country: formData.country,
         userId: userId,
       };
-      const response = await fetch("http://192.168.1.12:8081/api/address/add", {
+      const response = await fetch("http://192.168.1.2:8081/api/address/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,30 +138,26 @@ const Address = ({ scrollToOrderSummary }) => {
   };// Handler for updating an existing address (PUT)
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
+  
+    if (!selectedAddress || !selectedAddress.id) {
+      alert("No address selected for update.");
+      return;
+    }
+  
     const token = localStorage.getItem("authToken");
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id;
-    if (!token) {
+    const user =JSON.parse(localStorage.getItem("user"))
+    console.log(user.id)
+    if (!token && user?.id ) {
       alert("You need to log in first.");
       navigate("/login");
       return;
     }
-    if (!userId) {
-      alert("User ID is not available.");
-      return;
-    }
-    // Validate that every field is filled
-    for (const [key, value] of Object.entries(formData)) {
-      if (!value) {
-        alert(`Please fill in the ${key.replace("_", " ")}`);
-        return;
-      }
-    }
+  
     setLoading(true);
     try {
-      // Build payload according to backend's expectation.
-      // Map street_address → address and postal_code → postalcode.
       const payload = {
+        id:(JSON.parse(selectedAddress.id)),
+        userId: user.id,
         full_name: formData.full_name,
         phone_number: formData.phone_number,
         address: formData.street_address,
@@ -163,9 +165,9 @@ const Address = ({ scrollToOrderSummary }) => {
         state: formData.state,
         postalcode: formData.postal_code,
         country: formData.country,
-      };
+      };        
       const response = await fetch(
-        `http://192.168.1.12:8081/api/address/update/${selectedAddress.id}`,
+        `http://192.168.1.2:8081/api/address/updateaddress/${selectedAddress.id}`,
         {
           method: "PUT",
           headers: {
@@ -174,11 +176,10 @@ const Address = ({ scrollToOrderSummary }) => {
           },
           body: JSON.stringify(payload),
         }
-      );
+      );  
       const data = await response.json();
       if (response.ok && data.success) {
         alert("Address updated successfully!");
-        // Reload addresses automatically
         fetchSavedAddresses();
         handleCancel();
       } else {
@@ -189,7 +190,7 @@ const Address = ({ scrollToOrderSummary }) => {
     } finally {
       setLoading(false);
     }
-  };
+  };  
   // Handler for deleting an address
   const handleDeleteAddress = async (addressId) => {
     const token = localStorage.getItem("authToken");
@@ -202,7 +203,7 @@ const Address = ({ scrollToOrderSummary }) => {
     if (confirmDelete) {
       setLoading(true);
       try {
-        const response = await fetch(`http://192.168.1.12/api/address/delete/${addressId}`, {
+        const response = await fetch(`http://192.168.1.2:8081/api/address/delete/${addressId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -219,26 +220,25 @@ const Address = ({ scrollToOrderSummary }) => {
         setLoading(false);
       }
     }
-  };
-  // When editing, populate the form with the address data.
+  };  // When editing, populate the form with the address data.
   const handleEditAddress = (address) => {
+    console.log("Editing address:", address); // Debugging
     setSelectedAddress(address);
     setFormData({
-      full_name: address.full_name,
-      phone_number: address.phone_number,
-      street_address: address.street_address,
-      city: address.city,
-      state: address.state,
-      postal_code: address.postal_code,
-      country: address.country,
+      id:address.id||"",
+      full_name: address.full_name || "",
+      phone_number: address.phone_number || "",
+      street_address: address.street_address || "",
+      city: address.city || "",
+      state: address.state || "",
+      postal_code: address.postal_code || "",
+      country: address.country || "",
     });
     setNewAddress(true);
-  };
-// Update form state when an input changes.
+  };// Update form state when an input changes.
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  // (Optional) Select an address for payment.
+  }; // (Optional) Select an address for payment.
   const handleSelectAddressForPayment = (address) => {
     setSelectedAddress(address);
   };  
@@ -248,7 +248,7 @@ const Address = ({ scrollToOrderSummary }) => {
        }
   }, [savedAddresses]);
   return (
-    <Container fluid style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}>
+    <Container fluid style={{  background: "#e3f2fd", padding: "10px 0px 0px 50px" }}>
       <Row className="justify-content-center my-2" >
       <Accordion defaultActiveKey="0" flush>
               <Accordion.Item eventKey="0">
@@ -272,11 +272,8 @@ const Address = ({ scrollToOrderSummary }) => {
           {error && <Alert variant="danger">{error}</Alert>}
           {savedAddresses.length > 0 ? (
             savedAddresses.map((addr) => (  
-                 <div>
-                              
-
-
-              <Card key={addr.id} className="mb-3">
+                 <div>                            
+                    <Card key={addr.id} className="mb-3">
                 <Card.Body>
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
@@ -284,13 +281,20 @@ const Address = ({ scrollToOrderSummary }) => {
                         type="radio"
                         name="address"
                         checked={selectedAddress?.id === addr.id}
-                        onChange={() => handleSelectAddressForPayment(addr)}
+                        onChange={() => {
+                          handleSelectAddressForPayment(addr);                      
+                          if (selectedAddress?.id === addr.id) {
+                            localStorage.setItem("addressId", selectedAddress.id);
+                          } else {
+                            localStorage.removeItem("addressId");
+                          }
+                        }}
                         label={
                           <>
                             <strong>{addr.full_name}</strong> ({addr.phone_number})
                             <br />
                             {addr.street_address}, {addr.city}, {addr.state},{" "}
-                            {addr.postal_code}, {addr.country}, {handleSelectAddressForPayment}
+                            {addr.postal_code}, {addr.country},                                          {handleSelectAddressForPayment}
                           </>
                         }
                         />
@@ -306,7 +310,6 @@ const Address = ({ scrollToOrderSummary }) => {
                   </div>
                 </Card.Body>
               </Card>
-
              </div>       
             ))
           ) : (
@@ -327,8 +330,18 @@ const Address = ({ scrollToOrderSummary }) => {
           >
             + Add New Address
           </Button>
-          <Button onClick={scrollToOrderSummary}>Continue</Button>
-          {/* Form for Adding a New Address */}
+          <Button
+  onClick={() => {
+    if (selectedAddress?.id) {
+      localStorage.setItem("addressId", selectedAddress.id); 
+      scrollToOrderSummary(); 
+    } else {
+      alert("Please select an address before continuing.");
+    }
+  }}
+>
+  Continue
+</Button>          {/* Form for Adding a New Address */}
           {newAddress && !selectedAddress && (
             <Card className="mt-3">
               <Card.Body>
@@ -509,9 +522,8 @@ const Address = ({ scrollToOrderSummary }) => {
         </Accordion.Body>
               </Accordion.Item>
             </Accordion>
-            </Row>
-
-           
+            
+      </Row>
     </Container>
   );
 };

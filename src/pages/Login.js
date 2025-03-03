@@ -9,25 +9,19 @@ const Login = () => {
   const dispatch = useDispatch();
   const { users = [] } = useSelector((state) => state.users);
   const navigate = useNavigate();
-
   const [login, setLogin] = useState({
     email: "",
     password: "",
   });
-
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState("");
-
   const { email, password } = login;
-
   const changefun = (e) => {
     setLogin({ ...login, [e.target.name]: e.target.value });
   };
-
   useEffect(() => {
     dispatch(fetchusersrequest());
   }, [dispatch]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -36,7 +30,7 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        const response = await fetch("http://192.168.1.12:8081/api/users/login", {
+        const response = await fetch("http://192.168.1.2:8081/api/users/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),

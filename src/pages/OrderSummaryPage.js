@@ -6,6 +6,7 @@ import {
   Col,
   Button,
   Image,
+  Container,
 } from "react-bootstrap";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -57,7 +58,7 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
       };
 
       const response = await axios.post(
-        "http://192.168.1.12:8081/api/orders/orders",
+        "http://192.168.1.2:8081/api/orders/orders",
         orderData
       );
 
@@ -75,6 +76,7 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
   return (
     <>
       <div  ref={ref} className="container mt-4">
+        < Container fluid style={{  background: "#e3f2fd", padding: "4px" }}>
         <Row>
           <Col md={12}>
             <Accordion defaultActiveKey="0" style={{ width: "102%" }}>
@@ -171,6 +173,7 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
             </Accordion>
           </Col>
         </Row>
+        </Container>
       </div>
       </>
   );
