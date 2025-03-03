@@ -5,7 +5,6 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { FaBars, FaRegUserCircle } from "react-icons/fa";
 import { useLocation, Link } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
-import Footer from "../Layout/Footer";
 import { useSelector } from "react-redux";
   
 

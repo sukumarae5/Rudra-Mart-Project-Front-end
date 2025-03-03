@@ -1,4 +1,3 @@
-// Action Types
 export const FETCH_ADDRESSES_REQUEST = "FETCH_ADDRESSES_REQUEST";
 export const FETCH_ADDRESSES_SUCCESS = "FETCH_ADDRESSES_SUCCESS";
 export const FETCH_ADDRESSES_FAILURE = "FETCH_ADDRESSES_FAILURE";
@@ -16,51 +15,25 @@ export const DELETE_ADDRESS_SUCCESS = "DELETE_ADDRESS_SUCCESS";
 export const DELETE_ADDRESS_FAILURE = "DELETE_ADDRESS_FAILURE";
 
 // Action Creators
-export const fetchAddressesRequest = () => ({ type: FETCH_ADDRESSES_REQUEST });
-export const fetchAddressesSuccess = (addresses) => ({
-  type: FETCH_ADDRESSES_SUCCESS,
-  payload: addresses,
-});
-export const fetchAddressesFailure = (error) => ({
-  type: FETCH_ADDRESSES_FAILURE,
-  payload: error,
+export const fetchAddresses = (userId) => ({
+  type: FETCH_ADDRESSES_REQUEST,
+  payload: userId,
 });
 
-export const addAddressRequest = (newAddress) => ({
+export const addAddress = (addressData) => ({
   type: ADD_ADDRESS_REQUEST,
-  payload: newAddress,
-});
-export const addAddressSuccess = (address) => ({
-  type: ADD_ADDRESS_SUCCESS,
-  payload: address,
-});
-export const addAddressFailure = (error) => ({
-  type: ADD_ADDRESS_FAILURE,
-  payload: error,
+  payload: addressData,
 });
 
-export const updateAddressRequest = (addressId, updatedAddress) => ({
+export const updateAddress = (addressId, updatedData) => ({
   type: UPDATE_ADDRESS_REQUEST,
-  payload: { addressId, updatedAddress },
-});
-export const updateAddressSuccess = (updatedAddress) => ({
-  type: UPDATE_ADDRESS_SUCCESS,
-  payload: updatedAddress,
-});
-export const updateAddressFailure = (error) => ({
-  type: UPDATE_ADDRESS_FAILURE,
-  payload: error,
+  payload: { addressId, updatedData }, // Ensure addressId is separate from updatedData
 });
 
-export const deleteAddressRequest = (addressId) => ({
+
+console.log(updateAddress.addressId);
+
+export const deleteAddress = (addressId) => ({
   type: DELETE_ADDRESS_REQUEST,
   payload: addressId,
-});
-export const deleteAddressSuccess = (addressId) => ({
-  type: DELETE_ADDRESS_SUCCESS,
-  payload: addressId,
-});
-export const deleteAddressFailure = (error) => ({
-  type: DELETE_ADDRESS_FAILURE,
-  payload: error,
 });
