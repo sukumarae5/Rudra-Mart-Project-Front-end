@@ -10,7 +10,7 @@ export const syncCartData = (cartProducts) => async (dispatch) => {
       return;
     }
 
-    const response = await fetch("http://192.168.1.12:8081/api/cart/all", {
+    const response = await fetch("http://192.168.1.2:8081/api/cart/all", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
