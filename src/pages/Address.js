@@ -155,7 +155,7 @@ const Address = ({scrollToOrderSummary}) => {
   
     setLoading(true);
     try {
-      const payload = {
+      const payload = { 
         id:(JSON.parse(selectedAddress.id)),
         userId: user.id,
         full_name: formData.full_name,

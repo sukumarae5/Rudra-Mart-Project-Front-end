@@ -5,12 +5,10 @@ import {
   Form,
   Row,
   Col,
-  Button,
-  
+  Button
 } from "react-bootstrap";
 import { FaRegCreditCard } from "react-icons/fa";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-
 import { useDispatch, useSelector } from "react-redux";
 import { QRCodeCanvas } from "qrcode.react";
 
