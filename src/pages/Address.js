@@ -8,13 +8,17 @@ import {
   Form,
   Button,
   Card,
+  Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import Accordion from "react-bootstrap/Accordion";
 import { FaHome } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 
 const Address = ({ scrollToOrderSummary }) => {
+  const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -28,9 +32,16 @@ const Address = ({ scrollToOrderSummary }) => {
     postal_code: "",
     country: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // Reusable function to fetch saved addresses
+  // Payment-related states (unchanged)
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+  }); // Reusable function to fetch saved addresses
   const fetchSavedAddresses = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -80,6 +91,7 @@ const Address = ({ scrollToOrderSummary }) => {
       localStorage.getItem("authToken") || localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
+    console.log(userId);
     if (!token) {
       alert("You need to log in first.");
       navigate("/login");
@@ -134,31 +146,27 @@ const Address = ({ scrollToOrderSummary }) => {
     }
   }; // Handler for updating an existing address (PUT)
   const handleUpdateAddress = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+
+    if (!selectedAddress || !selectedAddress.id) {
+      alert("No address selected for update.");
+      return;
+    }
+
     const token = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id;
-    if (!token) {
+    console.log(user.id);
+    if (!token && user?.id) {
       alert("You need to log in first.");
       navigate("/login");
       return;
     }
-    if (!userId) {
-      alert("User ID is not available.");
-      return;
-    }
-    // Validate that every field is filled
-    for (const [key, value] of Object.entries(formData)) {
-      if (!value) {
-        alert(`Please fill in the ${key.replace("_", " ")}`);
-        return;
-      }
-    }
+
     setLoading(true);
     try {
-      // Build payload according to backend's expectation.
-      // Map street_address → address and postal_code → postalcode.
       const payload = {
+        id: JSON.parse(selectedAddress.id),
+        userId: user.id,
         full_name: formData.full_name,
         phone_number: formData.phone_number,
         address: formData.street_address, // Match backend field name
@@ -167,12 +175,6 @@ const Address = ({ scrollToOrderSummary }) => {
         postalcode: formData.postal_code, // Match backend field name
         country: formData.country,
       };
-      if (!selectedAddress || !selectedAddress.id) {
-        alert("Address ID is missing.");
-        return;
-      }
-      
-      
       const response = await fetch(
         `http://192.168.1.2:8081/api/address/updateaddress/${selectedAddress.id}`,
         {
@@ -184,11 +186,9 @@ const Address = ({ scrollToOrderSummary }) => {
           body: JSON.stringify(payload),
         }
       );
-      
       const data = await response.json();
       if (response.ok && data.success) {
         alert("Address updated successfully!");
-        // Reload addresses automatically
         fetchSavedAddresses();
         handleCancel();
       } else {
@@ -215,7 +215,7 @@ const Address = ({ scrollToOrderSummary }) => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://192.168.1.2/api/address/delete/${addressId}`,
+          `http://192.168.1.2:8081/api/address/delete/${addressId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
@@ -234,26 +234,25 @@ const Address = ({ scrollToOrderSummary }) => {
         setLoading(false);
       }
     }
-  };
-  // When editing, populate the form with the address data.
+  }; // When editing, populate the form with the address data.
   const handleEditAddress = (address) => {
+    console.log("Editing address:", address); // Debugging
     setSelectedAddress(address);
     setFormData({
-      full_name: address.full_name,
-      phone_number: address.phone_number,
-      street_address: address.street_address,
-      city: address.city,
-      state: address.state,
-      postal_code: address.postal_code,
-      country: address.country,
+      id: address.id || "",
+      full_name: address.full_name || "",
+      phone_number: address.phone_number || "",
+      street_address: address.street_address || "",
+      city: address.city || "",
+      state: address.state || "",
+      postal_code: address.postal_code || "",
+      country: address.country || "",
     });
     setNewAddress(true);
-  };
-  // Update form state when an input changes.
+  }; // Update form state when an input changes.
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  // (Optional) Select an address for payment.
+  }; // (Optional) Select an address for payment.
   const handleSelectAddressForPayment = (address) => {
     setSelectedAddress(address);
   };
@@ -265,7 +264,7 @@ const Address = ({ scrollToOrderSummary }) => {
   return (
     <Container
       fluid
-      style={{ minHeight: "100vh", background: "#e3f2fd", padding: "50px" }}
+      style={{ background: "#e3f2fd", padding: "10px 0px 0px 50px" }}
     >
       <Row className="justify-content-center my-2">
         <Accordion defaultActiveKey="0" flush>
@@ -302,9 +301,17 @@ const Address = ({ scrollToOrderSummary }) => {
                                 type="radio"
                                 name="address"
                                 checked={selectedAddress?.id === addr.id}
-                                onChange={() =>
-                                  handleSelectAddressForPayment(addr)
-                                }
+                                onChange={() => {
+                                  handleSelectAddressForPayment(addr);
+                                  if (selectedAddress?.id === addr.id) {
+                                    localStorage.setItem(
+                                      "addressId",
+                                      selectedAddress.id
+                                    );
+                                  } else {
+                                    localStorage.removeItem("addressId");
+                                  }
+                                }}
                                 label={
                                   <>
                                     <strong>{addr.full_name}</strong> (
@@ -322,7 +329,7 @@ const Address = ({ scrollToOrderSummary }) => {
                               <Button
                                 variant="warning"
                                 size="sm"
-                                onClick={() => handleEditAddress(addr.id)}
+                                onClick={() => handleEditAddress(addr)}
                                 className="mr-2"
                               >
                                 Edit
@@ -364,7 +371,21 @@ const Address = ({ scrollToOrderSummary }) => {
                 >
                   + Add New Address
                 </Button>
-                <Button onClick={scrollToOrderSummary}>Continue</Button>
+                <div className="d-flex justify-content-end">
+                  <Button
+                    onClick={() => {
+                      if (selectedAddress?.id) {
+                        localStorage.setItem("addressId", selectedAddress.id);
+                        scrollToOrderSummary();
+                      } else {
+                        alert("Please select an address before continuing.");
+                      }
+                    }}
+                    className="px-4 py-2 fw-bold"
+                  >
+                    Next
+                  </Button>
+                </div>{" "}
                 {/* Form for Adding a New Address */}
                 {newAddress && !selectedAddress && (
                   <Card className="mt-3">
@@ -396,7 +417,7 @@ const Address = ({ scrollToOrderSummary }) => {
                           <Form.Control
                             type="text"
                             name="street_address"
-                            value={formData.streetaddress}
+                            value={formData.street_address}
                             onChange={handleChange}
                             required
                           />
@@ -426,7 +447,7 @@ const Address = ({ scrollToOrderSummary }) => {
                           <Form.Control
                             type="text"
                             name="postal_code"
-                            value={formData.postalcode}
+                            value={formData.postal_code}
                             onChange={handleChange}
                             required
                           />
@@ -493,7 +514,7 @@ const Address = ({ scrollToOrderSummary }) => {
                           <Form.Control
                             type="text"
                             name="street_address"
-                            value={formData.streetaddress}
+                            value={formData.street_address}
                             onChange={handleChange}
                             required
                           />
@@ -523,7 +544,7 @@ const Address = ({ scrollToOrderSummary }) => {
                           <Form.Control
                             type="text"
                             name="postal_code"
-                            value={formData.postalcode}
+                            value={formData.postal_code}
                             onChange={handleChange}
                             required
                           />

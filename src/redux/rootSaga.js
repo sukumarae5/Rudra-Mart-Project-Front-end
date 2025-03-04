@@ -5,7 +5,7 @@ import userSaga from '../features/user/userSaga';
 import orderSaga from '../features/order/orderSaga';
 
 import { watchCartSaga } from "../features/cart/cartSaga"; // ✅ Correct Import
-import addressSaga from '../features/address/addressSaga';
+import addressSaga  from '../features/address/addressSaga';
 
 function* rootSaga() {
   yield all([productSaga(),userSaga(),orderSaga(),watchCartSaga(),addressSaga()]); // Call productSaga as a function

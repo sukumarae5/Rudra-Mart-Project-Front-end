@@ -53,24 +53,25 @@ const ProductDetailPage = () => {
           <div className="d-flex flex-column align-items-center">
             {/* Small Images */}
             <div className="d-flex mb-3">
-              {images.length > 0 ? (
-                images.slice(0, 4).map((img, index) => (
-                  <img
-                    key={index}
-                    src={img.image_url}
-                    alt={`Product thumbnail ${index + 1}`}
-                    className="img-thumbnail me-2"
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => setMainImage(img.image_url)}
-                  />
-                ))
-              ) : (
-                <p>{title}</p>
-              )}
+            {images.length > 0 ? (
+  images.slice(0, 4).map((img, index) => (
+    <img
+      key={index}
+      src={img.image_url}
+      alt={`Product thumbnail ${index + 1}`}
+      className="img-thumbnail me-2"
+      style={{
+        width: "80px",
+        height: "80px",
+        cursor: "pointer",
+      }}
+      onClick={() => setMainImage(img.image_url)}
+    />
+  ))
+) : (
+  <p>{title}</p>
+)}
+
             </div>
             {/* Main Image */}
             <img
@@ -103,7 +104,7 @@ const ProductDetailPage = () => {
           </div>
           {/* Price */}
           <h3 className="text-success mb-3 text-center">
-            ${totalPrice.toFixed(2)}
+            Rs.{totalPrice.toFixed(2)}
           </h3>{" "}
           {/* Display total price */}
           {/* Description */}

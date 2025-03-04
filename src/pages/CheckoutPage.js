@@ -22,7 +22,7 @@ const CheckoutPage = () => {
   };
   return (
     <div>
-      <Container>
+      <Container fluid style={{  background: "#e3f2fd", padding: "10px" }}>
         <Row>
           <Address scrollToOrderSummary={scrollToOrderSummary}/>
         </Row>
