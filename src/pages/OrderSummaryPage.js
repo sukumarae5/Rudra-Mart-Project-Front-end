@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef } from "react";
 import {
   Accordion,
   Card,
@@ -10,7 +10,6 @@ import {
 } from "react-bootstrap";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 
 import {
   decreaseQuantity,
@@ -18,12 +17,10 @@ import {
   removeProduct,
 } from "../features/cart/cartActions";
 
-const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
+const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const userId = localStorage.getItem("userId"); // Get user ID from localStorage or Redux
-
- 
 
   const handleIncreaseQuantity = (productId) => {
     dispatch(increaseQuantity(productId));
@@ -42,41 +39,29 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
     0
   );
 
-  // Function to handle order confirmation
+  // Function to handle order confirmation and scroll to payment page
   const handleConfirmOrder = async () => {
     if (checkoutData.length === 0) {
       alert("Your cart is empty. Add items before confirming the order.");
       return;
     }
-
-    try {
-      const orderData = {
-        userId,
-        totalPrice: totalCost,
-        status: "Pending",
-        products: checkoutData,
-      };
-
-      const response = await axios.post(
-        "http://192.168.1.2:8081/api/orders/orders",
-        orderData
-      );
-
-      if (response.status === 201) {
-        alert("Order placed successfully!");
-      } else {
-        alert("Failed to place order. Please try again.");
+    
+    // Call onConfirmOrder if provided by the parent component
+    if (onConfirmOrder) {
+      onConfirmOrder();
+      alert("move to payment page")
+    } else {
+      // Fallback: scroll to element with id "payment-section"
+      const paymentSection = document.getElementById("payment-section");
+      if (paymentSection) {
+        paymentSection.scrollIntoView({ behavior: "smooth" });
       }
-    } catch (error) {
-      console.error("Error placing order:", error);
-      alert("An error occurred while placing your order.");
     }
   };
 
   return (
-    <>
-      <div  ref={ref} className="container mt-4">
-        < Container fluid style={{  background: "#e3f2fd", padding: "4px" }}>
+    <div ref={ref} className="container mt-4">
+      <Container fluid style={{ background: "#e3f2fd", padding: "4px" }}>
         <Row>
           <Col md={12}>
             <Accordion defaultActiveKey="0" style={{ width: "102%" }}>
@@ -164,7 +149,7 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
                         onClick={handleConfirmOrder}
                         className="px-4 py-2 fw-bold"
                       >
-                        Confirm Order
+                        Next
                       </Button>
                     </div>
                   </Card>
@@ -173,9 +158,8 @@ const OrderSummaryPage = forwardRef(({onConfirmOrder}, ref) => {
             </Accordion>
           </Col>
         </Row>
-        </Container>
-      </div>
-      </>
+      </Container>
+    </div>
   );
 });
 
