@@ -45,6 +45,23 @@ const CartPage = () => {
     }
   };
 
+  const handleBuyNow = (cartItem) => {
+    const product = products.find((p) => p.id === cartItem.product_id);
+    const checkoutData = [
+      {
+        userId: cartItem.user_id,
+        productId: cartItem.product_id,
+        productName: product?.name || "Unknown",
+        productImage: product?.image_url || "",
+        productPrice: parseFloat(product?.price || 0),
+        quantity: cartItem.quantity,
+        totalPrice: parseFloat(product?.price || 0) * cartItem.quantity,
+      },
+    ];
+    dispatch(fetcheckeoutpagedata(checkoutData));
+    navigate("/CheckoutPage");
+  };
+
   const finalCost = (totalCost - discount).toFixed(2);
 
   return (
@@ -62,7 +79,7 @@ const CartPage = () => {
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Subtotal</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -94,8 +111,13 @@ const CartPage = () => {
                     </td>
                     <td className="text-success">₹{(price * cartItem.quantity).toFixed(2)}</td>
                     <td>
-                      <Button variant="danger" onClick={() => handleRemoveItem(cartItem.id)}>
-                        Remove
+                      <Button variant="danger" onClick={() => handleRemoveItem(cartItem.id)}>Remove</Button>
+                      <Button 
+                        variant="warning" 
+                        className="ms-2" 
+                        onClick={() => handleBuyNow(cartItem)}
+                      >
+                        Buy Now
                       </Button>
                     </td>
                   </tr>
@@ -119,7 +141,11 @@ const CartPage = () => {
                     </Form.Group>
                   </Col>
                   <Col xs={4}>
-                    <Button variant="danger" style={{ background: "linear-gradient(45deg,rgb(131, 218, 240), #ff6f61)" }} onClick={handleApplyCoupon}>
+                    <Button 
+                      variant="danger" 
+                      style={{ background: "linear-gradient(45deg,rgb(131, 218, 240), #ff6f61)" }} 
+                      onClick={handleApplyCoupon}
+                    >
                       Apply Coupon
                     </Button>
                   </Col>
@@ -149,22 +175,26 @@ const CartPage = () => {
                   <strong className="text-success">₹{finalCost}</strong>
                 </div>
                 <div className="d-flex justify-content-center mt-3">
-                <Button className="w-100" style={{ background: "linear-gradient(45deg,rgb(247, 122, 153), #ff6f61)", border: "none", fontWeight: "bold" }} onClick={() => {
-                    const checkoutData = cartItems.map((cartItem) => {
-                      const product = products.find((p) => p.id === cartItem.product_id);
-                      return {
-                        userId: cartItem.user_id,
-                        productId: cartItem.product_id,
-                        productName: product?.name || "Unknown",
-                        productImage: product?.image_url || "",
-                        productPrice: parseFloat(product?.price || 0),
-                        quantity: cartItem.quantity,
-                        totalPrice: parseFloat(product?.price || 0) * cartItem.quantity,
-                      };
-                    });
-                    dispatch(fetcheckeoutpagedata(checkoutData));
-                    navigate("/CheckoutPage");
-                  }}>
+                  <Button 
+                    className="w-100" 
+                    style={{ background: "linear-gradient(45deg,rgb(247, 122, 153), #ff6f61)", border: "none", fontWeight: "bold" }} 
+                    onClick={() => {
+                      const checkoutData = cartItems.map((cartItem) => {
+                        const product = products.find((p) => p.id === cartItem.product_id);
+                        return {
+                          userId: cartItem.user_id,
+                          productId: cartItem.product_id,
+                          productName: product?.name || "Unknown",
+                          productImage: product?.image_url || "",
+                          productPrice: parseFloat(product?.price || 0),
+                          quantity: cartItem.quantity,
+                          totalPrice: parseFloat(product?.price || 0) * cartItem.quantity,
+                        };
+                      });
+                      dispatch(fetcheckeoutpagedata(checkoutData));
+                      navigate("/CheckoutPage");
+                    }}
+                  >
                     Proceed to Checkout
                   </Button>
                 </div>
