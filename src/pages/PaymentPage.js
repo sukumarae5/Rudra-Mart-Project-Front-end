@@ -1,12 +1,5 @@
 import React, { forwardRef, useState } from "react";
-import {
-  Accordion,
-  Card,
-  Form,
-  Row,
-  Col,
-  Button
-} from "react-bootstrap";
+import {Accordion,Card,Form,Row,Col,Button} from "react-bootstrap";
 import { FaRegCreditCard } from "react-icons/fa";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,25 +8,20 @@ import { QRCodeCanvas } from "qrcode.react";
 const PaymentPage = forwardRef((props, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const [paymentMethod, setPaymentMethod] = useState("cod");
-
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
   };
-
   const totalCost = checkoutData.reduce(
     (total, item) => total + item.productPrice * item.quantity,
     0
   );
-
   const handleApprove = (data, actions) => {
     return actions.order.capture().then((details) => {
       alert(`Payment successful! Transaction ID: ${details.id}`);
     });
   };
-
   const upiUrl = `upi://pay?pa=test@upi&pn=YourStoreName&am=${totalCost}&cu=INR&tn=Order%20Payment`;
-
-  return (
+return (
     <div ref={ref}>
     <PayPalScriptProvider
       options={{ "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || "" }}

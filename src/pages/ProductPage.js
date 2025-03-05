@@ -44,6 +44,7 @@ const ProductDetailPage = () => {
 
   // Calculate the total price based on the quantity
   const totalPrice = price * quantity;
+  
 
   return (
     <div className="container my-4">
@@ -170,7 +171,7 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Buy Now Button */}
-            <button className="btn btn-warning me-3">Buy Now</button>
+            <button  className="btn btn-warning me-3">Buy Now</button>
 
             {/* Favorite Icon */}
             <button className="btn btn-outline-danger">
