@@ -60,7 +60,7 @@ const UserTable = () => {
       await Promise.all(
         selectedUsers.map(async (userId) => {
           const response = await fetch(
-            `http://192.168.1.9:8081/api/users/delete/${userId}`,
+            `http://192.168.1.10:8081/api/users/delete/${userId}`,
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
