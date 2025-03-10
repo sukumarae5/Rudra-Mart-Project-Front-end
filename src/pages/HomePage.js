@@ -15,6 +15,7 @@ import { fetchApiCartDataRequest  } from '../features/cart/cartActions';
 import { addToWishlist } from "../features/product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
+import SellingProductspage from './SellingProductspage';
 
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
@@ -495,6 +496,7 @@ const HomePage = () => {
       </Container>
       <ProductCategory />
       <br />
+      <SellingProductspage/>
     </div>
   );
 };
