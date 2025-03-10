@@ -14,6 +14,7 @@ const WishListPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+<<<<<<< HEAD
 
   const handleAddToCart = async (event, product) => {
     event.stopPropagation();
@@ -24,6 +25,63 @@ const WishListPage = () => {
         alert("Session expired or user not authenticated. Please log in.");
         navigate("/login");
         return;
+=======
+ const handleAddToCart = async (event, product) => {
+      event.stopPropagation();
+    
+      try {
+        const userToken = localStorage.getItem("authToken");
+        if (!userToken) {
+          alert("Session expired or user not authenticated. Please log in.");
+          navigate("/login");
+          return;
+        }
+    
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.id) {
+          alert("User information is missing or corrupted. Please log in.");
+          navigate("/login");
+          return;
+        }
+    
+        
+        const isProductInCart = cartItems.some(
+          (item) => item.user_id === user.id && item.product_id === product.id
+        );  
+        if (isProductInCart) {
+          alert("Product is already in the cart.");
+          return;
+        }
+        
+        const cartItem = {
+          user_id: user.id,
+          product_id: product.id,
+          quantity: 1,
+        };
+    
+        // API call to add product to cart
+        const response = await fetch("http://192.168.1.10:8081/api/cart/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify(cartItem),
+        });
+    
+        const data = await response.json();
+    
+        if (!response.ok) {
+          alert(`Error: ${data.message || response.statusText}`);
+          return;
+        }
+    
+        alert("Product successfully added to cart.");
+        dispatch(fetchApiCartDataRequest());
+      } catch (error) {
+        console.error("Error adding product to cart:", error);
+        alert(`Error: ${error.message}`);
+>>>>>>> origin/main
       }
 
       const user = JSON.parse(localStorage.getItem("user"));

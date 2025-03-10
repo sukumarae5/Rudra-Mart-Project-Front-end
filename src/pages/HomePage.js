@@ -15,6 +15,7 @@ import { fetchApiCartDataRequest  } from '../features/cart/cartActions';
 import { addToWishlist } from "../features/product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
+import SellingProductspage from './SellingProductspage';
 
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
@@ -114,7 +115,7 @@ const HomePage = () => {
         };
     
         // API call to add product to cart
-        const response = await fetch("http://192.168.1.9:8081/api/cart/add", {
+        const response = await fetch("http://192.168.1.10:8081/api/cart/add", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -495,6 +496,7 @@ const HomePage = () => {
       </Container>
       <ProductCategory />
       <br />
+      <SellingProductspage/>
     </div>
   );
 };

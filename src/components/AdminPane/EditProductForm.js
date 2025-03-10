@@ -35,7 +35,7 @@ const EditProductForm = () => {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.9:8081/api/products/updateproduct/${product.id}`, {
+      const response = await fetch(`http://192.168.1.10:8081/api/products/updateproduct/${product.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
