@@ -1,10 +1,14 @@
 import { takeEvery, call, put } from "redux-saga/effects";
-import { FETCH_ORDERS_REQUEST, fetchOrdersSuccess, fetchOrdersFailure } from "./orderActions";
+import {
+  FETCH_ORDERS_REQUEST,
+  fetchOrdersSuccess,
+  fetchOrdersFailure,
+} from "./orderActions";
 
-// Function to fetch orders from API without authentication
+// Function to fetch orders from API
 const fetchOrdersApi = async () => {
   try {
-    const response = await fetch("http://192.168.1.9:8081/api/orders/all", {
+    const response = await fetch("http://192.168.1.10:8081/api/orders/getall", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -16,7 +20,7 @@ const fetchOrdersApi = async () => {
     }
 
     const data = await response.json();
-    return data.orders; // Assuming API returns { orders: [...] }
+    return data.data; // Ensure API returns { data: [...] }
   } catch (error) {
     throw new Error("Failed to fetch orders: " + error.message);
   }
