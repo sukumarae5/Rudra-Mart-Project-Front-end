@@ -95,7 +95,7 @@ const Header = () => {
         </div>
       </div>
 
-      <Navbar bg="white" expand="lg" className="shadow-sm">
+      <Navbar bg="white" expand="lg" className="shadow-sm"  >
         <Container>
           <Navbar.Brand as={Link} to="/" className="text-dark fw-bold">
             Light Up
