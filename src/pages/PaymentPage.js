@@ -1,130 +1,230 @@
-import React, { forwardRef, useState } from "react";
-import {
-  Accordion,
-  Card,
-  Form,
-  Row,
-  Col,
-  Button
-} from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Accordion, Card, Form, Row, Col, Button } from "react-bootstrap";
 import { FaRegCreditCard } from "react-icons/fa";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { useDispatch, useSelector } from "react-redux";
-import { QRCodeCanvas } from "qrcode.react";
+import { useSelector } from "react-redux";
 
-const PaymentPage = forwardRef((props, ref) => {
+const PaymentPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [isLoading, setIsLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState({
+    name: "Guest User",
+    email: "guest@example.com",
+    contact: "0000000000",
+  });
 
-  const handlePaymentMethodChange = (e) => {
-    setPaymentMethod(e.target.value);
-  };
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUserDetails({
+        name: storedUser.name || "Guest User",
+        email: storedUser.email || "guest@example.com",
+        contact: storedUser.phone_number || "0000000000",
+      });
+    }
+  }, []);
 
+  // Calculate total cost
   const totalCost = checkoutData.reduce(
     (total, item) => total + item.productPrice * item.quantity,
     0
   );
 
-  const handleApprove = (data, actions) => {
-    return actions.order.capture().then((details) => {
-      alert(`Payment successful! Transaction ID: ${details.id}`);
+  const handlePaymentMethodChange = (e) => {
+    setPaymentMethod(e.target.value);
+  };
+
+  const placeOrder = async (userId, addressId, token, paymentStatus, transactionId, paymentMethod) => {
+    try {
+      // Step 1: Place Order
+      const orderResponse = await fetch("http://192.168.1.10:8081/api/orders/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: userId,
+          totalPrice: totalCost,
+          status: "Pending",
+          addressId: addressId,
+        }),
+      });
+
+      const orderResult = await orderResponse.json();
+      if (!orderResponse.ok) {
+        throw new Error(orderResult.message || "Failed to place order");
+      }
+
+      alert("✅ Order placed successfully!");
+
+      // Step 2: Create Payment Record
+      const paymentResponse = await fetch("http://192.168.1.10:8081/api/payments/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          amount: totalCost,
+          payment_status: paymentStatus,
+          payment_method: paymentMethod,
+          transaction_id: transactionId,
+        }),
+      });
+
+      const paymentResult = await paymentResponse.json();
+      if (!paymentResponse.ok) {
+        throw new Error(paymentResult.message || "Failed to process payment");
+      }
+
+      alert("✅ Payment recorded successfully!");
+      localStorage.removeItem("cart");
+
+    } catch (error) {
+      console.error("Error processing order/payment:", error);
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCashOnDelivery = async () => {
+    setIsLoading(true);
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?.id; 
+      const addressId = JSON.parse(localStorage.getItem("addressId"));
+      const token = localStorage.getItem("authToken");
+
+      if (!user || !addressId || !token) {
+        alert("User, Address, or Token missing! Please login again.");
+        setIsLoading(false);
+        return;
+      }
+
+      await placeOrder(userId, addressId, token, "Pending", "COD_NO_TXN", "Cash on Delivery");
+
+    } catch (error) {
+      console.error("Error placing COD order:", error);
+      alert(error.message);
+    }
+  };
+
+  // Load Razorpay Script
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
     });
   };
 
-  const upiUrl = `upi://pay?pa=test@upi&pn=YourStoreName&am=${totalCost}&cu=INR&tn=Order%20Payment`;
+  const handleRazorpayPayment = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?.id; 
+      const addressId = JSON.parse(localStorage.getItem("addressId"));
+
+      if (!user || !addressId || !token) {
+        alert("User, Address, or Token missing! Please login again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Load Razorpay SDK
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error("Razorpay SDK failed to load.");
+      }
+
+      // Initialize Razorpay Payment
+      const options = {
+        key: "rzp_test_GRRNoJBdPElkDv",
+        amount: totalCost * 100,
+        currency: "INR",
+        name: "Your Store Name",
+        description: "Order Payment",
+        handler: async function (response) {
+          alert("✅ Payment Successful!");
+
+          await placeOrder(userId, addressId, token, "Paid", response.razorpay_payment_id, "Razorpay");
+        },
+        prefill: {
+          name: userDetails.name,
+          email: userDetails.email,
+          contact: userDetails.phone_number,
+        },
+        theme: { color: "#3399cc" },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error("Error processing Razorpay order:", error);
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div ref={ref}>
-    <PayPalScriptProvider
-      options={{ "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || "" }}
-    >
-      <div className="container mt-4">
+    <div className="container mt-4">
+      <Row>
+        <Col>
+          <Accordion defaultActiveKey="0">
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Payment Method</Accordion.Header>
+              <Accordion.Body>
+                <Card className="p-3">
+                  <h4>
+                    <FaRegCreditCard /> Payment Details
+                  </h4>
+                  <Form>
+                    <Form.Check
+                      type="radio"
+                      label="Cash on Delivery"
+                      value="cod"
+                      checked={paymentMethod === "cod"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                    <Form.Check
+                      type="radio"
+                      label="Razorpay"
+                      value="razorpay"
+                      checked={paymentMethod === "razorpay"}
+                      onChange={handlePaymentMethodChange}
+                    />
+                  </Form>
 
-        <Row id="payment-section" className="justify-content-center my-2">
-          <Col>
-            <Accordion defaultActiveKey="0" flush>
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>Payment Method</Accordion.Header>
-                <Accordion.Body>
-                  <Card
-                    className="p-4 mb-4 shadow-lg border-primary"
-                    style={{ backgroundColor: "#f0faff" }}
-                  >
-                    <h4 className="text-primary d-flex align-items-center">
-                      <FaRegCreditCard className="me-2" /> Payment Details
-                    </h4>
-                    <Form>
-                      <Form.Check
-                        type="radio"
-                        label="Cash on Delivery"
-                        value="cod"
-                        checked={paymentMethod === "cod"}
-                        onChange={handlePaymentMethodChange}
-                      />
-                      <Form.Check
-                        type="radio"
-                        label="PayPal"
-                        value="paypal"
-                        checked={paymentMethod === "paypal"}
-                        onChange={handlePaymentMethodChange}
-                      />
-                      <Form.Check
-                        type="radio"
-                        label="UPI (Google Pay, PhonePe, Paytm)"
-                        value="upi"
-                        checked={paymentMethod === "upi"}
-                        onChange={handlePaymentMethodChange}
-                      />
-                    </Form>
+                  {paymentMethod === "cod" && (
+                    <Button onClick={handleCashOnDelivery} disabled={isLoading}>
+                      {isLoading ? "Processing..." : "Place Order (COD)"}
+                    </Button>
+                  )}
 
-                    {paymentMethod === "paypal" && (
-                      <div className="mt-3">
-                        <PayPalButtons
-                          style={{ layout: "vertical" }}
-                          createOrder={(data, actions) => {
-                            return actions.order.create({
-                              purchase_units: [
-                                {
-                                  amount: {
-                                    currency_code: "USD",
-                                    value: totalCost,
-                                  },
-                                },
-                              ],
-                            });
-                          }}
-                          onApprove={handleApprove}
-                        />
-                      </div>
-                    )}
-
-                    {paymentMethod === "upi" && (
-                      <div className="mt-3 text-center">
-                        <Button
-                          variant="success"
-                          className="w-100 mb-3"
-                          onClick={() => window.location.assign(upiUrl)}
-                        >
-                          Pay via UPI
-                        </Button>
-                        <div className="p-3 bg-white shadow rounded">
-                          <QRCodeCanvas value={upiUrl} size={200} />
-                        </div>
-                        <p className="mt-2 text-muted">
-                          Scan this QR code to pay via UPI
-                        </p>
-                      </div>
-                    )}
-                  </Card>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </Col>
-        </Row>
-      </div>
-    </PayPalScriptProvider>
+                  {paymentMethod === "razorpay" && (
+                    <Button onClick={handleRazorpayPayment} disabled={isLoading}>
+                      {isLoading ? "Processing..." : "Pay with Razorpay"}
+                    </Button>
+                  )}
+                </Card>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+      </Row>
     </div>
   );
-});
+};
 
 export default PaymentPage;
