@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Card, Row, Col, Container } from "react-bootstrap";
 import { FaEye, FaRegHeart, FaHeart } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import {
-    fetchproductsrequest,
-    addToWishlist,
-    setSelectedProduct,
-} from "../features/product/productActions"; 
+import {fetchproductsrequest,addToWishlist,setSelectedProduct,} from "../features/product/productActions"; 
 import { fetchApiCartDataRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
 

@@ -17,6 +17,7 @@ import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import SellingProductspage from './SellingProductspage';
 
+
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {

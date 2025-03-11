@@ -6,10 +6,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchproductsrequest,
-  searchquryproduct,
-} from "../../features/product/productActions";
+import {fetchproductsrequest,searchquryproduct,} from "../../features/product/productActions";
 import { FaRegUserCircle } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
 import { userlogoutdata } from "../../features/user/userActions";
@@ -108,7 +105,7 @@ const Header = () => {
               <Nav.Link as={Link} to="/" className="text-dark">
                 Home
               </Nav.Link>
-              <Nav.Link as={Link} to="/PaymentPage" className="text-dark">
+              <Nav.Link as={Link} to="/Aboutpage" className="text-dark">
                 About
               </Nav.Link>
               <Nav.Link as={Link} to="/contactpage" className="text-dark">

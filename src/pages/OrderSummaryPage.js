@@ -1,16 +1,7 @@
 import React, { forwardRef } from "react";
-import {
-  Accordion,
-  Card,
-  Row,
-  Col,
-  Button,
-  Image,
-  Container,
-} from "react-bootstrap";
+import {Accordion,Card,Row, Col,Button,Image,Container} from "react-bootstrap";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-
 import {
   decreaseQuantity,
   increaseQuantity,
@@ -20,8 +11,7 @@ import {
 const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
-  const userId = localStorage.getItem("userId"); // Get user ID from localStorage or Redux
-
+  // const userId = localStorage.getItem("userId") // Get user ID from localStorage or Redux
   const handleIncreaseQuantity = (productId) => {
     dispatch(increaseQuantity(productId));
   };
@@ -37,28 +27,28 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const totalCost = checkoutData.reduce(
     (total, item) => total + item.productPrice * item.quantity,
     0
-  );
-
+  ); 
   // Function to handle order confirmation and scroll to payment page
-  const handleConfirmOrder = async () => {
+  const handleConfirmOrder = async (totalcost) => {
     if (checkoutData.length === 0) {
       alert("Your cart is empty. Add items before confirming the order.");
       return;
     }
-    
-    // Call onConfirmOrder if provided by the parent component
+  
     if (onConfirmOrder) {
-      onConfirmOrder();
-      alert("move to payment page")
+    
+       alert("Order confirmed! Moving to the payment page...");
+        onConfirmOrder();
+        
+      
     } else {
-      // Fallback: scroll to element with id "payment-section"
       const paymentSection = document.getElementById("payment-section");
       if (paymentSection) {
         paymentSection.scrollIntoView({ behavior: "smooth" });
       }
     }
   };
-
+  
   return (
     <div ref={ref} className="container mt-4">
       <Container fluid style={{ background: "#e3f2fd", padding: "4px" }}>
@@ -146,7 +136,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                       </h5>
                       <Button
                         variant="success"
-                        onClick={handleConfirmOrder}
+                        onClick={()=>handleConfirmOrder(totalCost)}
                         className="px-4 py-2 fw-bold"
                       >
                         Next

@@ -16,6 +16,8 @@ import WishListpage from "../pages/UserAccontDetialsPage/WishListpage";
 import Checkoutpage from"../pages/CheckoutPage"
 import OrderPlacedSuccessfullyPage from "../pages/OrderPlacedSuccessfullyPage";
 import PaymentPage from "../pages/PaymentPage";
+import ProductDetailPage from "../pages/ProductPage";
+import AboutPage from "../pages/Aboutpage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -51,6 +53,9 @@ const AppRouter = createBrowserRouter([
       {
         path: "/searchpage",
         element: <SearchPage />,
+      },{
+        path:"/Aboutpage",
+        element:<AboutPage/>
       },
       {
         path: "/signup",
@@ -63,6 +68,10 @@ const AppRouter = createBrowserRouter([
       {
         path: "/productpage",
         element: <ProductPage />,
+      },
+      {
+        path: "/productpage/:id", 
+        element: <ProductDetailPage />,
       },
       
       {

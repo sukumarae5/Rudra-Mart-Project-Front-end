@@ -1,8 +1,6 @@
 import { takeEvery, call, put } from 'redux-saga/effects';
 import { FETCH_PRODUCTS_REQUEST } from '../product/productActions';
 import { fetchproductssuccess, fetchproductsfailure } from '../product/productActions';
-
-// Function to fetch the products using fetch API
 const fetchTheApi = async () => {
   try {
     const response = await fetch('http://192.168.1.10:8081/api/products/allproducts', {

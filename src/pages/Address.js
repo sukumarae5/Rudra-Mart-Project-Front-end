@@ -164,9 +164,8 @@ const Address = ({ scrollToOrderSummary }) => {
 
     setLoading(true);
     try {
-      const payload = {
-        id: JSON.parse(selectedAddress.id),
-        userId: user.id,
+      const payload = { 
+        id:(JSON.parse(selectedAddress.id)),
         full_name: formData.full_name,
         phone_number: formData.phone_number,
         address: formData.street_address, // Match backend field name
