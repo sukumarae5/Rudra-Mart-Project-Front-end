@@ -4,14 +4,13 @@ import { Card, Row, Col, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { fetchApiCartDataRequest } from "../../features/cart/cartActions";
 import { motion } from "framer-motion";
-import { MdDeleteOutline } from "react-icons/md"; 
+import { MdDeleteOutline } from "react-icons/md";
 import { FiShoppingCart } from "react-icons/fi";
-import Button from "react-bootstrap/Button";
 
 const WishListPage = () => {
   const { addToWishlist = [] } = useSelector((state) => state.products);
   const { cartItems = [] } = useSelector((state) => state.cart || {});
-
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -33,6 +32,7 @@ const WishListPage = () => {
         return;
       }
 
+      // Check if product is already in cart
       const isProductInCart = cartItems.some(
         (item) => item.user_id === user.id && item.product_id === product.id
       );
@@ -47,6 +47,7 @@ const WishListPage = () => {
         quantity: 1,
       };
 
+      // API call to add product to cart
       const response = await fetch("http://192.168.1.10:8081/api/cart/add", {
         method: "POST",
         headers: {
@@ -73,7 +74,6 @@ const WishListPage = () => {
 
   const handleRemoveFromWishlist = (event, productId) => {
     event.stopPropagation();
-
     console.log(`Removing product ${productId} from wishlist.`);
   };
 
@@ -86,23 +86,16 @@ const WishListPage = () => {
       {addToWishlist.length > 0 ? (
         <Row className="justify-content-center">
           {addToWishlist.map((product, index) => (
-            <Col key={index} xs={12} sm={6} md={4} lg={3} xl={3} className="mb-4">
+            <Col key={product.id} xs={12} sm={6} md={4} lg={3} xl={3} className="mb-4">
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                style={{ position: "relative" }} 
+                style={{ position: "relative" }}
               >
                 <Card className="shadow-lg border-1 rounded overflow-hidden"
-                  style={{
-                    width: "100%",
-                    maxWidth: "280px",
-                    height: "auto",
-                    margin: "auto",
-                    position: "relative",
-                  }}
+                  style={{ width: "100%", maxWidth: "280px", margin: "auto", position: "relative" }}
                 >
-              
                   <button
                     onClick={(e) => handleRemoveFromWishlist(e, product.id)}
                     className="delete-btn"
@@ -113,25 +106,20 @@ const WishListPage = () => {
                       background: "transparent",
                       border: "none",
                       cursor: "pointer",
-                      color: "green",
+                      color: "red",
                       fontSize: "22px",
                     }}
                   >
                     <MdDeleteOutline />
                   </button>
 
-                  <motion.div >
+                  <motion.div>
                     <Card.Img
                       className="overflow-hidden"
                       variant="top"
-                      src={product?.image_url || "https://via.placeholder.com/150"}
-                      alt={product?.name || "Product Image"}
-                      style={{
-                        width: "100%",
-                        height: "170px",
-                        objectFit: "cover",
-                        borderRadius: "8px 8px 0 0",
-                      }}
+                      src={product.image_url || "https://via.placeholder.com/150"}
+                      alt={product.name || "Product Image"}
+                      style={{ width: "100%", height: "170px", objectFit: "cover" }}
                     />
                   </motion.div>
                   <Card.Body className="text-center">
@@ -141,13 +129,13 @@ const WishListPage = () => {
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <FiShoppingCart color="green" /> Add to Cart
+                      <FiShoppingCart color="white" /> Add to Cart
                     </motion.button>
                     <Card.Title className="text-dark fw-bold mt-2 text-start">
-                      {product?.name || "Unnamed Product"}
+                      {product.name || "Unnamed Product"}
                     </Card.Title>
                     <Card.Text className="text-danger text-start">
-                      Price: <span className="text-success fw-bold">${product?.price || "N/A"}</span>
+                      Price: <span className="text-success fw-bold">${product.price || "N/A"}</span>
                     </Card.Text>
                   </Card.Body>
                 </Card>

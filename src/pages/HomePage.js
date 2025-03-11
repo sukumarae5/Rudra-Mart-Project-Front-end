@@ -16,6 +16,7 @@ import { addToWishlist } from "../features/product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import SellingProductspage from './SellingProductspage';
+import Categories from './Categories';
 
 
 const renderStars = (rating, onClick, productId) => {
@@ -498,6 +499,7 @@ const HomePage = () => {
       <ProductCategory />
       <br />
       <SellingProductspage/>
+    <Categories/>
     </div>
   );
 };
