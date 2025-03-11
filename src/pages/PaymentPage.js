@@ -84,14 +84,7 @@ const PaymentPage = () => {
 
       // Navigate after short delay
       setTimeout(() => {
-        navigate("/orderplacedsuccessfullypage", {
-          state: {
-            orderId: orderResult.orderId,
-            amount: totalCost,
-            paymentMethod,
-            transactionId,
-          },
-        });
+        navigate("/orderplacedsuccessfullypage");
       }, 2000);
     } catch (error) {
       console.error("Error:", error);

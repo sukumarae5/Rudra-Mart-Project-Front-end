@@ -23,7 +23,7 @@ const fetchCartDataApi = async () => {
       Authorization: `Bearer ${userToken}`,
     },
   });
-
+console.log(response)
   if (!response.ok) {
     throw new Error("Failed to fetch cart data");
   }

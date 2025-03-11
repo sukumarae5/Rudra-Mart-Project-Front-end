@@ -4,11 +4,15 @@ import { FaHeart, FaTruck, FaUndo } from "react-icons/fa";
 import ReactImageMagnify from "react-image-magnify";
 import { useNavigate } from "react-router-dom";
 import { fetcheckeoutpagedata } from "../features/cart/cartActions";
+import { setSelectedProduct } from "../features/product/productActions";
 
 const ProductDetailPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { selectedProduct = {} } = useSelector((state) => state.products || {});
+  const dispatch = useDispatch();
+
+  const { products = [], selectedProduct = {} } = useSelector(
+    (state) => state.products || {}
+  );
 
   const {
     name: title = "No Title",
@@ -16,17 +20,11 @@ const ProductDetailPage = () => {
     image_url = "",
     price = "0",
     stock = 0,
+    category_id,
   } = selectedProduct;
+
   const [mainImage, setMainImage] = useState(image_url);
   const [quantity, setQuantity] = useState(1);
-
-  const checkoutData = useSelector((state) => state.cart.checkoutData || []);
-
-  console.log("Checkout Data:", checkoutData); // Debugging
-
-  const totalAmount = Array.isArray(checkoutData)
-    ? checkoutData.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    : 0;
 
   useEffect(() => {
     setMainImage(image_url);
@@ -38,25 +36,23 @@ const ProductDetailPage = () => {
     }
   }, [selectedProduct, dispatch]);
 
+  const relatedProducts = products.filter(
+    (product) => product.category_id === category_id && product.id !== selectedProduct.id
+  );
+
   if (!selectedProduct || Object.keys(selectedProduct).length === 0) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          color: "red",
-          fontSize: "20px",
-          marginTop: "50px",
-        }}
-      >
+      <div style={{ textAlign: "center", color: "red", fontSize: "20px", marginTop: "50px" }}>
         No product selected!
       </div>
     );
   }
-
+  const handleCardClick = (product) => {
+    dispatch(setSelectedProduct(product));
+    navigate(`/productpage/${product.id}`); // Updates URL without refreshing
+  };
   const handleQuantityChange = (type) => {
-    setQuantity((prev) =>
-      type === "increment" ? prev + 1 : prev > 1 ? prev - 1 : 1
-    );
+    setQuantity((prev) => (type === "increment" ? prev + 1 : prev > 1 ? prev - 1 : 1));
   };
 
   const handleBuy = () => {
@@ -77,13 +73,9 @@ const ProductDetailPage = () => {
       },
     ];
 
-    console.log("Dispatching checkout data:", checkoutItem); // Debugging
-
     dispatch(fetcheckeoutpagedata(checkoutItem));
     navigate("/CheckoutPage");
   };
-
-  const totalPrice = parseFloat(price) * quantity;
 
   return (
     <div
@@ -91,10 +83,12 @@ const ProductDetailPage = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "column",
         padding: "40px",
         background: "linear-gradient(to right, #2267ac, #37628d)",
       }}
     >
+      {/* Product Detail Section */}
       <div
         style={{
           display: "flex",
@@ -107,7 +101,7 @@ const ProductDetailPage = () => {
           minHeight: "550px",
         }}
       >
-        {/* Left Section: Product Image */}
+        {/* Product Image */}
         <div
           style={{
             flex: "1",
@@ -134,12 +128,10 @@ const ProductDetailPage = () => {
           )}
         </div>
 
-        {/* Right Section: Product Details */}
+        {/* Product Details */}
         <div style={{ flex: "1", padding: "30px", textAlign: "center" }}>
           <h1 style={{ fontSize: "26px", fontWeight: "bold" }}>{title}</h1>
-          <h3 style={{ fontSize: "24px", color: "#28a745" }}>
-            Rs. {totalPrice.toFixed(2)}
-          </h3>
+          <h3 style={{ fontSize: "24px", color: "#28a745" }}>Rs. {(price * quantity).toFixed(2)}</h3>
           <p style={{ color: "#555", fontSize: "16px" }}>{description}</p>
           <p
             style={{
@@ -151,7 +143,7 @@ const ProductDetailPage = () => {
             <strong>Stock:</strong> {stock > 0 ? stock : "Out of Stock"}
           </p>
 
-          {/* Quantity Selector & Buy Now Button */}
+          {/* Quantity Selector & Buy Button */}
           <div
             style={{
               display: "flex",
@@ -166,49 +158,18 @@ const ProductDetailPage = () => {
                 alignItems: "center",
                 border: "2px solid #28a745",
                 borderRadius: "25px",
-                overflow: "hidden",
                 background: "#fff",
               }}
             >
               <button
-                style={{
-                  background: "#28a745",
-                  color: "white",
-                  border: "none",
-                  padding: "12px 18px",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  borderRadius: "20px",
-                  transition: "0.3s ease",
-                }}
+                style={{ background: "#28a745", color: "white", padding: "12px 18px", fontSize: "20px" }}
                 onClick={() => handleQuantityChange("decrement")}
               >
                 -
               </button>
-
-              <span
-                style={{
-                  padding: "10px 25px",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  minWidth: "50px",
-                }}
-              >
-                {quantity}
-              </span>
-
+              <span style={{ padding: "10px 25px", fontSize: "20px", fontWeight: "bold" }}>{quantity}</span>
               <button
-                style={{
-                  background: "#28a745",
-                  color: "white",
-                  border: "none",
-                  padding: "12px 18px",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  borderRadius: "20px",
-                  transition: "0.3s ease",
-                }}
+                style={{ background: "#28a745", color: "white", padding: "12px 18px", fontSize: "20px" }}
                 onClick={() => handleQuantityChange("increment")}
               >
                 +
@@ -219,14 +180,10 @@ const ProductDetailPage = () => {
               style={{
                 background: "linear-gradient(135deg, #ff9800, #ff5722)",
                 color: "white",
-                border: "none",
                 padding: "12px 25px",
                 marginLeft: "20px",
                 borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "bold",
                 fontSize: "16px",
-                transition: "0.3s ease",
               }}
               onClick={handleBuy}
               disabled={stock === 0}
@@ -234,40 +191,50 @@ const ProductDetailPage = () => {
               Buy Now
             </button>
 
-            <button
-              style={{
-                background: "white",
-                border: "2px solid #dc3545",
-                color: "#dc3545",
-                padding: "10px 15px",
-                marginLeft: "10px",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontSize: "18px",
-                transition: "0.3s ease",
-              }}
-            >
+            <button style={{ border: "2px solid #dc3545", color: "#dc3545", padding: "10px 15px", marginLeft: "10px" }}>
               <FaHeart />
             </button>
           </div>
 
-          {/* Delivery and Return Info */}
-          <div
-            style={{
-              marginTop: "30px",
-              fontSize: "16px",
-              color: "rgb(63, 38, 62)",
-            }}
-          >
-            <p>
-              <FaTruck /> Free Delivery
-            </p>
-            <p>
-              <FaUndo /> Easy Returns
-            </p>
+          {/* Delivery & Return Info */}
+          <div style={{ marginTop: "30px", fontSize: "16px", color: "rgb(63, 38, 62)" }}>
+            <p><FaTruck /> Free Delivery</p>
+            <p><FaUndo /> Easy Returns</p>
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div style={{ marginTop: "50px", textAlign: "center" }} >
+          <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>Related Products</h2>
+          <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+            {relatedProducts.map((product) => (
+              <div
+                key={product.id}
+                onClick={(e)=> {e.stopPropagation();handleCardClick(product)}}
+
+                style={{ 
+                  width: "200px",
+                  background: "white",
+                  padding: "15px",
+                  borderRadius: "10px",
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                  cursor: "pointer",
+                }}
+              >
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }}
+                />
+                <h3 style={{ fontSize: "16px", margin: "10px 0" }}>{product.name}</h3>
+                <p style={{ color: "#28a745", fontWeight: "bold" }}>Rs. {product.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -24,15 +24,12 @@ const ContactPage = () => {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "linear-gradient(90deg, #6a994e 0%, #40916c 100%)",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
+      padding: "3%",
       }}
     >
-      <Container className="p-5 bg-light border rounded" style={{ maxWidth: "1100px" }}>
+      <Container className="p-5 bg-light border rounded" style={{ maxWidth: "1200px" }}>
         <Row>
           <Col lg={4} className="mb-4">
             <div className="p-4 bg-light border rounded">
@@ -105,10 +102,10 @@ const ContactPage = () => {
                 <Button
                   variant="danger"
                   type="submit"
-                  style={{
-                    background: "linear-gradient(90deg,rgb(131, 241, 150) 0%,rgb(95, 144, 233) 100%)",
+                  style={{                     
                     border: "none",
-                    padding: "12px 25px",
+                    marginLeft:"75%",
+                    padding: "10px 20px ",
                     fontSize: "18px",
                   }}
                 >
