@@ -99,8 +99,10 @@ const ProductCategory = () => {
         user_id: user.id,
         product_id: product.id,
         quantity: 1,
-      };  
-       const response = await fetch("http://192.168.1.9:8081/api/cart/add", {
+      };
+  
+      // API call to add product to cart
+      const response = await fetch("http://192.168.1.10:8081/api/cart/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

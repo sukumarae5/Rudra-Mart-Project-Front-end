@@ -40,7 +40,7 @@ const ProductTable = () => {
       return;
     try {
       const response = await fetch(
-        `http://192.168.1.9:8081/api/products/deleteproduct/${productId}`,
+        `http://192.168.1.10:8081/api/products/deleteproduct/${productId}`,
         { method: "DELETE", headers: { "Content-Type": "application/json" } }
       );
 
