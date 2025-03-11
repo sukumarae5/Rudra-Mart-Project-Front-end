@@ -84,7 +84,10 @@ const AppRouter = createBrowserRouter([
           
         ],
       },
-
+      {
+        path:"orderplacedsuccessfullypage",
+        element:<OrderPlacedSuccessfullyPage/>
+      },
       {
         path: "/admin",
         element: <AdminHeader />,
