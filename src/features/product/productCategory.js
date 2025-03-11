@@ -142,8 +142,7 @@ const ProductCategory = () => {
   ];
 
   return (
-    <div>
-      <hr />
+    <div>      
       <div
         className="d-flex justify-content-between align-items-center"
         style={{ paddingLeft: "3%" }}
@@ -235,7 +234,7 @@ const ProductCategory = () => {
                       }}
                     >
                       {clickedProducts.has(product.id) ? (
-                        
+
                         <FaHeart
                           style={{
                             fontSize: "1.3rem",
