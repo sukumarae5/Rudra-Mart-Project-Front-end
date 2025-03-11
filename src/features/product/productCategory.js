@@ -23,7 +23,7 @@ const ProductCategory = () => {
   const { cartItems = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+// console.log(products)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -48,8 +48,9 @@ const ProductCategory = () => {
     }
   };
 
-  const handleCardClick = (productId, product) => {
+  const handleCardClick = (productId,product) => {
     dispatch(setSelectedProduct(product));
+    
     navigate("/productpage");
   };
 
@@ -93,16 +94,13 @@ const ProductCategory = () => {
       if (isProductInCart) {
         alert("Product is already in the cart.");
         return;
-      }
-      
+      }      
       const cartItem = {
         user_id: user.id,
         product_id: product.id,
         quantity: 1,
-      };
-  
-      // API call to add product to cart
-      const response = await fetch("http://192.168.1.9:8081/api/cart/add", {
+      };  
+       const response = await fetch("http://192.168.1.9:8081/api/cart/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -212,8 +210,8 @@ const ProductCategory = () => {
                 {filteredProducts.map((product, index) => (
                   <div
                     key={index}
-                    onMouseEnter={() => setHoveredCard(product.id)}
-                    onMouseLeave={() => setHoveredCard(null)}
+                    // onMouseEnter={() => setHoveredCard(product.id)}
+                    // onMouseLeave={() => setHoveredCard(null)}
                     onClick={() => handleCardClick(product.id, product)}
                     style={{
                       padding: "15px",
@@ -269,11 +267,12 @@ const ProductCategory = () => {
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCardClick(product.id, product);
+                          
+                          handleCardClick(product.id, product ,
+                          );
                         }}
                       />
                     </div>
-
                     <img
                       src={product.image_url}
                       alt={product.name}

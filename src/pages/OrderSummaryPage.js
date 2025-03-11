@@ -36,7 +36,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
     }
   
     if (onConfirmOrder) {
-      // localStorage.setItem("totalpricee",totalcost)
+    
        alert("Order confirmed! Moving to the payment page...");
         onConfirmOrder();
         
