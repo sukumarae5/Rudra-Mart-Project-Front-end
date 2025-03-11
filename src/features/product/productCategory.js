@@ -235,6 +235,7 @@ const ProductCategory = () => {
                       }}
                     >
                       {clickedProducts.has(product.id) ? (
+                        
                         <FaHeart
                           style={{
                             fontSize: "1.3rem",

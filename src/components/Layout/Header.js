@@ -6,10 +6,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import Footer from "./Footer";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchproductsrequest,
-  searchquryproduct,
-} from "../../features/product/productActions";
+import {fetchproductsrequest,searchquryproduct,} from "../../features/product/productActions";
 import { FaRegUserCircle } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
 import { userlogoutdata } from "../../features/user/userActions";
@@ -95,7 +92,7 @@ const Header = () => {
         </div>
       </div>
 
-      <Navbar bg="white" expand="lg" className="shadow-sm">
+      <Navbar bg="white" expand="lg" className="shadow-sm"  >
         <Container>
           <Navbar.Brand as={Link} to="/" className="text-dark fw-bold">
             Light Up
