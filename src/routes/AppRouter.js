@@ -18,6 +18,7 @@ import OrderPlacedSuccessfullyPage from "../pages/OrderPlacedSuccessfullyPage";
 import PaymentPage from "../pages/PaymentPage";
 import ProductDetailPage from "../pages/ProductPage";
 import AboutPage from "../pages/Aboutpage";
+import Invoice from "../pages/Invoice";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -77,6 +78,9 @@ const AppRouter = createBrowserRouter([
       {
         path: "/wishlistpage",
         element: <WishListpage />,
+      }, {
+        path: "/invoice",
+        element: <Invoice/>,
       },
       {
         path: "/useraccountpage",
@@ -93,10 +97,9 @@ const AppRouter = createBrowserRouter([
           
         ],
       },
-      {
-        path:"orderplacedsuccessfullypage",
-        element:<OrderPlacedSuccessfullyPage/>
-      },
+     
+
+
       {
         path: "/admin",
         element: <AdminHeader />,

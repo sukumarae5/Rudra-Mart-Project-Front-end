@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Accordion, Card, Form, Row, Col, Button, Spinner } from "react-bootstrap";
 import { FaRegCreditCard } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import 'react-toastify/dist/ReactToastify.css';
 
 const PaymentPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
@@ -29,6 +27,7 @@ const PaymentPage = () => {
     }
   }, []);
 
+  // Calculate total cost based on checkoutData
   const totalCost = checkoutData.reduce(
     (total, item) => total + item.productPrice * item.quantity,
     0
@@ -38,60 +37,87 @@ const PaymentPage = () => {
     setPaymentMethod(e.target.value);
   };
 
-  const placeOrder = async (userId, addressId, token, paymentStatus, transactionId, paymentMethod) => {
-    try {
-      // Step 1: Place Order
-      const orderResponse = await fetch("http://192.168.1.10:8081/api/orders/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userId: userId,
-          totalPrice: totalCost,
-          status: "Pending",
-          addressId: addressId,
-        }),
-      });
+  // Function to place order and payment record, then navigate on success
+  // Function to place order and payment record, then navigate on success
+const placeOrder = async (userId, addressId, token, paymentStatus, transactionId, paymentMethodType) => {
+  try {
+    console.log("Starting order placement...");
 
-      const orderResult = await orderResponse.json();
-      if (!orderResponse.ok) throw new Error(orderResult.message || "Failed to place order");
+    // Step 1: Place Order (including order items)
+    const orderResponse = await fetch("http://192.168.1.10:8081/api/orders/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId,
+        totalPrice: totalCost,
+        status: "Pending", // Adjust this if you have other statuses
+        addressId,
+        items: checkoutData.map(item => ({
+          product_id: item.productId, // Backend format check
+          quantity: item.quantity,
+          price: item.productPrice,
+        })),
+      }),
+    });
 
-      // Step 2: Create Payment Record
-      const paymentResponse = await fetch("http://192.168.1.10:8081/api/payment/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          amount: totalCost,
-          payment_status: paymentStatus,
-          payment_method: paymentMethod,
-          transaction_id: transactionId,
-        }),
-      });
+    const orderResult = await orderResponse.json();
+    console.log("Order API response:", orderResult);
 
-      const paymentResult = await paymentResponse.json();
-      if (!paymentResponse.ok) throw new Error(paymentResult.message || "Failed to process payment");
-
-      toast.success("Order & Payment Successful!", { autoClose: 2000 });
-
-      // Clear cart
-      localStorage.removeItem("cart");
-
-      // Navigate after short delay
-      setTimeout(() => {
-        navigate("/orderplacedsuccessfullypage");
-      }, 2000);
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error(error.message || "Something went wrong!");
-    } finally {
-      setIsLoading(false);
+    if (!orderResponse.ok) {
+      alert(orderResult.message || "Failed to place order");
+      throw new Error(orderResult.message || "Failed to place order");
     }
+
+    // ✅ Order placed successfully
+    alert(orderResult.message);
+    
+    // Step 2: Create Payment Record
+    console.log("Proceeding to create payment record...");
+    const paymentResponse = await fetch("http://192.168.1.10:8081/api/payment/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        amount: totalCost,
+        payment_status: paymentStatus,
+        payment_method: paymentMethodType,
+        transaction_id: transactionId,
+      }),
+    });
+
+    const paymentResult = await paymentResponse.json();
+    console.log("Payment API response:", paymentResult);
+
+    if (!paymentResponse.ok) {
+      alert(paymentResult.message || "Failed to process payment");
+      throw new Error(paymentResult.message || "Failed to process payment");
+    }
+    navigate("/OrderPlacedSuccessfullyPage");
+
+    // ✅ Payment recorded successfully
+    alert("Payment processed successfully!");
+  
+    // Final steps
+    localStorage.removeItem("cart");
+    alert("Order and payment completed successfully. Redirecting now...");
+
+  } catch (error) {
+    console.error("Error during order/payment:", error);
+    alert(error.message || "Something went wrong!");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+  const generateUniqueTransactionId = () => {
+    return `COD_${Date.now()}`;
   };
 
   const handleCashOnDelivery = async () => {
@@ -101,20 +127,22 @@ const PaymentPage = () => {
       const userId = user?.id;
       const addressId = JSON.parse(localStorage.getItem("addressId"));
       const token = localStorage.getItem("authToken");
-
+  
       if (!user || !addressId || !token) {
-        toast.error("User, Address, or Token missing! Please login again.");
+        alert("User, Address, or Token missing! Please login again.");
         setIsLoading(false);
         return;
       }
-
-      await placeOrder(userId, addressId, token, "Pending", "COD_NO_TXN", "Cash on Delivery");
+  
+      console.log("Handling Cash on Delivery for userId:", userId);
+      await placeOrder(userId, addressId, token, "Pending", generateUniqueTransactionId(), "Cash on Delivery");
+  
     } catch (error) {
       console.error("Error placing COD order:", error);
-      toast.error(error.message);
+      alert(error.message || "Something went wrong during COD!");
     }
   };
-
+  
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) return resolve(true);
@@ -135,7 +163,7 @@ const PaymentPage = () => {
       const addressId = JSON.parse(localStorage.getItem("addressId"));
 
       if (!user || !addressId || !token) {
-        toast.error("User, Address, or Token missing! Please login again.");
+        alert("User, Address, or Token missing! Please login again.");
         setIsLoading(false);
         return;
       }
@@ -150,6 +178,7 @@ const PaymentPage = () => {
         name: "Your Store",
         description: "Payment for Order",
         handler: async (response) => {
+          console.log("Razorpay payment response:", response);
           await placeOrder(userId, addressId, token, "Paid", response.razorpay_payment_id, "Razorpay");
         },
         prefill: {
@@ -163,7 +192,7 @@ const PaymentPage = () => {
       new window.Razorpay(options).open();
     } catch (error) {
       console.error("Razorpay Error:", error);
-      toast.error(error.message);
+      alert(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +200,6 @@ const PaymentPage = () => {
 
   return (
     <div className="container mt-4">
-      <ToastContainer position="top-center" />
       <Row>
         <Col>
           <Accordion defaultActiveKey="0">
@@ -179,7 +207,9 @@ const PaymentPage = () => {
               <Accordion.Header>Payment Method</Accordion.Header>
               <Accordion.Body>
                 <Card className="p-4 shadow">
-                  <h4><FaRegCreditCard /> Payment Details</h4>
+                  <h4>
+                    <FaRegCreditCard /> Payment Details
+                  </h4>
                   <Form className="mt-3">
                     <Form.Check
                       type="radio"
