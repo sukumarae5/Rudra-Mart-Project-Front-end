@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Row, Col, Container } from "react-bootstrap";
+import { Button, Card, Row, Col, Container, Badge } from "react-bootstrap";
 import { FaEye, FaRegHeart, FaHeart } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {fetchproductsrequest,addToWishlist,setSelectedProduct,} from "../features/product/productActions"; 
@@ -98,9 +98,15 @@ const SellingProductspage = () => {
 
     return (
         <div>
+            <div className="d-flex align-items-center">
+              <Badge bg="danger" style={{ width: "20px", height: "50px",marginLeft: "30px" , marginRight:"10px"}}>  </Badge>
+              <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px", }}>
+            this month
+              </p>
+            </div>
             <div className="d-flex justify-content-around">
-                <h1 style={{ fontWeight: "bold", fontSize: "30px", marginRight: "500px" }}>
-                    Best Selling Products
+            <h1 style={{ fontWeight: "bold", fontSize: "30px", marginRight: "700px" }}>
+            Best Selling Products
                 </h1>
                 <Row className="mt-4">
                     <Col md={12} className="text-center">

@@ -34,7 +34,7 @@ const Categories = () => {
   }, []);
 
   return (
-    <div className="container bg-dark text-light p-5 rounded">
+    <div className="container bg-dark text-light p-5 rounded m-7 " >
       <div className="row align-items-center">
         <div className="col-lg-6 text-center text-lg-start">
           <p className="text-success">Categories</p>

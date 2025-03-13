@@ -12,7 +12,7 @@ const PaymentPage = () => {
     email: "guest@example.com",
     contact: "0000000000",
   });
-
+console.log(checkoutData)
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
@@ -29,41 +29,46 @@ const PaymentPage = () => {
     (total, item) => total + item.productPrice * item.quantity,
     0
   );
-
+console.log(checkoutData)
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
   };
 
   const placeOrder = async (userId, addressId, token, paymentStatus, transactionId, paymentMethod) => {
     try {
-      // Step 1: Place Order
       const orderResponse = await fetch("http://192.168.1.10:8081/api/orders/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({
           userId: userId,
           totalPrice: totalCost,
           status: "Pending",
           addressId: addressId,
+          items: checkoutData.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.productPrice,
+          })),
         }),
       });
-
+  
       const orderResult = await orderResponse.json();
       if (!orderResponse.ok) {
         throw new Error(orderResult.message || "Failed to place order");
       }
-
+  
       alert("✅ Order placed successfully!");
 
+  
       // Step 2: Create Payment Record
       const paymentResponse = await fetch("http://192.168.1.10:8081/api/payments/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({
           user_id: userId,
@@ -73,15 +78,15 @@ const PaymentPage = () => {
           transaction_id: transactionId,
         }),
       });
-
+  
       const paymentResult = await paymentResponse.json();
       if (!paymentResponse.ok) {
         throw new Error(paymentResult.message || "Failed to process payment");
       }
-
+  
       alert("✅ Payment recorded successfully!");
       localStorage.removeItem("cart");
-
+  
     } catch (error) {
       console.error("Error processing order/payment:", error);
       alert(error.message);
@@ -89,7 +94,7 @@ const PaymentPage = () => {
       setIsLoading(false);
     }
   };
-
+  
   const handleCashOnDelivery = async () => {
     setIsLoading(true);
     try {
