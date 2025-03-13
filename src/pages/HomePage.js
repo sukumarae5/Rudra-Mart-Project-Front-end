@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { Carousel, Col, Container, Row } from 'react-bootstrap';
+import { Badge, Carousel, Col, Container, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import ProductCategory from '../features/product/productCategory';
 import { fetchproductsrequest, setSelectedProduct } from '../features/product/productActions';
@@ -16,6 +16,9 @@ import { addToWishlist } from "../features/product/productActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import SellingProductspage from './SellingProductspage';
+import Categories from './Categories';
+import ExploreOurProductspage from './ExploreOurProductspage';
+import NewArrivalpage from './NewArrivalpage';
 
 
 const renderStars = (rating, onClick, productId) => {
@@ -203,11 +206,18 @@ const HomePage = () => {
             </Carousel>
           </Col>
         </Row>
-
+        
+        
         <Container fluid className="mt-4">
+        <div className="d-flex align-items-center">
+  <Badge bg="danger" style={{ width: "20px", height: "50px",marginLeft: "20px" , marginRight:"10px"}}>  </Badge>
+  <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px", }}>
+  todays
+  </p>
+</div>   
           <Row className="align-items-center">
             <Col md={3}>
-              <h1 className="text-left" style={{ color: 'red', fontSize: '30px' }}>
+              <h1 className="text-left" style={{ color: "#DB4444", fontSize: '30px', marginLeft:"10px"}}>
                 <b>Flash Sale</b>
               </h1>
             </Col>
@@ -498,6 +508,11 @@ const HomePage = () => {
       <ProductCategory />
       <br />
       <SellingProductspage/>
+    <Categories/>
+    <br/>
+    <ExploreOurProductspage/>
+    <br/>
+    <NewArrivalpage/>
     </div>
   );
 };

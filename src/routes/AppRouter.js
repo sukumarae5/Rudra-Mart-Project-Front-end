@@ -18,6 +18,8 @@ import OrderPlacedSuccessfullyPage from "../pages/OrderPlacedSuccessfullyPage";
 import PaymentPage from "../pages/PaymentPage";
 import ProductDetailPage from "../pages/ProductPage";
 import AboutPage from "../pages/Aboutpage";
+import ExploreOurProductspage from "../pages/ExploreOurProductspage";
+import NewArrivalpage from "../pages/NewArrivalpage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -46,6 +48,11 @@ const AppRouter = createBrowserRouter([
         element:<OrderPlacedSuccessfullyPage/>
 
       },
+      {
+        path:"/ExploreOurProductspage",
+        element:<ExploreOurProductspage/>
+      },{path:"/NewArrivalpage",
+      element:<NewArrivalpage/>},
       {
         path: "/cartpage",
         element: <CartPage />,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Badge } from "react-bootstrap";
 import { IoBagOutline } from "react-icons/io5";
 import { IoIosDesktop } from "react-icons/io";
 import { IoBookOutline } from "react-icons/io5";
@@ -142,12 +142,18 @@ const ProductCategory = () => {
   ];
 
   return (
-    <div>      
+    <div> 
+      <div className="d-flex align-items-center">
+  <Badge bg="danger" style={{ width: "20px", height: "50px",marginLeft: "30px" , marginRight:"10px"}}>  </Badge>
+  <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px", }}>
+  Categorys
+  </p>
+</div>     
       <div
         className="d-flex justify-content-between align-items-center"
         style={{ paddingLeft: "3%" }}
       >
-        <h2 style={{ color: "red", fontSize: "30px" }}>Product Category</h2>
+        <h2 style={{  fontSize: "30px" }}>Browse By Category</h2>
         <div>
           <button className="btn btn-light" onClick={() => scrollCategory("left")}>
             <ArrowBackIos />
@@ -175,6 +181,9 @@ const ProductCategory = () => {
               {categories.map((category, index) => (
                 <div
                   key={index}
+                  onMouseEnter={(e)=>{e.currentTarget.style.background="#DB4444"}}
+                  onMouseLeave={(e) => e.currentTarget.style.background = activeCategory === category.categoryid ? "#a4a7ab" : "white"}
+
                   style={{
                     padding: "4%",
                     borderWidth: "2px",
@@ -211,8 +220,8 @@ const ProductCategory = () => {
                 {filteredProducts.map((product, index) => (
                   <div
                     key={index}
-                    // onMouseEnter={() => setHoveredCard(product.id)}
-                    // onMouseLeave={() => setHoveredCard(null)}
+                    onMouseEnter={() => setHoveredCard(product.id)}
+                    onMouseLeave={() => setHoveredCard(null)}
                     onClick={() => handleCardClick(product.id, product)}
                     style={{
                       padding: "15px",

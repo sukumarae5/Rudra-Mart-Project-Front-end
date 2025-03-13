@@ -156,7 +156,6 @@ const ProductDetailPage = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                border: "2px solid #28a745",
                 borderRadius: "25px",
                 background: "#fff",
               }}
