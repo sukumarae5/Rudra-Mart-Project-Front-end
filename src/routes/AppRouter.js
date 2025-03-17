@@ -19,6 +19,8 @@ import PaymentPage from "../pages/PaymentPage";
 import ProductDetailPage from "../pages/ProductPage";
 import AboutPage from "../pages/Aboutpage";
 import Invoice from "../pages/Invoice";
+import ExploreOurProductspage from "../pages/ExploreOurProductspage";
+import NewArrivalpage from "../pages/NewArrivalpage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -48,6 +50,11 @@ const AppRouter = createBrowserRouter([
 
       },
       {
+        path:"/ExploreOurProductspage",
+        element:<ExploreOurProductspage/>
+      },
+     
+      {
         path: "/cartpage",
         element: <CartPage />,
       },
@@ -74,14 +81,18 @@ const AppRouter = createBrowserRouter([
         path: "/productpage/:id", 
         element: <ProductDetailPage />,
       },
+      {path:"/NewArrivalpage",
+        element:<NewArrivalpage/>},
       
       {
         path: "/wishlistpage",
         element: <WishListpage />,
-      }, {
-        path: "/invoice",
-        element: <Invoice/>,
       },
+      {
+        path: "/invoice/:transactionId",
+        element: <Invoice />,
+      },
+      
       {
         path: "/useraccountpage",
         element: <UserAccontPage />,

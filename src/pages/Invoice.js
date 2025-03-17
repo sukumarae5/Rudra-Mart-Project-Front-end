@@ -8,7 +8,7 @@ const Invoice = () => {
 
   useEffect(() => {
     if (!transactionId) return;
-    axios.get(`http://192.168.1.10:8081/api/invoice/data/${transactionId}`)
+    axios.get(`http://192.168.1.15:8081/api/invoice/data/${transactionId}`)
       .then(res => setInvoice(res.data))
       .catch(err => console.error('Error:', err));
   }, [transactionId]);

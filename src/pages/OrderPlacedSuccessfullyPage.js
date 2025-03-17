@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const OrderPlacedSuccessfullyPage = () => {
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [downloading, setDownloading] = useState(false);
   const navigate = useNavigate();
+  const invoiceRef = useRef(); // Reference for capturing invoice
 
   const token = localStorage.getItem("authToken");
 
-  // Fetch latest payment details
+  // Fetch latest payment and order details
   useEffect(() => {
     const fetchPaymentDetails = async () => {
       if (!token) {
@@ -20,7 +22,7 @@ const OrderPlacedSuccessfullyPage = () => {
       }
 
       try {
-        const response = await fetch("http://192.168.1.10:8081/api/payment", {
+        const response = await fetch("http://192.168.1.15:8081/api/payment", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -28,26 +30,17 @@ const OrderPlacedSuccessfullyPage = () => {
           },
         });
 
-        if (!response.ok) {
-          if (response.status === 401) throw new Error("Unauthorized. Please log in again.");
-          if (response.status === 404) throw new Error("Payment details not found.");
-          throw new Error("Failed to fetch payment details.");
-        }
+        if (!response.ok) throw new Error('Failed to fetch payment details');
 
         const data = await response.json();
-        console.log("✅ Payment details fetched:", data);
-
         if (Array.isArray(data) && data.length > 0) {
-          const sortedPayments = data.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
+          const sortedPayments = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           setPayment(sortedPayments[0]);
         } else {
-          setPayment(null);
           setError("No payment data found.");
         }
+
       } catch (err) {
-        console.error("❌ Error fetching payment:", err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -56,68 +49,122 @@ const OrderPlacedSuccessfullyPage = () => {
 
     fetchPaymentDetails();
   }, [token]);
-  console.log(payment.transaction_id)
 
+  // Download Invoice as PDF
   const handleDownloadInvoice = async () => {
-    try {
-      const response = await fetch(`http://192.168.1.10:8081/api/invoice/pdf/${payment.transaction_id}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to download invoice.');
-      }
-  
-      const blob = await response.blob(); // Get binary data as blob
-      const url = window.URL.createObjectURL(blob); // Create a blob URL
-  
-      // Create a link and trigger download
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Invoice_${payment.transaction_id}.pdf`; // Filename
-      document.body.appendChild(a);
-      a.click();
-      a.remove(); // Clean up
-      window.URL.revokeObjectURL(url); // Free memory
-    } catch (error) {
-      console.error('Error downloading invoice:', error);
-      alert('Failed to download invoice.');
-    }
-  };
-  
+    const input = invoiceRef.current;
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL("image/png");
 
-  // Navigate to My Orders
-  const handleMyOrders = () => {
-    navigate("/my-orders");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Invoice_${payment.transaction_id}.pdf`);
   };
 
-  if (loading) return <div style={{ textAlign: "center", marginTop: "50px" }}>Loading payment details...</div>;
-  if (error) return <div style={{ textAlign: "center", color: "red", marginTop: "50px" }}>{error}</div>;
-  if (!payment) return <div style={{ textAlign: "center", color: "orange", marginTop: "50px" }}>No payment details available.</div>;
+  if (loading) return <div>Loading payment details...</div>;
+  if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
   return (
-    <div style={{ margin: "50px auto", padding: "20px", border: "1px solid #ddd", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", fontFamily: "Arial, sans-serif", maxWidth: "600px" }}>
-      <h2 style={{ textAlign: "center", color: "green" }}>🎉 Order Placed Successfully!</h2>
-      <h3 style={{ textAlign: "center", marginBottom: "20px" }}>Payment Summary</h3>
+    <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
+      <h2 style={{ color: "green", textAlign: "center" }}>🎉 Order Placed Successfully!</h2>
 
-      <p><strong>Transaction ID:</strong> {payment.transaction_id || "N/A"}</p>
-      <p><strong>Payment Method:</strong> {payment.payment_method || "N/A"}</p>
-      <p><strong>Status:</strong> <span style={{ color: payment.payment_status === "Success" ? "green" : "orange" }}>{payment.payment_status || "N/A"}</span></p>
-      <p><strong>Total Paid:</strong> ₹ {payment.amount ? payment.amount.toLocaleString("en-IN") : "N/A"}</p>
-      <p><strong>Paid On:</strong> {payment.created_at ? new Date(payment.created_at).toLocaleString() : "N/A"}</p>
+      {/* Invoice Section */}
+      <div
+        ref={invoiceRef}
+        style={{
+          padding: "20px",
+          border: "2px solid #ccc",
+          borderRadius: "10px",
+          marginTop: "20px",
+          backgroundColor: "#fff",
+          fontFamily: "Arial, sans-serif"
+        }}
+      >
+        {/* Logo and Header */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <h1 style={{ margin: "0", color: "#007bff" }}>LightUp</h1>
+          <p style={{ margin: "5px 0", fontSize: "14px" }}>Invoice</p>
+        </div>
 
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "30px", flexWrap: "wrap" }}>
-        <button onClick={handleMyOrders} style={{ padding: "10px 15px", backgroundColor: "#007bff", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", minWidth: "120px" }}>My Orders</button>
-        <button onClick={handleDownloadInvoice} style={{ padding: "10px 15px", backgroundColor: "green", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", minWidth: "120px" }}>
-  Download Invoice
-</button>
-        <button onClick={() => navigate("/")} style={{ padding: "10px 15px", backgroundColor: "gray", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", minWidth: "120px" }}>Home</button>
+        {/* Customer & Transaction Info */}
+        <div style={{ marginBottom: "20px" }}>
+          <p><strong>Customer Name:</strong> {payment.customer_name || "N/A"}</p>
+          <p><strong>Phone Number:</strong> {payment.phone_number || "N/A"}</p>
+          <p><strong>Transaction ID:</strong> {payment.transaction_id}</p>
+          <p><strong>Payment Method:</strong> {payment.payment_method}</p>
+          <p><strong>Status:</strong> {payment.payment_status}</p>
+          <p><strong>Paid On:</strong> {new Date(payment.created_at).toLocaleString()}</p>
+        </div>
+
+        {/* Items Table */}
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+          <thead>
+            <tr style={{ backgroundColor: "#f2f2f2" }}>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>#</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Item Name</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Quantity</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Price</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payment.items && payment.items.length > 0 ? (
+              payment.items.map((item, index) => (
+                <tr key={index}>
+                  <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "center" }}>{index + 1}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{item.name}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "center" }}>{item.quantity}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "right" }}>₹ {item.price.toLocaleString("en-IN")}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "right" }}>₹ {(item.price * item.quantity).toLocaleString("en-IN")}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" style={{ border: "1px solid #ddd", padding: "8px", textAlign: "center" }}>No items found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Total Paid */}
+        <h3 style={{ textAlign: "right", marginRight: "10px" }}>
+          Total Paid: ₹ {payment.amount.toLocaleString("en-IN")}
+        </h3>
+
+        {/* Thank You Note */}
+        <p style={{ textAlign: "center", marginTop: "30px", fontStyle: "italic" }}>
+          Thank you for shopping with LightUp! ✨
+        </p>
+      </div>
+
+      {/* Buttons */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "30px" }}>
+        <button onClick={() => navigate('/my-orders')} style={buttonStyle("#007bff")}>My Orders</button>
+        <button onClick={handleDownloadInvoice} style={buttonStyle("green")}>Download Invoice</button>
+        <button onClick={() => navigate('/')} style={buttonStyle("gray")}>Home</button>
       </div>
     </div>
   );
 };
+
+// Reusable button style function
+const buttonStyle = (bgColor) => ({
+  padding: "12px 20px",
+  backgroundColor: bgColor,
+  color: "white",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+  fontSize: "16px",
+});
 
 export default OrderPlacedSuccessfullyPage;

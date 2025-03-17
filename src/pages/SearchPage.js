@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
-import { fetchApiCartDataRequest } from '../features/cart/cartActions';
+import { fetchApiCartDataRequest, fetcheckeoutpagedata } from '../features/cart/cartActions';
 
 const SearchPage = () => {
   const { products = [] } = useSelector((state) => state.products);
@@ -56,7 +56,7 @@ const SearchPage = () => {
           };
       
           // API call to add product to cart
-          const response = await fetch("http://192.168.1.10:8081/api/cart/add", {
+          const response = await fetch("http://192.168.1.15:8081/api/cart/add", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -80,7 +80,38 @@ const SearchPage = () => {
         }
       };
 
-
+      const handelbuy = (event, productid) => {
+        event.stopPropagation();
+        
+        const product = products.find((p) => p.id === productid);
+        if (!product) {
+          alert("Product not found");
+          return;
+        }
+      
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.id) {
+          alert("User information is missing or corrupted. Please log in.");
+          navigate("/login");
+          return;
+        }
+      
+        const Buynowdata = [
+          {
+            user_id: user.id,
+            productId: product.id,
+            productName: product?.name || "Unknown",
+            productImage: product?.image_url || "",
+            productPrice: parseFloat(product?.price || 0),
+            quantity: 1, 
+            totalPrice: parseFloat(product?.price || 0) * 1, 
+          },
+        ];
+      
+        dispatch(fetcheckeoutpagedata(Buynowdata));
+        navigate("/CheckoutPage");
+      };
+      
   return (
     <div style={{ padding: '20px', backgroundColor: '#f0f8ea', minHeight: '100vh' }}>
       <h2 style={{ color: '#2d6a4f', textAlign: 'center' }}>Search Results: {searchproduct}</h2>
@@ -120,7 +151,7 @@ const SearchPage = () => {
                 <p style={{ color: '#dda15e' }}>{product.ratings} Ratings</p>
                 <p style={{ fontSize: '14px', color: '#666' }}>{product.description}</p>
                 <p style={{ fontSize: '14px', color: '#666' }}>{product.stock}</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', }}>
                   <Button
                     style={{
                       background: 'linear-gradient(90deg, #6a994e 0%, #40916c 100%)',
@@ -137,6 +168,21 @@ const SearchPage = () => {
                   >
                     Add to Cart
                   </Button>
+                  <Button  
+                  style={{
+                    background:'linear-gradient(90deg,rgb(241, 14, 14) 0%,rgb(245, 72, 72) 100%)',
+                      color:"white",
+                      border:"none",
+                      padding: '10px 15px',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      marginTop: '10px',
+                      marginLeft:"10px"
+                    }}
+                    onMouseOver={(e) => (e.target.style.background = 'linear-gradient(90deg,rgb(241, 14, 14) 0%,rgb(240, 10, 10) 100%)')}
+                    onMouseOut={(e) => (e.target.style.background = 'linear-gradient(90deg,rgb(247, 8, 8) 0%, #40916c 100%)')}
+
+                  onClick={(e)=>handelbuy(e,product.id)}> Buy now</Button>
                 </div>
               </div>
             </div>
