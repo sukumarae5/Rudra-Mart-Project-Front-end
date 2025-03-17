@@ -36,7 +36,7 @@ console.log(checkoutData)
 
   const placeOrder = async (userId, addressId, token, paymentStatus, transactionId, paymentMethod) => {
     try {
-      const orderResponse = await fetch("http://192.168.1.10:8081/api/orders/add", {
+      const orderResponse = await fetch("http://192.168.1.15:8081/api/orders/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +64,7 @@ console.log(checkoutData)
 
   
       // Step 2: Create Payment Record
-      const paymentResponse = await fetch("http://192.168.1.10:8081/api/payments/create", {
+      const paymentResponse = await fetch("http://192.168.1.15:8081/api/payments/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
