@@ -8,7 +8,7 @@ import {
 // Function to fetch orders from API
 const fetchOrdersApi = async () => {
   try {
-    const response = await fetch("http://192.168.1.10:8081/api/orders/getall", {
+    const response = await fetch("http://192.168.1.15:8081/api/orders/getall", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

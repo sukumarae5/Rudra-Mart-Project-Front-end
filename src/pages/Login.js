@@ -30,7 +30,7 @@ const Login = () => {
       );
 
       if (matchingUser) {
-        const response = await fetch("http://192.168.1.10:8081/api/users/login", {
+        const response = await fetch("http://192.168.1.15:8081/api/users/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
