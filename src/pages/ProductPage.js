@@ -86,9 +86,7 @@ const ProductDetailPage = () => {
         flexDirection: "column",
         padding: "40px",
         background: "linear-gradient(to right, #2267ac, #37628d)",
-      }}
-    >
-      {/* Product Detail Section */}
+      }}>{/* Product Detail Section */}
       <div
         style={{
           display: "flex",
@@ -99,9 +97,7 @@ const ProductDetailPage = () => {
           boxShadow: "0 6px 15px rgba(0, 0, 0, 0.2)",
           maxWidth: "1000px",
           minHeight: "550px",
-        }}
-      >
-        {/* Product Image */}
+        }}>{/* Product Image */}
         <div
           style={{
             flex: "1",
@@ -109,8 +105,7 @@ const ProductDetailPage = () => {
             justifyContent: "center",
             alignItems: "center",
             padding: "30px",
-          }}
-        >
+          }}>
           {mainImage && (
             <ReactImageMagnify
               {...{
@@ -120,38 +115,32 @@ const ProductDetailPage = () => {
                   src: mainImage,
                   width: 380,
                   height: 380,
-                },
-                largeImage: { src: mainImage, width: 1000, height: 800 },
+                },largeImage: { src: mainImage, width: 1000, height: 800 },
                 enlargedImagePosition: "beside",
               }}
             />
           )}
         </div>
-
         {/* Product Details */}
         <div style={{ flex: "1", padding: "30px", textAlign: "center" }}>
           <h1 style={{ fontSize: "26px", fontWeight: "bold" }}>{title}</h1>
           <h3 style={{ fontSize: "24px", color: "#28a745" }}>Rs. {(price * quantity).toFixed(2)}</h3>
           <p style={{ color: "#555", fontSize: "16px" }}>{description}</p>
-          <p
-            style={{
+          <p style={{
               fontSize: "18px",
               fontWeight: "bold",
               color: stock > 0 ? "#28a745" : "#dc3545",
             }}
           >
             <strong>Stock:</strong> {stock > 0 ? stock : "Out of Stock"}
-          </p>
-
-          {/* Quantity Selector & Buy Button */}
+          </p>{/* Quantity Selector & Buy Button */}
           <div
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               marginTop: "30px",
-            }}
-          >
+            }}>
             <div
               style={{
                 display: "flex",
@@ -189,12 +178,10 @@ const ProductDetailPage = () => {
             >
               Buy Now
             </button>
-
             <button style={{ border: "2px solid #dc3545", color: "#dc3545", padding: "10px 15px", marginLeft: "10px" }}>
               <FaHeart />
             </button>
           </div>
-
           {/* Delivery & Return Info */}
           <div style={{ marginTop: "30px", fontSize: "16px", color: "rgb(63, 38, 62)" }}>
             <p><FaTruck /> Free Delivery</p>
@@ -202,7 +189,6 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </div>
-
       {/* Related Products Section */}
       {relatedProducts.length > 0 && (
         <div style={{ marginTop: "50px", textAlign: "center" }} >

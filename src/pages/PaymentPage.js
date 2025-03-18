@@ -183,10 +183,10 @@ console.log(checkoutData)
   };
 
   return (
-    <div className="container mt-4">
-      <Row>
+    <div className="container mt-4 " >
+      <Row style={{width:"103%"}}>
         <Col>
-          <Accordion defaultActiveKey="0">
+          <Accordion >
             <Accordion.Item eventKey="0">
               <Accordion.Header>Payment Method</Accordion.Header>
               <Accordion.Body>

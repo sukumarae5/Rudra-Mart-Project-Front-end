@@ -263,10 +263,10 @@ const Address = ({ scrollToOrderSummary }) => {
   return (
     <Container
       fluid
-      style={{ background: "#e3f2fd", padding: "10px 0px 0px 50px" }}
+      style={{ background: "#e3f2fd", padding: "10px 0px 0px 40px",width:"97%" }}
     >
       <Row className="justify-content-center my-2">
-        <Accordion defaultActiveKey="0" flush>
+        <Accordion  flush>
           <Accordion.Item eventKey="0">
             <Accordion.Header>
               <FaHome />
