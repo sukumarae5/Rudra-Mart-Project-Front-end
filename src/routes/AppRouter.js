@@ -51,8 +51,8 @@ const AppRouter = createBrowserRouter([
       {
         path:"/ExploreOurProductspage",
         element:<ExploreOurProductspage/>
-      },{path:"/NewArrivalpage",
-      element:<NewArrivalpage/>},
+      },
+     
       {
         path: "/cartpage",
         element: <CartPage />,
@@ -80,6 +80,8 @@ const AppRouter = createBrowserRouter([
         path: "/productpage/:id", 
         element: <ProductDetailPage />,
       },
+      {path:"/NewArrivalpage",
+        element:<NewArrivalpage/>},
       
       {
         path: "/wishlistpage",
@@ -100,6 +102,8 @@ const AppRouter = createBrowserRouter([
           
         ],
       },
+     
+
 
       {
         path: "/admin",

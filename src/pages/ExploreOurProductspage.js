@@ -7,7 +7,6 @@ import { fetchApiCartDataRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
 import Badge from 'react-bootstrap/Badge';
 
-import { FaArrowCircleRight } from "react-icons/fa";
 
 const ExploreOurProductspage = () => {
     const dispatch = useDispatch();
