@@ -18,7 +18,6 @@ import OrderPlacedSuccessfullyPage from "../pages/OrderPlacedSuccessfullyPage";
 import PaymentPage from "../pages/PaymentPage";
 import ProductDetailPage from "../pages/ProductPage";
 import AboutPage from "../pages/Aboutpage";
-import Invoice from "../pages/Invoice";
 import ExploreOurProductspage from "../pages/ExploreOurProductspage";
 import NewArrivalpage from "../pages/NewArrivalpage";
 const AppRouter = createBrowserRouter([
@@ -88,11 +87,6 @@ const AppRouter = createBrowserRouter([
         path: "/wishlistpage",
         element: <WishListpage />,
       },
-      {
-        path: "/invoice/:transactionId",
-        element: <Invoice />,
-      },
-      
       {
         path: "/useraccountpage",
         element: <UserAccontPage />,
