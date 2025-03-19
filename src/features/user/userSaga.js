@@ -4,7 +4,7 @@ import { FETCH_USERS_REQUEST, fetchUserssuccess, fetchusersfailuer } from "../us
 // Fetch API function
 const fetchapi = async () => {
   try {
-    const response = await fetch("http://192.168.1.15:8081/api/users/all");
+    const response = await fetch("http://192.168.1.17:8081/api/users/all");
     const data = await response.json();
     
     console.log("API Fetch Response:", data); // Debug API response

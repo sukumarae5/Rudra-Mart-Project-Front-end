@@ -51,7 +51,7 @@ const Register = () => {
       };
 
       const response = await fetch(
-        "http://192.168.1.15:8081/api/users/register",
+        "http://192.168.1.17:8081/api/users/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
