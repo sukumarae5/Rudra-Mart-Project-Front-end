@@ -70,7 +70,7 @@ const updateAddressAPI = async (addressId, updatedData) => {
 const deleteAddressAPI = async (addressId) => {
   const token = localStorage.getItem("authToken");
   const response = await fetch(
-    `http://192.168.1.15:8081/api/address/delete/${addressId}`,
+    `http://192.168.1.17:8081/api/address/delete/${addressId}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },

@@ -4,7 +4,7 @@ import { FaRegCreditCard } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const PaymentPage = () => {
+const PaymentPage = ({ref}) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +44,7 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
     console.log("Starting order placement...");
 
     // Step 1: Place Order (including order items)
-    const orderResponse = await fetch("http://192.168.1.15:8081/api/orders/add", {
+    const orderResponse = await fetch("http://192.168.1.17:8081/api/orders/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
     
     // Step 2: Create Payment Record
     console.log("Proceeding to create payment record...");
-    const paymentResponse = await fetch("http://192.168.1.15:8081/api/payment/add", {
+    const paymentResponse = await fetch("http://192.168.1.17:8081/api/payment/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -199,10 +199,10 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
   };
 
   return (
-    <div className="container mt-4">
-      <Row>
+    <div ref={ref} className="container mt-4 " >
+      <Row style={{width:"103%"}}>
         <Col>
-          <Accordion defaultActiveKey="0">
+          <Accordion defaultActiveKey="0" >
             <Accordion.Item eventKey="0">
               <Accordion.Header>Payment Method</Accordion.Header>
               <Accordion.Body>
