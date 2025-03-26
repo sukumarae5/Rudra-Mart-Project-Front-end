@@ -84,7 +84,7 @@ const AppRouter = createBrowserRouter([
         element:<NewArrivalpage/>},
       
       {
-        path: "/wishlistpage",
+        path: "/WishListpage",
         element: <WishListpage />,
       },
       {
