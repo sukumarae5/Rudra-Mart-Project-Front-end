@@ -14,10 +14,13 @@ import { userlogoutdata } from "../../features/user/userActions";
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
+      const wishlistItems = Array.isArray(wishlistData[0]) ? wishlistData[0] : wishlistData;
+  
   const [searchQuery, setSearchQuery] = useState("");
-  const { data = {} } = useSelector((state) => state.users);
-  const { addToWishlist = [] } = useSelector((state) => state.products);
-  const { cartProducts = [] } = useSelector((state) => state.cart); // Default empty array
+  // const { data = {} } = useSelector((state) => state.users);
+  // const { addToWishlist = [] } = useSelector((state) => state.products);
+  // const { cartProducts = [] } = useSelector((state) => state.cart); // Default empty array
   const [user, setUser] = useState(null);
   const location = useLocation();
   const { cartItems = [] } = useSelector((state) => state.cart || {});
@@ -25,7 +28,7 @@ const Header = () => {
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/signup";
 
-  const checkout = location.pathname.includes("/CheckoutPage");
+  // const checkout = location.pathname.includes("/CheckoutPage");
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
@@ -170,7 +173,7 @@ const Header = () => {
                     className="text-dark"
                     style={{ cursor: "pointer" }}
                   />
-                  {addToWishlist.length > 0 && (
+                  {wishlistItems.length > 0 && (
                     <Badge
                       pill
                       bg="danger"
@@ -181,7 +184,7 @@ const Header = () => {
                         fontSize: "0.7rem",
                       }}
                     >
-                      {addToWishlist.length}
+                      {wishlistItems.length}
                     </Badge>
                   )}
                 </div>

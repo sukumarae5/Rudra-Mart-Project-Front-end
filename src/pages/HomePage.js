@@ -19,6 +19,7 @@ import SellingProductspage from './SellingProductspage';
 import Categories from './Categories';
 import ExploreOurProductspage from './ExploreOurProductspage';
 import NewArrivalpage from './NewArrivalpage';
+import { addToWishlistRequest, removeWishlistProductRequest} from '../features/wishlist/wishlistAction';
 
 
 const renderStars = (rating, onClick, productId) => {
@@ -44,7 +45,8 @@ const renderStars = (rating, onClick, productId) => {
 const HomePage = () => {
   const { products = [], error = null, loading = false } = useSelector((state) => state.products || {});
     const { cartItems = [] } = useSelector((state) => state.cart || {});
-  
+  const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
+      const wishlistItems = Array.isArray(wishlistData[0]) ? wishlistData[0] : wishlistData;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(3600); // 1 hour in seconds
@@ -119,7 +121,7 @@ const HomePage = () => {
         };
     
         // API call to add product to cart
-        const response = await fetch("http://192.168.1.15:8081/api/cart/add", {
+        const response = await fetch("http://192.168.1.25:8081/api/cart/add", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -153,21 +155,65 @@ const HomePage = () => {
     navigate('/productpage');
   };
 
+  // const handleWishlistClick = (e, product) => {
+  //   console.log(product)
+  //   e.stopPropagation(); // Prevent card click navigation
+  //   const isClicked = clickedProducts.has(product.id);
+  //   if (isClicked) {
+  //     setClickedProducts((prev) => {
+  //       const newSet = new Set(prev);
+  //       newSet.delete(product.id);
+  //       return newSet;
+  //     });
+  //   } else {
+  //     setClickedProducts((prev) => new Set(prev).add(product.id));
+  //     dispatch(addToWishlist(product));
+  //   }
+  // };
+
   const handleWishlistClick = (e, product) => {
     e.stopPropagation(); // Prevent card click navigation
-    const isClicked = clickedProducts.has(product.id);
-    if (isClicked) {
-      setClickedProducts((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(product.id);
-        return newSet;
-      });
+
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+        console.error("User not found in localStorage");
+        return;
+    }
+
+    const user = JSON.parse(userData);
+    if (!user?.id || !product?.id) {
+        console.error("Invalid user or product data");
+        return;
+    }
+console.log(product.id)
+    dispatch(addToWishlistRequest(product.id));
+};
+const removeItem = (event, productid) => {
+    event.stopPropagation(); // Prevents event bubbling if needed
+    console.log("Received Product ID:", productid);
+  
+    if (!productid) {
+      console.error("Error: Product ID is undefined or null.");
+      return;
+    }
+  
+  
+    const wishlistItem = wishlistItems.find((item) => Number(item.product_id) === Number(productid));
+  
+    if (wishlistItem) {
+      alert("Are you sure you want to remove the product from the wishlist?");
+      console.log("Wishlist Item ID:", wishlistItem.id);
+      
+      dispatch(removeWishlistProductRequest(wishlistItem.id));
     } else {
-      setClickedProducts((prev) => new Set(prev).add(product.id));
-      dispatch(addToWishlist(product));
+      console.log(`Product ID ${productid} not found in wishlist.`);
     }
   };
+  
+  
+    
 
+  
   return (
     <div>
       <Container fluid className="mt-4 mb-4">
@@ -286,35 +332,33 @@ const HomePage = () => {
                         marginBottom: "100px",
                       }}>
 
-                      {clickedProducts.has(product.id) ? (
-                        
-                        <FaHeart
-                        style={{
-                          fontSize: "1.3rem",
-                          padding:"10%",
-                          width:"150%",
-                            color: "red",
-                            cursor: "pointer",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "50%",
-                        }}
-                        onClick={(e) => handleWishlistClick(e, product)}
-                        />
-                      ) : (
-                        <FaRegHeart
-                        style={{
-                          fontSize: "1.2rem",
-                          padding:"10%",                          
-                            color: "#575B5A",
-                            cursor: "pointer",
-                            width:"150%",
-                            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
-                            borderRadius: "50%",
-                        }}
-                        onClick={(e) => handleWishlistClick(e, product)}
-                        />
-                      )}
-                      <FaEye
+{
+wishlistItems.some((item) => item.product_id === product.id) 
+? (
+  <FaHeart
+    style={{
+      fontSize: "1.3rem",
+      padding: "10%",
+      width: "150%",
+      color: "red",
+      cursor: "pointer",
+      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+      borderRadius: "50%",
+    }}
+    onClick={(e) => removeItem(e, product.id)}
+  />
+) : (
+  <FaRegHeart
+    style={{
+      fontSize: "1.2rem",
+      color: "black",
+      cursor: "pointer",
+      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+      borderRadius: "40%",
+    }}
+    onClick={(e) => handleWishlistClick(e, product)}
+  />
+)}                      <FaEye
                       style={{
                       fontSize: "1.2rem",
                      color: "gray",
@@ -414,7 +458,10 @@ const HomePage = () => {
                         marginBottom: "100px",
                       }}>
 
-                      {clickedProducts.has(product.id) ? (
+                      {
+wishlistItems.some((item) => item.product_id === product.id) 
+? 
+                      (
                         
                         <FaHeart
                         style={{
@@ -426,7 +473,7 @@ const HomePage = () => {
                             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow added
                             borderRadius: "50%",
                         }}
-                        onClick={(e) => handleWishlistClick(e, product)}
+                        onClick={(e) => removeItem(e, product.id)}
                         />
                       ) : (
                         <FaRegHeart
