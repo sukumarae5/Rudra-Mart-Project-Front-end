@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { FaPhone, FaEnvelope } from "react-icons/fa";
+import emailjs from "@emailjs/browser";
 
 const ContactPage = () => {
+  const formRef = useRef();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,10 +18,29 @@ const ContactPage = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form Data Submitted: ", formData);
-    alert("Message Sent!");
-    setFormData({ name: "", email: "", phone: "", message: "" });
+      e.preventDefault(); // Prevent form from refreshing the page
+
+      emailjs
+      .send(
+        "service_psruo8l", 
+        "template_334gnmg", 
+        formData,
+        "mBpMLaypCOJsTVE_x" 
+      )
+
+      
+    .then(
+      (response) => {
+        console.log("Email sent successfully!", response);
+        alert("Message Sent Successfully!");
+        setFormData({ name: "", email: "", phone: "", message: "" });
+      },
+      (error) => {
+        console.error("Failed to send email:", error);
+        alert("Failed to send message. Try again later.");
+      }
+    );
+   
   };
 
   return (
@@ -50,7 +72,7 @@ const ContactPage = () => {
 
           <Col lg={8}>
             <div className="p-4 bg-light border rounded">
-              <Form onSubmit={handleSubmit}>
+              <Form ref={formRef} onSubmit={handleSubmit}>
                 <Row className="mb-3">
                   <Col md={4}>
                     <Form.Group controlId="formName">
