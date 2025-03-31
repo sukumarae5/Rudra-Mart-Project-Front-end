@@ -478,7 +478,7 @@ wishlistItems.some((item) => item.product_id === product.id)
                       ) : (
                         <FaRegHeart
                         style={{
-                          fontSize: "1.2rem",
+                          fontSize: "1.2rem",  
                           padding:"10%",                          
                             color: "#575B5A",
                             cursor: "pointer",
