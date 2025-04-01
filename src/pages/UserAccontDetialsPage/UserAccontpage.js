@@ -50,7 +50,8 @@ const UserAccountPage = () => {
           </h2>
           <ul className="text-gray-600">
             <li className="cursor-pointer hover:text-purple-600"
-            onClick={()=>navigate( )}>Wishlisted Products</li>
+                    onClick={() => navigate("/WishListpage")}
+                    >Wishlisted Products</li>
           </ul>
         </div>
 

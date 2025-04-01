@@ -43,7 +43,7 @@ const ProfileEdit = () => {
 
   const handleCancel = () => {
     alert("Changes canceled!");
-  };
+  }; 
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white shadow rounded-2xl">

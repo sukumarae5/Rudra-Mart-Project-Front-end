@@ -94,6 +94,8 @@ const AppRouter = createBrowserRouter([
           {
             path: "userprofile",
             element: <UserProfile />,
+            index: true,
+
           },
           {
             path: "usercheckoutpage",
