@@ -114,12 +114,10 @@ const NewArrivalpage = () => {
                 <img
                   src={newarivelpageimage2}
                   alt="Perfume"
-                  className="img-fluid"
-                />
+                  className="img-fluid"                />
                 <div
                   className="position-absolute bottom-0 text-white p-3"
-                  style={{ width: "100%" }}
-                >
+                  style={{ width: "100%" }}                >
                   <h2>Perfume</h2>
                   <p>GUCCI INTENSE OUD EDP</p>
                   <h4 className="text-decoration-underline">Shop Now</h4>
@@ -129,7 +127,6 @@ const NewArrivalpage = () => {
           </Row>
         </Col>
       </Row>
-
       <Row className="justify-content-center mt-5">
         {iconData1.map((item, index) => (
           <Col key={index} md={3} sm={6} xs={12} className="text-center mb-4">
