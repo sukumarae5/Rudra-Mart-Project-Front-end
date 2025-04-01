@@ -114,12 +114,10 @@ const NewArrivalpage = () => {
                 <img
                   src={newarivelpageimage2}
                   alt="Perfume"
-                  className="img-fluid"
-                />
+                  className="img-fluid"                />
                 <div
                   className="position-absolute bottom-0 text-white p-3"
-                  style={{ width: "100%" }}
-                >
+                  style={{ width: "100%" }}                >
                   <h2>Perfume</h2>
                   <p>GUCCI INTENSE OUD EDP</p>
                   <h4 className="text-decoration-underline">Shop Now</h4>
@@ -129,15 +127,11 @@ const NewArrivalpage = () => {
           </Row>
         </Col>
       </Row>
-
       <Row className="justify-content-center mt-5">
         {iconData1.map((item, index) => (
           <Col key={index} md={3} sm={6} xs={12} className="text-center mb-4">
-            <div className="p-4 rounded bg-white border shadow-sm">
-              <div
-                className="d-flex justify-content-center align-items-center rounded-circle mx-auto bg-dark"
-                style={{ width: "80px", height: "80px" }}
-              >
+            <div className="p-4 bg-white ">
+              <div className="d-flex justify-content-center align-items-center rounded-circle mx-auto bg-dark" style={{ width: '80px', height: '80px' }}>
                 <span className="fs-2 text-white">{item.icons}</span>
               </div>
               <h5 className="fw-bold mt-3">{item.title}</h5>

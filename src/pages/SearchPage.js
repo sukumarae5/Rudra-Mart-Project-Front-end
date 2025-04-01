@@ -56,7 +56,7 @@ const SearchPage = () => {
           };
       
           // API call to add product to cart
-          const response = await fetch("http://192.168.1.15:8081/api/cart/add", {
+          const response = await fetch("http://192.168.1.25:8081/api/cart/add", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

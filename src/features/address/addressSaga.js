@@ -17,7 +17,7 @@ import {
 // API calls
 const fetchAddressesAPI = async () => {
   const token = localStorage.getItem("authToken");
-  const response = await fetch("http://192.168.1.15:8081/api/address/get", {
+  const response = await fetch("http://192.168.1.25:8081/api/address/get", {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -29,7 +29,7 @@ const fetchAddressesAPI = async () => {
 const addAddressAPI = async (addressData) => {
   const token = localStorage.getItem("authToken");
   
-  const response = await fetch("http://192.168.1.15:8081/api/address/add", {
+  const response = await fetch("http://192.168.1.25:8081/api/address/add", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,7 +52,7 @@ const updateAddressAPI = async (addressId, updatedData) => {
   }
 
   const token = localStorage.getItem("authToken");
-  const response = await fetch(`http://192.168.1.15:8081/api/address/updateaddress/${addressId}`, {
+  const response = await fetch(`http://192.168.1.25:8081/api/address/updateaddress/${addressId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -70,7 +70,7 @@ const updateAddressAPI = async (addressId, updatedData) => {
 const deleteAddressAPI = async (addressId) => {
   const token = localStorage.getItem("authToken");
   const response = await fetch(
-    `http://192.168.1.15:8081/api/address/delete/${addressId}`,
+    `http://192.168.1.25:8081/api/address/delete/${addressId}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },

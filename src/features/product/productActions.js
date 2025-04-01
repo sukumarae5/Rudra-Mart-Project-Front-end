@@ -6,6 +6,8 @@ export const GET_SEARCH_PRODUCT='GET_SEARCH_PRODUCT'
 export const REMOVE_FROM_WISHLIST = "REMOVE_FROM_WISHLIST";
 export const SET_SELECTED_PRODUCT='SET_SELECTED_PRODUCT' 
 export const ADD_TO_WISHlIST="ADD_TO_WISHlIST"
+
+
 // Action Creators
 export const fetchproductsrequest = () => ({
   type: FETCH_PRODUCTS_REQUEST,
@@ -20,6 +22,9 @@ export const fetchproductsfailure = (error) => ({
   type: FETCH_PRODUCTS_FAILURE,
   payload: error,
 });
+
+
+
 export const searchquryproduct=(searchproduct)=>({
   type:GET_SEARCH_PRODUCT,
   payload:searchproduct,
@@ -39,7 +44,3 @@ export const addToWishlist=(addToWishlist)=>{
   };
   
 }
-
-
-
-

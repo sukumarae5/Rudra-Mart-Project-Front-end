@@ -29,7 +29,7 @@ const OrderPlacedSuccessfullyPage = () => {
 
         const payments = await paymentRes.json();
         if (!Array.isArray(payments) || payments.length === 0) throw new Error("No payment data found.");
-        
+         
         const latestPayment = payments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
         setPayment(latestPayment);
       } catch (err) {

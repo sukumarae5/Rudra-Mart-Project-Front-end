@@ -1,9 +1,10 @@
 import { takeEvery, call, put } from 'redux-saga/effects';
 import { FETCH_PRODUCTS_REQUEST } from '../product/productActions';
 import { fetchproductssuccess, fetchproductsfailure } from '../product/productActions';
+
 const fetchTheApi = async () => {
   try {
-    const response = await fetch('http://192.168.1.15:8081/api/products/allproducts', {
+    const response = await fetch('http://192.168.1.25:8081/api/products/allproducts', {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // Replace with your actual token
@@ -20,6 +21,7 @@ const fetchTheApi = async () => {
   }
 };
 
+
 // Saga to handle fetching the products
 function* fetchProductSaga() {
   try {
@@ -34,7 +36,6 @@ function* fetchProductSaga() {
   }
 }
 
-// Root saga to listen for FETCH_PRODUCTS_REQUEST action
 export default function* productSaga() {
   yield takeEvery(FETCH_PRODUCTS_REQUEST, fetchProductSaga);
 }

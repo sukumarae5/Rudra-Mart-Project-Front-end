@@ -6,6 +6,7 @@ import {
   GET_SEARCH_PRODUCT,
   ADD_TO_WISHlIST,
   REMOVE_FROM_WISHLIST,
+  
 } from "./productActions";
 
 const initialState = {
@@ -29,6 +30,7 @@ const productReducer = (state = initialState, action) => {
       return { ...state, selectedProduct: action.payload };
     case GET_SEARCH_PRODUCT:
       return { ...state, searchproduct: action.payload };
+   
     case ADD_TO_WISHlIST:
       // Avoid duplicate wishlist items
       const itemExists = state.addToWishlist.some(
