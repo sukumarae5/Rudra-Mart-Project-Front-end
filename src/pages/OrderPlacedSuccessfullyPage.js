@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { FaGifts, FaArrowCircleRight, FaArrowAltCircleDown, FaArrowAltCircleLeft } from "react-icons/fa";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const OrderPlacedSuccessfullyPage = () => {
@@ -18,7 +17,7 @@ const OrderPlacedSuccessfullyPage = () => {
     const fetchPayment = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const paymentRes = await fetch("http://192.168.1.17:8081/api/payment", {
+        const paymentRes = await fetch("http://192.168.1.25:8081/api/payment", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -53,7 +52,7 @@ const OrderPlacedSuccessfullyPage = () => {
     const token = localStorage.getItem("authToken");
     const transactionId = payment.transaction_id;
 
-    fetch(`http://192.168.1.17:8081/api/invoice/pdf/${transactionId}`, {
+    fetch(`http://192.168.1.25:8081/api/invoice/pdf/${transactionId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -85,7 +84,7 @@ const OrderPlacedSuccessfullyPage = () => {
     const token = localStorage.getItem("authToken");
     const transactionId = payment.transaction_id;
 
-    fetch(`http://192.168.1.17:8081/api/invoice/pdf/${transactionId}`, {
+    fetch(`http://192.168.1.25:8081/api/invoice/pdf/${transactionId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -109,7 +108,7 @@ const OrderPlacedSuccessfullyPage = () => {
 
   return (
     <div>
-      <div className="text-center">
+    <div className="text-center">
         <div className="w-100 h-100 p-5 bg-light text-danger fs-6 m-3" style={{ backgroundColor: "#c5e0cd" }}>
           <h1 style={{ color: "#586cfc", fontSize: "20px" }}>
             <span>

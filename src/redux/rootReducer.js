@@ -5,6 +5,7 @@ import userReducer from '../features/user/userSlice';
 import {addressReducer}  from '../features/address/addressSlice';
 import orderReducer from '../features/order/orderSlice';
 import wishlistReducer from '../features/wishlist/wishlistSlice'
+import dashboardReducer from '../features/admin/adminSlice';
 
 const rootReducer = combineReducers({
   products: productReducer,
@@ -12,7 +13,8 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   orders: orderReducer,
   address: addressReducer,
-  wishlist:wishlistReducer
+  wishlist:wishlistReducer,
+  admindashboard: dashboardReducer,
   
    // Add orders reducer
 });
