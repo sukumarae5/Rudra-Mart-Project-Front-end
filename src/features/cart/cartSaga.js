@@ -21,6 +21,7 @@ const fetchCartDataApi = async () => {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${userToken}`,
+      
     },
   });
 console.log(response)

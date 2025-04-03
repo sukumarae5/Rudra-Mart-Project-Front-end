@@ -169,7 +169,7 @@ const Header = () => {
                 {/* Display wishlist length */}
                 <div className="position-relative mx-3">
                   <FavoriteBorderIcon
-                    onClick={() => navigate("/WishListpage")}
+                    onClick={() => navigate("/useraccountpage/WishListpage")}
                     className="text-dark"
                     style={{ cursor: "pointer" }}
                   />

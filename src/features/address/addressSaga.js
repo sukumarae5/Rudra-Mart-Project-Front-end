@@ -74,6 +74,7 @@ const deleteAddressAPI = async (addressId) => {
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
+      
     }
   );
 

@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 const CartPage = () => {
   const dispatch = useDispatch();
   const { cartItems = [], error } = useSelector((state) => state.cart);
+
+  
   const { products = [] } = useSelector((state) => state.products || {});
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
