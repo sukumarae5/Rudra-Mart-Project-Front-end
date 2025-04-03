@@ -26,11 +26,15 @@ const UserAccountPage = () => {
           <ul className="text-gray-600 space-y-2">
             <li
               className="cursor-pointer hover:text-purple-600"
-              onClick={() => navigate("userprofile")}
+              onClick={() => navigate("userprofile")
+
+              }
             >
               My Profile
             </li>
-            <li>Address Book</li>
+            <li className="cursor-pointer hover:text-purple-600"
+       onClick={() => navigate("UserAddressBook")
+            }>Address Book</li>
             <li>My Payment Options</li>
             
           </ul>
@@ -40,7 +44,7 @@ const UserAccountPage = () => {
           </h2>
           <ul className="text-gray-600 space-y-2">
           <li className="cursor-pointer hover:text-purple-600"
-            onClick={()=>navigate("usercheckoutpage")}>Order History</li>
+            onClick={()=>navigate("UserOrderHistory")}>Order History</li>
             <li>My Returns</li>
             <li>My Cancellations</li>
           </ul>
@@ -50,7 +54,7 @@ const UserAccountPage = () => {
           </h2>
           <ul className="text-gray-600">
             <li className="cursor-pointer hover:text-purple-600"
-                    onClick={() => navigate("/WishListpage")}
+                    onClick={() => navigate("WishListpage")}
                     >Wishlisted Products</li>
           </ul>
         </div>

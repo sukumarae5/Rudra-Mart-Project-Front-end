@@ -20,6 +20,8 @@ import ProductDetailPage from "../pages/ProductPage";
 import AboutPage from "../pages/Aboutpage";
 import ExploreOurProductspage from "../pages/ExploreOurProductspage";
 import NewArrivalpage from "../pages/NewArrivalpage";
+import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook"
+import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory"
 const AppRouter = createBrowserRouter([
 
   { 
@@ -83,10 +85,7 @@ const AppRouter = createBrowserRouter([
       {path:"/NewArrivalpage",
         element:<NewArrivalpage/>},
       
-      {
-        path: "/WishListpage",
-        element: <WishListpage />,
-      },
+      
       {
         path: "/useraccountpage",
         element: <UserAccontPage />,
@@ -100,6 +99,17 @@ const AppRouter = createBrowserRouter([
           {
             path: "usercheckoutpage",
             element: <UserCheckOutpage />,
+          },{
+            path:"UserAddressBook",
+            element:<UserAddressBook/>
+          },
+          {
+            path: "WishListpage",
+            element: <WishListpage />,
+          },{
+            path:"UserOrderHistory",
+            element:<UserOrderHistory/>
+
           },
           
         ],

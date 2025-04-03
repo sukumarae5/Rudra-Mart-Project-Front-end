@@ -9,6 +9,7 @@ import OrderTable from "../components/AdminPane/OrderTable";
 import ProductTable from "../components/AdminPane/ProductTable";
 import UserTable from "../components/AdminPane/UserTable";
 import AdminProfileSettingPage from "../pages/AdminPages/AdminProfileSettingsPage";
+import AdminReportsPage from "../pages/AdminPages/AdminReportsPage";
 
 const AdminRoute = [
   {
@@ -51,6 +52,9 @@ const AdminRoute = [
   },{
     path:"adminprofile",
     element:<AdminProfileSettingPage/>
+  },{
+    path:"adminreports",
+    element:<AdminReportsPage/>
   }
 ];
 

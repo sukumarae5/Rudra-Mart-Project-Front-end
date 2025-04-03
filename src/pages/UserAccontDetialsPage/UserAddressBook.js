@@ -16,7 +16,7 @@ import Accordion from "react-bootstrap/Accordion";
 import { FaHome } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 
-const Address = ({ scrollToOrderSummary }) => {
+const UserAddressBook = ({  }) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,12 +36,6 @@ const Address = ({ scrollToOrderSummary }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   // Payment-related states (unchanged)
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-  }); // Reusable function to fetch saved addresses
   const fetchSavedAddresses = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -266,13 +260,9 @@ const Address = ({ scrollToOrderSummary }) => {
       style={{ background: "#e3f2fd", padding: "10px 0px 0px 40px",width:"97%" }}
     >
       <Row className="justify-content-center my-2">
-        <Accordion defaultActiveKey="0" >
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>
+            
               <FaHome />
               Select The Address
-            </Accordion.Header>
-            <Accordion.Body>
               {/* Address Section */}
               <Col
                 md={12}
@@ -370,21 +360,6 @@ const Address = ({ scrollToOrderSummary }) => {
                 >
                   + Add New Address
                 </Button>
-                <div className="d-flex justify-content-end">
-                  <Button
-                    onClick={() => {
-                      if (selectedAddress?.id) {
-                        localStorage.setItem("addressId", selectedAddress.id);
-                        scrollToOrderSummary();
-                      } else {
-                        alert("Please select an address before continuing.");
-                      }
-                    }}
-                    className="px-4 py-2 fw-bold"
-                  >
-                    Next
-                  </Button>
-                </div>{" "}
                 {/* Form for Adding a New Address */}
                 {newAddress && !selectedAddress && (
                   <Card className="mt-3">
@@ -581,12 +556,9 @@ const Address = ({ scrollToOrderSummary }) => {
                 )}
               </Col>
               {/* Order Summary & Payment Section */}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
       </Row>
     </Container>
   );
 };
 
-export default Address;
+export default UserAddressBook;
