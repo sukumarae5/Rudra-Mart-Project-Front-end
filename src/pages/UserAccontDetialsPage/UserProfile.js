@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 const ProfileEdit = () => {
-  const { data = {} } = useSelector((state) => state.users);
+  const { data = []} = useSelector((state) => state.users);
 
   const [profile, setProfile] = useState({
     firstName: "",
@@ -15,12 +15,13 @@ const ProfileEdit = () => {
   });
 
   useEffect(() => {
+    const user=JSON.parse(localStorage.getItem("user"))
     // Populate the profile state with user data when component mounts
     setProfile({
-      firstName: data.name || "",
-      lastName: data.lastName || "",
-      email: data.email || "",
-      phoneNo: data.phone || "",
+      firstName: user.name || "",
+      lastName: "",
+      email: user.email || "",
+      phoneNo: user.phone_number || "",
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
@@ -43,7 +44,7 @@ const ProfileEdit = () => {
 
   const handleCancel = () => {
     alert("Changes canceled!");
-  };
+  }; 
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white shadow rounded-2xl">

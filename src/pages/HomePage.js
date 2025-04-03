@@ -151,6 +151,7 @@ const HomePage = () => {
   };
 
   const handleCardClick = (productId, product) => {
+    console.log(product)
     dispatch(setSelectedProduct(product)); 
     navigate('/productpage');
   };
@@ -208,12 +209,7 @@ const removeItem = (event, productid) => {
     } else {
       console.log(`Product ID ${productid} not found in wishlist.`);
     }
-  };
-  
-  
-    
-
-  
+  };  
   return (
     <div>
       <Container fluid className="mt-4 mb-4">
