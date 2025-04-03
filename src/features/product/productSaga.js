@@ -1,5 +1,5 @@
 import { takeEvery, call, put } from 'redux-saga/effects';
-import { FETCH_PRODUCTS_REQUEST } from '../product/productActions';
+import { FETCH_PRODUCTS_REQUEST, FETCH_PRODUCTS_WITH_CATEGORY_REQUEST, fetchProductsWithCategoryFailure, fetchProductsWithCategorySuccess } from '../product/productActions';
 import { fetchproductssuccess, fetchproductsfailure } from '../product/productActions';
 
 const fetchTheApi = async () => {
@@ -21,6 +21,28 @@ const fetchTheApi = async () => {
   }
 };
 
+function* fetchProductsWithCategorySaga() {
+  try {
+    const response = yield call(fetch, 'http://192.168.1.25:8081/api/products/products', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    const data = yield response.json();
+
+    yield put(fetchProductsWithCategorySuccess(data.products));
+  } catch (error) {
+    yield put(fetchProductsWithCategoryFailure(error.message));
+  }
+}
+
 
 // Saga to handle fetching the products
 function* fetchProductSaga() {
@@ -36,6 +58,11 @@ function* fetchProductSaga() {
   }
 }
 
+
+
 export default function* productSaga() {
   yield takeEvery(FETCH_PRODUCTS_REQUEST, fetchProductSaga);
+  yield takeEvery(FETCH_PRODUCTS_WITH_CATEGORY_REQUEST, fetchProductsWithCategorySaga);
+
+
 }
