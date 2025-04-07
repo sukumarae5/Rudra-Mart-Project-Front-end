@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const ProfileEdit = () => {
   const { data = []} = useSelector((state) => state.users);
-
+const navigate=useNavigate()
   const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
@@ -141,6 +143,13 @@ const ProfileEdit = () => {
           >
             Cancel
           </button>
+          <Button
+  variant="secondary"
+  onClick={() => navigate("/useraccountpage/userforgotpasswordpage")}
+>
+  forgot password
+</Button>
+
           <button
             type="submit"
             className="px-6 py-2 bg-red-500 text-white font-semibold rounded-md"

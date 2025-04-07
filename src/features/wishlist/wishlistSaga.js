@@ -8,7 +8,7 @@ const fetchWishlistApi = async () => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found!");
 
-  const response = await fetch("http://192.168.1.25:8081/api/wishlist/all", {
+  const response = await fetch("http://192.168.1.12:8081/api/wishlist/all", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -28,7 +28,7 @@ const addToWishlistApi = async (productid) => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found!");
 
-  const response = await fetch("http://192.168.1.25:8081/api/wishlist/add", {
+  const response = await fetch("http://192.168.1.12:8081/api/wishlist/add", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +47,7 @@ const addToWishlistApi = async (productid) => {
 // Delete Wishlist Item API
 const deleteItemApi = async (wishlistid) => {
   const token = localStorage.getItem("authToken");
-  const response = await fetch(`http://192.168.1.25:8081/api/wishlist/${wishlistid}`, {
+  const response = await fetch(`http://192.168.1.12:8081/api/wishlist/${wishlistid}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
