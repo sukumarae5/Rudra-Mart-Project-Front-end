@@ -30,3 +30,4 @@ function* usersSaga() {
 export default function* userSaga() {
   yield takeEvery(FETCH_USERS_REQUEST, usersSaga);
 }
+

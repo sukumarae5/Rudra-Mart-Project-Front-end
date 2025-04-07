@@ -8,11 +8,9 @@ import {
   Form,
   Button,
   Card,
-  Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
-import Accordion from "react-bootstrap/Accordion";
 import { FaHome } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 

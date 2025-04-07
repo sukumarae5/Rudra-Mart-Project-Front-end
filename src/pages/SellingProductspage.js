@@ -49,7 +49,7 @@ const SellingProductspage = () => {
         }
 
         try {
-            const response = await fetch("http://192.168.1.15:8081/api/cart/add", {
+            const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
