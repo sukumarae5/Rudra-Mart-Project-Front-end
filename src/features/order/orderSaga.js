@@ -11,7 +11,7 @@ import {
 // Function to fetch orders from API
 const fetchOrdersApi = async () => {
   try {
-    const response = await fetch("http://192.168.1.25:8081/api/orders/getall", {
+    const response = await fetch("http://192.168.1.12:8081/api/orders/getall", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ const fetchUserOrder = async () => {
   }
 
   try {
-    const response = await fetch(`http://192.168.1.25:8081/api/orders/user-orders/${user.id}`, {
+    const response = await fetch(`http://192.168.1.12:8081/api/orders/user-orders/${user.id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
