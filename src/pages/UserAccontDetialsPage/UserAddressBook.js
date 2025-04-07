@@ -8,11 +8,9 @@ import {
   Form,
   Button,
   Card,
-  Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
-import Accordion from "react-bootstrap/Accordion";
 import { FaHome } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -45,7 +43,7 @@ const UserAddressBook = ({  }) => {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.25:8081/api/address/get", {
+      const response = await fetch("http://192.168.1.12:8081/api/address/get", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -116,7 +114,7 @@ const UserAddressBook = ({  }) => {
         country: formData.country,
         userId: userId,
       };
-      const response = await fetch("http://192.168.1.25:8081/api/address/add", {
+      const response = await fetch("http://192.168.1.12:8081/api/address/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,7 +167,7 @@ const UserAddressBook = ({  }) => {
         country: formData.country,
       };
       const response = await fetch(
-        `http://192.168.1.25:8081/api/address/updateaddress/${selectedAddress.id}`,
+        `http://192.168.1.12:8081/api/address/updateaddress/${selectedAddress.id}`,
         {
           method: "PUT",
           headers: {
@@ -208,7 +206,7 @@ const UserAddressBook = ({  }) => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://192.168.1.25:8081/api/address/delete/${addressId}`,
+          `http://192.168.1.12:8081/api/address/delete/${addressId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },

@@ -3,6 +3,7 @@ import AddUserForm from "../components/AdminPane/AddUserForm";
 import AdminCategories from "../components/AdminPane/AdminCategories";
 import CategoryCard from "../components/AdminPane/CategoryCard";
 import Dashboard from "../components/AdminPane/Dashboard";
+import EditOrdersForm from "../components/AdminPane/EditOrdersForm";
 import EditProductForm from "../components/AdminPane/EditProductForm";
 import EditUserForm from "../components/AdminPane/EditUserForm";
 import OrderTable from "../components/AdminPane/OrderTable";
@@ -35,6 +36,10 @@ const AdminRoute = [
   {
     path: "editproduct", // Nested route
     element: <EditProductForm />,
+  },
+  {
+    path: "editorders", // Nested route
+    element: <EditOrdersForm />,
   },
   {
     path:"addusers",

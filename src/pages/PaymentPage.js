@@ -44,7 +44,7 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
     console.log("Starting order placement...");
 
     // Step 1: Place Order (including order items)
-    const orderResponse = await fetch("http://192.168.1.25:8081/api/orders/add", {
+    const orderResponse = await fetch("http://192.168.1.12:8081/api/orders/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
     
     // Step 2: Create Payment Record
     console.log("Proceeding to create payment record...");
-    const paymentResponse = await fetch("http://192.168.1.25:8081/api/payment/add", {
+    const paymentResponse = await fetch("http://192.168.1.12:8081/api/payment/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

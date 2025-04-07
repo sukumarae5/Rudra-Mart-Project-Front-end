@@ -15,9 +15,7 @@ import {
   };
   
   const dashboardReducer = (state = initialState, action) => {
-    console.log(state.bestSellingProducts)
-    console.log(state.topCustomers)
-    console.log(action.payload)
+    
     switch (action.type) {
       case FETCH_BEST_SELLING_PRODUCTS_REQUEST:
         return { ...state, loading: true, error: null };

@@ -44,6 +44,26 @@ const ProductTable = () => {
     }
   }, [productsWithCategory]);
 
+  // Filter & Search
+  const filteredProducts = productsWithCategory.filter((product) => {
+    const matchesSearchQuery = product.product_name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    return filterCategory === "All"
+      ? matchesSearchQuery
+      : matchesSearchQuery && product.category_name === filterCategory;
+  });
+
+  // Pagination Logic
+  const indexOfLastProduct = currentPage * itemsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
   // Select or Deselect all products
   const handleSelectAll = () => {
     if (selectedProducts.length === currentProducts.length) {
@@ -92,7 +112,7 @@ const ProductTable = () => {
       await Promise.all(
         selectedProducts.map(async (productId) => {
           const response = await fetch(
-            `http://192.168.1.25:8081/api/products/delete/${productId}`,
+            `http://192.168.1.12:8081/api/products/deleteproduct/${productId}`,
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
@@ -113,26 +133,6 @@ const ProductTable = () => {
       alert("Error: Could not delete products");
     }
   };
-
-  // Filter & Search
-  const filteredProducts = productsWithCategory.filter((product) => {
-    const matchesSearchQuery = product.product_name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-    return filterCategory === "All"
-      ? matchesSearchQuery
-      : matchesSearchQuery && product.category_name === filterCategory;
-  });
-
-  // Pagination Logic
-  const indexOfLastProduct = currentPage * itemsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
     <div className="container-fluid">
@@ -185,6 +185,23 @@ const ProductTable = () => {
               />
             </InputGroup>
           </Col>
+          <Col xs={12} md={6} className="d-flex justify-content-end">
+            <Button
+              variant="outline-primary"
+              className="me-2"
+              disabled={selectedProducts.length !== 1}
+              onClick={handleEditSelectedProduct}
+            >
+              <MdModeEditOutline size={20} />
+            </Button>
+            <Button
+              variant="outline-danger"
+              disabled={selectedProducts.length === 0}
+              onClick={handleDeleteSelectedProducts}
+            >
+              <MdOutlineDeleteOutline size={20} />
+            </Button>
+          </Col>
         </Row>
 
         {/* Product Table */}
@@ -233,7 +250,9 @@ const ProductTable = () => {
                   <td>{product.product_description}</td>
                   <td>{product.product_price}</td>
                   <td>{product.stock}</td>
-                  <td>{product.category_name}</td>
+                  <td title={`Category ID: ${product.category_id}`}>
+                    {product.category_name}
+                  </td>
                 </tr>
               ))
             ) : (

@@ -7,6 +7,10 @@ export const FETCH_USER_ORDER_SUCCESS="FETCH_USER_ORDER_SUCCESS";
 export const FETCH_USER_ORDER_FAILURE="FETCH_USER_ORDER_FAILUER";
 
 
+export const FETCH_ALL_ORDER_REQUEST = "FETCH_ALL_ORDER_REQUEST";
+export const FETCH_ALL_ORDER_SUCCESS = "FETCH_ALL_ORDER_SUCCESS";
+export const FETCH_ALL_ORDER_FAILURE = "FETCH_ALL_ORDER_FAILURE";
+
 
 
 // Action Creators
@@ -25,7 +29,7 @@ export const fetchOrdersFailure = (error) => ({
 });
  export const fetchUserOrderRequst=()=>({
   type:FETCH_USER_ORDER_REQUEST
-
+  
  })
  export const fetchUserOrderSuccess=(userorder)=>({
   type:FETCH_USER_ORDER_SUCCESS,
@@ -35,3 +39,16 @@ export const fetchOrdersFailure = (error) => ({
   type:FETCH_USER_ORDER_FAILURE,
   payload:error
  })
+ export const fetchAllOrderRequest = () => ({
+  type: FETCH_ALL_ORDER_REQUEST,
+});
+
+export const fetchAllOrderSuccess = (allOrders) => ({
+  type: FETCH_ALL_ORDER_SUCCESS,
+  payload: allOrders,
+});
+
+export const fetchAllOrderFailure = (error) => ({
+  type: FETCH_ALL_ORDER_FAILURE,
+  payload: error,
+});
