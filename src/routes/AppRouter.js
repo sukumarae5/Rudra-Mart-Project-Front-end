@@ -20,8 +20,9 @@ import ProductDetailPage from "../pages/ProductPage";
 import AboutPage from "../pages/Aboutpage";
 import ExploreOurProductspage from "../pages/ExploreOurProductspage";
 import NewArrivalpage from "../pages/NewArrivalpage";
-import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook"
-import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory"
+import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook";
+import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory";
+import UserForgotPasswordpage from "../pages/UserAccontDetialsPage/UserForgotPasswordpage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -92,10 +93,14 @@ const AppRouter = createBrowserRouter([
         children: [
           {
             path: "userprofile",
-            element: <UserProfile />,
-            index: true,
+            element: <UserProfile />,          
 
           },
+          {
+            path: "userforgotpasswordpage",
+            element: <UserForgotPasswordpage />,
+          },          
+
           {
             path: "usercheckoutpage",
             element: <UserCheckOutpage />,
@@ -109,6 +114,11 @@ const AppRouter = createBrowserRouter([
           },{
             path:"UserOrderHistory",
             element:<UserOrderHistory/>
+
+          },
+          
+          {
+
 
           },
           

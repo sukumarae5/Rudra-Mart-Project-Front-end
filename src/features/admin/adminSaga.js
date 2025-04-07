@@ -8,7 +8,7 @@ import {
   fetchTopCustomersFailure,
 } from "./adminActions";
 
-const fetchBestSellingProductsApi = async () => {
+const fetchBestSellingProductsApi = async () => { 
   try {
     const response = await fetch("http://192.168.1.12:8081/api/dashboard/products/best-selling");
     const data = await response.json();

@@ -13,7 +13,7 @@ const ProductDetailPage = () => {
   const { products = [], selectedProduct = {} } = useSelector(
     (state) => state.products || {}
   );
-
+console.log(products)
   const {
     name: title = "No Title",
     description = "No Description Available",
@@ -102,7 +102,9 @@ const ProductDetailPage = () => {
           style={{
             flex: "1",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "center",  
+
+            
             alignItems: "center",
             padding: "30px",
           }}>
