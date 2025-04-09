@@ -23,6 +23,7 @@ import NewArrivalpage from "../pages/NewArrivalpage";
 import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook";
 import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory";
 import UserForgotPasswordpage from "../pages/UserAccontDetialsPage/UserForgotPasswordpage";
+import EditOrdersForm from "../components/AdminPane/EditOrdersForm";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -117,10 +118,7 @@ const AppRouter = createBrowserRouter([
 
           },
           
-          {
-
-
-          },
+          
           
         ],
       },
