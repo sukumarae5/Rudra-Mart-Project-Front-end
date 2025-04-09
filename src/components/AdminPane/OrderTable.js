@@ -15,7 +15,6 @@ import {
 } from "react-bootstrap";
 import PaginationComponent from "./Pagination";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
-import { GoPlus } from "react-icons/go";
 
 const OrderTable = () => {
   const dispatch = useDispatch();
@@ -27,27 +26,16 @@ const OrderTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("All");
   const [selectedOrders, setSelectedOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     dispatch(fetchAllOrderRequest());
   }, [dispatch]);
 
-  const handleCheckboxChange = (orderId) => {
-    setSelectedOrders((prevSelected) =>
-      prevSelected.includes(orderId)
-        ? prevSelected.filter((id) => id !== orderId)
-        : [...prevSelected, orderId]
-    );
-  };
-
-  const totalPages = Math.ceil(allOrders.length / itemsPerPage);
   const indexOfLastOrder = currentPage * itemsPerPage;
   const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
 
   const filteredOrders = allOrders.filter((order) => {
     const matchesSearchQuery =
-      (order?.customerName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
       (order?.status?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
       (order?.total_price?.toString() || "").includes(searchQuery);
 
@@ -57,37 +45,38 @@ const OrderTable = () => {
   });
 
   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+    setSelectedOrders([]);
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this order?");
+    if (!confirmed) return;
+
+    try {
+      // Uncomment and implement delete API here
+      // await deleteOrder(orderId);
+      alert("Order deleted successfully!");
+      dispatch(fetchAllOrderRequest());
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      alert("Failed to delete order.");
+    }
   };
 
   return (
     <div className="container-fluid p-4">
       <Row>
-        {/* Left side: Orders table */}
-        <Col lg={selectedOrder ? 8 : 12}>
+        <Col>
           <Card className="p-4 shadow-lg border-0 rounded-3">
             <Row className="align-items-center mb-3">
               <Col xs={12} md={6}>
                 <h1 className="fw-bold" style={{ fontSize: "2rem", color: "#131523" }}>
                   Orders
                 </h1>
-              </Col>
-              <Col xs={12} md={6} className="text-md-end d-flex justify-content-end">
-                <Button
-                  onClick={() => navigate("/admin/addorder")}
-                  className="d-flex align-items-center btn-primary shadow"
-                  style={{
-                    fontSize: "1rem",
-                    padding: "0.6rem 1.2rem",
-                    borderRadius: "8px",
-                    border: "none",
-                  }}
-                >
-                  <GoPlus className="me-2" size={22} />
-                  Add Order
-                </Button>
               </Col>
             </Row>
 
@@ -100,8 +89,12 @@ const OrderTable = () => {
                 >
                   <Dropdown.Item eventKey="All">All</Dropdown.Item>
                   <Dropdown.Item eventKey="Pending">Pending</Dropdown.Item>
-                  <Dropdown.Item eventKey="Completed">Completed</Dropdown.Item>
+                  <Dropdown.Item eventKey="Processing">Processing</Dropdown.Item>
+                  <Dropdown.Item eventKey="Confirmed">Confirmed</Dropdown.Item>
+                  <Dropdown.Item eventKey="Shipped">Shipped</Dropdown.Item>
+                  <Dropdown.Item eventKey="Delivered">Delivered</Dropdown.Item>
                   <Dropdown.Item eventKey="Cancelled">Cancelled</Dropdown.Item>
+                  <Dropdown.Item eventKey="Returned">Returned</Dropdown.Item>
                 </DropdownButton>
 
                 <InputGroup className="w-50">
@@ -113,18 +106,8 @@ const OrderTable = () => {
                   />
                 </InputGroup>
               </Col>
-
-              <Col xs={12} md={6} className="d-flex justify-content-end gap-3">
-                <Button variant="outline-primary" size="sm">
-                  <MdModeEditOutline size={20} />
-                </Button>
-                <Button variant="outline-danger" size="sm">
-                  <MdOutlineDeleteOutline size={20} />
-                </Button>
-              </Col>
             </Row>
 
-            {/* Table */}
             {loading ? (
               <p>Loading orders...</p>
             ) : error ? (
@@ -133,40 +116,21 @@ const OrderTable = () => {
               <Table striped bordered hover responsive className="rounded shadow-sm">
                 <thead className="bg-light">
                   <tr>
-                    <th>
-                      <Form.Check
-                        type="checkbox"
-                        onChange={(e) =>
-                          setSelectedOrders(
-                            e.target.checked ? currentOrders.map((order) => order.id) : []
-                          )
-                        }
-                        checked={
-                          selectedOrders.length === currentOrders.length &&
-                          currentOrders.length > 0
-                        }
-                      />
-                    </th>
+                    
                     <th>Order ID</th>
                     <th>Customer ID</th>
                     <th>Status</th>
                     <th>Total Amount</th>
                     <th>Order Date</th>
-                    <th>Action</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentOrders.length > 0 ? (
-                    currentOrders.map((order, index) => (
-                      <tr key={order.id}>
-                        <td>
-                          <Form.Check
-                            type="checkbox"
-                            checked={selectedOrders.includes(order.id)}
-                            onChange={() => handleCheckboxChange(order.id)}
-                          />
-                        </td>
-                        <td className="fw-bold">{indexOfFirstOrder + index + 1}</td>
+                    currentOrders.map((order) => (
+                      <tr key={order.order_id}>
+                       
+                        <td className="fw-bold">{order.order_id}</td>
                         <td>{order.user_id || "N/A"}</td>
                         <td
                           className={`fw-bold ${
@@ -181,13 +145,26 @@ const OrderTable = () => {
                         </td>
                         <td className="fw-bold">₹{order.total_price}</td>
                         <td>{new Date(order.order_created_at).toLocaleDateString()}</td>
-                        <td>
+                        <td className="d-flex gap-2 justify-content-center">
                           <Button
-                            variant="outline-info"
+                            variant="outline-primary"
                             size="sm"
-                            onClick={() => setSelectedOrder(order)}
+                            title="Edit Order"
+                            onClick={() =>
+                              navigate(`/admin/editorders`, {
+                                state: { order },
+                              })
+                            }
                           >
-                            View
+                            <MdModeEditOutline size={18} />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            title="Delete Order"
+                            onClick={() => handleDeleteOrder(order.order_id)}
+                          >
+                            <MdOutlineDeleteOutline size={18} />
                           </Button>
                         </td>
                       </tr>
@@ -212,58 +189,6 @@ const OrderTable = () => {
             </div>
           </Card>
         </Col>
-
-        {/* Right side: Order Details */}
-        {selectedOrder && (
-          <Col lg={4}>
-            <Card className="p-4 shadow-sm border-0 bg-light">
-              <h5 className="fw-bold mb-3">
-                Order Details (ID: {selectedOrder.order_id})
-              </h5>
-              <p><strong>Status:</strong> {selectedOrder.status}</p>
-              <p><strong>Total Price:</strong> ₹{selectedOrder.total_price}</p>
-              <p>
-                <strong>Order Date:</strong>{" "}
-                {new Date(selectedOrder.order_created_at).toLocaleString()}
-              </p>
-              <p>
-                <strong>Address:</strong>{" "}
-                {selectedOrder.address?.street_address}, {selectedOrder.address?.city},{" "}
-                {selectedOrder.address?.state}, {selectedOrder.address?.postal_code}
-              </p>
-
-              <div className="mt-3">
-                <strong>Products:</strong>
-                <ul>
-                  {selectedOrder.products?.map((product, i) => (
-                    <li key={i} className="d-flex align-items-center mb-2">
-                      <img
-                        src={product.image_url}
-                        alt={product.product_name}
-                        width="50"
-                        height="50"
-                        style={{ objectFit: "cover", borderRadius: "8px", marginRight: "10px" }}
-                      />
-                      <div>
-                        <div><strong>{product.product_name}</strong></div>
-                        <div>₹{product.product_price}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                className="mt-3"
-                onClick={() => setSelectedOrder(null)}
-              >
-                Close
-              </Button>
-            </Card>
-          </Col>
-        )}
       </Row>
     </div>
   );

@@ -29,15 +29,15 @@ import {
   Box,
 } from "@mui/material";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import PersonIcon from "@mui/icons-material/Person";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const AdminDashboardpage1 = () => {
   const dispatch = useDispatch();
   const { users = [], customerCount = 0 } = useSelector((state) => state.users);
+  console.log(users)
   const { orders = [] } = useSelector((state) => state.orders);
-  
   const [filter, setFilter] = useState("year");
   const [filteredOrders, setFilteredOrders] = useState([]);
 
@@ -62,8 +62,7 @@ const AdminDashboardpage1 = () => {
         }
       });
       setFilteredOrders(months.map((month, index) => ({ label: month, orderCount: monthlyData[index] })));
-    } 
-    else if (filter === "month") {
+    } else if (filter === "month") {
       const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const daysInLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
       let dailyData = Array(daysInLastMonth).fill(0);
@@ -76,8 +75,7 @@ const AdminDashboardpage1 = () => {
       });
 
       setFilteredOrders(dailyData.map((count, index) => ({ label: index + 1, orderCount: count })));
-    } 
-    else if (filter === "thisMonth") {
+    } else if (filter === "thisMonth") {
       const currentMonth = now.getMonth();
       const daysInThisMonth = new Date(now.getFullYear(), currentMonth + 1, 0).getDate();
       let dailyData = Array(daysInThisMonth).fill(0);
@@ -90,8 +88,7 @@ const AdminDashboardpage1 = () => {
       });
 
       setFilteredOrders(dailyData.map((count, index) => ({ label: index + 1, orderCount: count })));
-    }
-    else if (filter === "day") {
+    } else if (filter === "day") {
       let last7Days = [];
       for (let i = 6; i >= 0; i--) {
         const pastDate = new Date(now);
@@ -122,21 +119,20 @@ const AdminDashboardpage1 = () => {
     );
   }).length;
 
-  const existingUsers = Math.max(customerCount - newUsers, 0);
-
+  const confirmedOrders = orders.filter((order) => order.status === "Confirmed").length;
+  const shippedOrders = orders.filter((order) => order.status === "Shipped").length;
   const stats = [
     { title: "Total Users", value: customerCount, color: "#1976D2", icon: <PeopleAltIcon /> },
-    { title: "New Users", value: newUsers, color: "#FF9800", icon: <PersonAddIcon /> },
-    { title: "Existing Users", value: existingUsers, color: "#43A047", icon: <PersonIcon /> },
     { title: "Total Orders", value: orders.length, color: "#D32F2F", icon: <ShoppingCartIcon /> },
+    { title: "Confirmed Orders", value: confirmedOrders, color: "#009688", icon: <CheckCircleIcon /> },
+    { title: "Shipped Orders", value: shippedOrders, color: "#3F51B5", icon: <LocalShippingIcon /> },
   ];
 
   return (
     <Container sx={{ mt: 4 }}>
-      {/* 📌 Stats Cards - Fixed Size */}
       <Grid container spacing={3}>
         {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
             <Card
               sx={{
                 background: "#fff",
@@ -153,7 +149,19 @@ const AdminDashboardpage1 = () => {
               }}
             >
               <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "center" }}>
-                <Box sx={{ background: `linear-gradient(135deg, ${stat.color} 30%, ${stat.color}CC 100%)`, color: "#fff", width: 55, height: 55, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", boxShadow: `0px 4px 10px ${stat.color}55` }}>
+                <Box
+                  sx={{
+                    background: `linear-gradient(135deg, ${stat.color} 30%, ${stat.color}CC 100%)`,
+                    color: "#fff",
+                    width: 55,
+                    height: 55,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "50%",
+                    boxShadow: `0px 4px 10px ${stat.color}55`,
+                  }}
+                >
                   {React.cloneElement(stat.icon, { fontSize: "large" })}
                 </Box>
                 <Box>

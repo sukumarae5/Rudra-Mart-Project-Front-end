@@ -57,7 +57,7 @@ const Login = () => {
       const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
       if (email === adminEmail && password === adminPassword) {
         alert("Admin Login Successful!");
-        navigate("/admin");
+        navigate("/admin/admindashboard");
       }
     } catch (error) {
       console.error("Login error:", error);

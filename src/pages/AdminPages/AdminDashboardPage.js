@@ -18,7 +18,6 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Avatar,
 } from "@mui/material";
 
 const AdminDashboardPage = () => {
@@ -33,16 +32,13 @@ const AdminDashboardPage = () => {
     dispatch(fetchTopCustomersRequest());
   }, [dispatch]);
 
-  // Get Data from Redux Store
-    const { users = [], customerCount = 0 } = useSelector((state) => state.users);
-  const { orders = [] } = useSelector((state) => state.orders);
   const { bestSellingProducts = [], topCustomers = [] } = useSelector(
     (state) => state.admindashboard
   );
-
+ console.log(bestSellingProducts)
   return (
-        <Container>
-            {/* Best Selling Products & Top Customers */}
+    <Container>
+      {/* Best Selling Products & Top Customers */}
       <Grid container spacing={4} sx={{ mt: 3 }}>
         {/* Best Selling Products */}
         <Grid item xs={12} sm={6}>
@@ -77,12 +73,13 @@ const AdminDashboardPage = () => {
                     <TableRow key={product.id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
-                        <Avatar
-                          src={product.image}
-                          alt={product.name}
-                          sx={{ width: 40, height: 40 }}
-                        />
-                      </TableCell>
+  <img
+    src={product.image_url}
+    alt={product.name}
+    style={{ width: 40, height: 40, objectFit: "cover", borderRadius: "50%" }}
+  />
+</TableCell>
+
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.total_sold}</TableCell>
                     </TableRow>
@@ -132,7 +129,7 @@ const AdminDashboardPage = () => {
           </Card>
         </Grid>
       </Grid>
-        </Container>
+    </Container>
   );
 };
 
