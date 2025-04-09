@@ -14,14 +14,13 @@ import {
 const initialState = {
 
   orders: [],
-  userorders:[],
+  userOrders:[],
   allOrders: [],
   loading: false,
   error: null,
 };
-
 const orderReducer = (state = initialState, action) => {
-  console.log(state.orders)
+  console.log(state.userOrders)
   console.log(state.allOrders)
   console.log(action.payload)
   switch (action.type) {
