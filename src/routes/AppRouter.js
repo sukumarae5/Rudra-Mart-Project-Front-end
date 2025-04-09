@@ -23,6 +23,7 @@ import NewArrivalpage from "../pages/NewArrivalpage";
 import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook";
 import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory";
 import UserForgotPasswordpage from "../pages/UserAccontDetialsPage/UserForgotPasswordpage";
+import UserCancellationProductpage from "../pages/UserAccontDetialsPage/UserCancellationProductpage"
 const AppRouter = createBrowserRouter([
 
   { 
@@ -114,6 +115,10 @@ const AppRouter = createBrowserRouter([
           },{
             path:"UserOrderHistory",
             element:<UserOrderHistory/>
+
+          },{
+            path:"UserCancellationProductpage",
+            element:<UserCancellationProductpage/>
 
           },
           

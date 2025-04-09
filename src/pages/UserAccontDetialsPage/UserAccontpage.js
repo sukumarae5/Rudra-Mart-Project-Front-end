@@ -5,13 +5,14 @@ import { useNavigate, Outlet } from "react-router-dom";
 const UserAccountPage = () => {
   const navigate = useNavigate();
   const { data = {} } = useSelector((state) => state.users);
+const user=JSON.parse(localStorage.getItem("user"))
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Email Display */}
       <div className="text-right">
         <p>
-          <span className="text-purple-500 font-medium">Your Email:</span>{" "}
+          <span className="text-purple-500 font-medium">Your Email:{user.email}</span>{" "}
           {data.email}
         </p>
       </div>
@@ -45,8 +46,9 @@ const UserAccountPage = () => {
           <ul className="text-gray-600 space-y-2">
           <li className="cursor-pointer hover:text-purple-600"
             onClick={()=>navigate("UserOrderHistory")}>Order History</li>
+            <li className="cursor-pointer hover:text-blue-600" 
+            onClick={()=>navigate("UserCancellationProductpage")}>My Cancellations</li>
             <li>My Returns</li>
-            <li>My Cancellations</li>
           </ul>
 
           <h2 className="text-lg font-semibold text-gray-800 mt-6 mb-4">

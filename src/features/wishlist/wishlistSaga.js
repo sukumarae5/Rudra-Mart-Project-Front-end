@@ -28,7 +28,7 @@ const addToWishlistApi = async (productid) => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User token not found!");
 
-  const response = await fetch("http://192.168.1.12:8081/api/wishlist/add", {
+  const response = await fetch("http://192.168.1.12:8081/api/wishlist/additem", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

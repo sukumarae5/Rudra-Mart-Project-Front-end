@@ -10,6 +10,10 @@ import {fetchproductsrequest,searchquryproduct,} from "../../features/product/pr
 import { FaRegUserCircle } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
 import { userlogoutdata } from "../../features/user/userActions";
+import { FaUser } from "react-icons/fa";
+import { RiLogoutCircleLine } from "react-icons/ri";
+import { FaHeart } from "react-icons/fa";
+import { FaCartArrowDown } from "react-icons/fa6";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -157,11 +161,28 @@ const Header = () => {
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       <Dropdown.Item onClick={handleProfile}>
-                        Profile
+                     <a style={{display:"flex", gap:"5px", position:"relative"}}> <FaUser />Profile</a>
                       </Dropdown.Item>
                       <Dropdown.Item onClick={handleLogout}>
-                        Logout
+                        <a style={{display:"flex",gap:"5px",position:"relative"}}> <RiLogoutCircleLine />
+                        Logout</a>
+                        
                       </Dropdown.Item>
+                      <Dropdown.Item   onClick={() => navigate("/useraccountpage/UserOrderHistory")}
+                      >
+                        <a style={{display:"flex",gap:"5px",position:"relative"}}> <FaCartArrowDown />
+
+                        Orders</a>
+                        
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={handleLogout}>
+                        <a style={{display:"flex",gap:"5px",position:"relative"}}  onClick={() => navigate("/useraccountpage/WishListpage")}
+                        > <FaHeart />
+
+                        Wishlist</a>
+                        
+                      </Dropdown.Item>
+
                     </Dropdown.Menu>
                   </Dropdown>
                 )}

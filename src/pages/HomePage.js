@@ -455,7 +455,7 @@ wishlistItems.some((item) => item.product_id === product.id)
                       }}>
 
                       {
-wishlistItems.some((item) => item.product_id === product.id) 
+wishlistItems.some((item) => item.product_id === product.id)  
 ? 
                       (
                         

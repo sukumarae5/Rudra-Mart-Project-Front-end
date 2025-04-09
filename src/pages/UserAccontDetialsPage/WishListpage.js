@@ -1,57 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { Button, Card } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchWishlistRequest,
-  removeWishlistProductRequest,
-} from "../../features/wishlist/wishlistAction";
+import {fetchWishlistRequest,removeWishlistProductRequest} from "../../features/wishlist/wishlistAction";
 import { MdCancel } from "react-icons/md";
 import { setSelectedProduct } from "../../features/product/productActions";
 import { useNavigate } from "react-router-dom";
-import { fetcheckeoutpagedata } from "../../features/cart/cartActions";
+import { fetchApiCartDataRequest, fetcheckeoutpagedata } from "../../features/cart/cartActions";
 
 const WishListPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
-  const { products = [] } = useSelector((state) => state.products || {});
-
+  const { cartItems = [] } = useSelector((state) => state.cart || {});
+  
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  // Normalize wishlist data (in case it's wrapped in another array)
-  const wishlistItems = Array.isArray(wishlistData[0])
+ const wishlistItems = Array.isArray(wishlistData[0])
     ? wishlistData[0]
     : wishlistData;
-
-  // Extract numeric product IDs
-  const wishlistProductIds = wishlistItems
-    .map((item) => Number(item.product_id))
-    .filter(Boolean);
-
-  // Debug logs
-  console.log("Wishlist Product IDs:", wishlistProductIds);
-  console.log("All Products:", products.map(p => ({ id: p.id, name: p.name })));
-
-  // Filter products that are in the wishlist
-  const matchedProducts = products.filter((product) =>
-    wishlistProductIds.includes(Number(product.id))
-  );
-
-  console.log("Matched Products:", matchedProducts);
-
-  // Fetch data on mount
+console.log(wishlistData[0])
   useEffect(() => {
     dispatch(fetchWishlistRequest());
-    // dispatch(fetchProductsRequest()); // ensure products are loaded
   }, [dispatch]);
 
-  // Remove item from wishlist
   const removeItem = (product_id) => {
+    console.log(product_id)
     dispatch(removeWishlistProductRequest(product_id));
   };
 
-  // Navigate to product details page
   const handleCardClick = (productId, product) => {
     dispatch(setSelectedProduct(product));
     navigate("/productpage");
@@ -65,7 +41,7 @@ const WishListPage = () => {
       {
         userId,
         productId: product.id,
-        productName: product.name || "Unknown",
+        productName: product.name  || "Unknown",
         productImage: product.image_url || "",
         productPrice: parseFloat(product.price || 0),
         quantity,
@@ -76,12 +52,70 @@ const WishListPage = () => {
     dispatch(fetcheckeoutpagedata(checkoutItem));
     navigate("/CheckoutPage");
   };
+  const handleAddToCart = async (product_id,product) => {
+        
+      
+        try {
+          const userToken = localStorage.getItem("authToken");
+          if (!userToken) {
+            alert("Session expired or user not authenticated. Please log in.");
+            navigate("/login");
+            return;
+          }
+      
+          const user = JSON.parse(localStorage.getItem("user"));
+          if (!user || !user.id) {
+            alert("User information is missing or corrupted. Please log in.");
+            navigate("/login");
+            return;
+          }
+      
+          
+          const isProductInCart = cartItems.some(
+            (item) => item.user_id === user.id && item.product_id === product.id
+          );  
+          if (isProductInCart) {
+            alert("Product is already in the cart.");
+            return;
+          }
+          
+          const cartItem = {
+            user_id: user.id,
+            product_id: product_id,
+            quantity: 1,
+          };
+          console.log(cartItem)
+      
+          // API call to add product to cart
+          const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
+            },
+            body: JSON.stringify(cartItem),
+          });
+      
+          const data = await response.json();
+      
+          if (!response.ok) {
+            alert(`Error: ${data.message || response.statusText}`);
+            return;
+          }
+      
+          alert("Product successfully added to cart.");
+          dispatch(fetchApiCartDataRequest());
+        } catch (error) {
+          console.error("Error adding product to cart:", error);
+          alert(`Error: ${error.message}`);
+        }
+      };
 
   return (
     <div className="container mt-4">
-      {matchedProducts.length > 0 ? (
+      {wishlistItems.length > 0 ? (
         <div className="row">
-          {matchedProducts.map((product, index) => (
+          {wishlistItems.map((product, index) => (
             <div key={index} className="col-md-4 col-sm-6 col-12 mb-3">
               <Card
                 className="shadow-lg border-0 h-100"
@@ -89,7 +123,7 @@ const WishListPage = () => {
               >
                 <div className="d-flex justify-content-end p-2">
                   <button
-                    onClick={() => removeItem(product.product_id)}
+                    onClick={() => removeItem(product.wishlist_id)} 
                     style={{
                       background: "none",
                       border: "none",
@@ -140,7 +174,9 @@ const WishListPage = () => {
                   <div className="d-flex justify-content-center gap-2 mt-2" style={{marginLeft: "20px",
                 borderRadius: "8px",
                 fontSize: "10px",}}> 
-                    <Button variant="outline-danger">Add to Cart</Button>
+                    <Button variant="outline-danger" 
+                    onClick={(event) => handleAddToCart(product.product_id, product)}
+                    >Add to Cart</Button>
                     <Button variant="outline-info"
               style={{
                 // background: "linear-gradient(135deg,rgb(255, 181, 70), #ff5722)",

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
 import { fetchApiCartDataRequest, fetcheckeoutpagedata, removeCartItemRequest, updateCartItemQuantityRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
+import { Box, CircularProgress } from "@mui/material";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -13,7 +14,7 @@ const CartPage = () => {
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
-
+  
   useEffect(() => {
     dispatch(fetchApiCartDataRequest());
   }, [dispatch]);
@@ -71,7 +72,9 @@ const CartPage = () => {
       <h1 className="text-center mb-4 text-danger">Shopping Cart</h1>
       {error && <p style={{ color: "red" }}>Error: {error}</p>}
       {!cartItems.length ? (
-        <h4 className="text-center text-muted">Your cart is empty.</h4>
+        <h4 className="text-center text-muted"> <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                            <CircularProgress />
+                        </Box>Your cart is empty.</h4>
       ) : (
         <>
           <Table bordered responsive className="mb-4" style={{ backgroundColor: "white", borderRadius: "8px" }}>
