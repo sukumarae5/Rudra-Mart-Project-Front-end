@@ -6,7 +6,7 @@ import { IoArrowBack } from "react-icons/io5";
 const EditUserForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = location.state || {}; // Get user data from state
+  const { user } = location.state || {};
 
   const [updatedUser, setUpdatedUser] = useState({
     name: "",
@@ -22,7 +22,7 @@ const EditUserForm = () => {
         name: user.name || "",
         email: user.email || "",
         phone_number: user.phone_number || "",
-        password: "", // Leave blank for security
+        password: "", // Keep it blank initially
         role: user.role || "",
       });
     }
@@ -30,34 +30,25 @@ const EditUserForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setUpdatedUser((prevUser) => ({
-      ...prevUser,
+    setUpdatedUser((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
-  if (!user?.id) {
-    console.error("User ID is missing.");
-    return <p>Error: User data is missing.</p>;
-  }
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (
-      !updatedUser.name ||
-      !updatedUser.email ||
-      !updatedUser.password ||
-      !updatedUser.phone_number ||
-      !updatedUser.role
-    ) {
-      alert("All fields (Name, Email, Password, Phone Number, Role) are required.");
+    const { name, email, password, phone_number, role } = updatedUser;
+
+    if (!name || !email || !password || !phone_number || !role) {
+      alert("All fields are required.");
       return;
     }
 
     try {
       const response = await fetch(
-        `http://192.168.1.12:8081/api/users/update/${user.id}`,
+        `http://192.168.1.12:8081/api/users/admin/update/${user.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -73,21 +64,25 @@ const EditUserForm = () => {
       }
 
       alert("User updated successfully!");
-      navigate("/admin/adminusers"); // Redirect after update
+      navigate("/admin/adminusers");
     } catch (error) {
       console.error("Error updating user:", error);
       alert("Error: Could not update user");
     }
   };
 
+  if (!user?.id) {
+    return <p>Error: User data is missing.</p>;
+  }
+
   return (
     <div className="container-fluid">
-      {/* Header: Back Button */}
+      {/* Header */}
       <Row className="align-items-center mb-3">
-        <Col xs={6} className="d-flex align-items-center">
+        <Col xs={6}>
           <Button
             variant="link"
-            onClick={() => navigate('/admin/adminusers')}
+            onClick={() => navigate("/admin/adminusers")}
             className="text-primary d-flex align-items-center"
             style={{ fontSize: "1.2rem", gap: "8px" }}
           >
@@ -97,22 +92,15 @@ const EditUserForm = () => {
         </Col>
       </Row>
 
-      {/* Edit User Title and Buttons on Same Line */}
+      {/* Title and Top Buttons */}
       <Row className="align-items-center mb-3">
-        {/* Title - Left */}
         <Col xs={6}>
-          <h1 className="text-start" style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}>
+          <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#131523" }}>
             Edit User
           </h1>
         </Col>
-
-        {/* Buttons - Right */}
         <Col xs={6} className="d-flex justify-content-end">
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/adminusers")}
-            className="me-2"
-          >
+          <Button variant="secondary" onClick={() => navigate("/admin/adminusers")} className="me-2">
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSubmit}>
@@ -121,7 +109,7 @@ const EditUserForm = () => {
         </Col>
       </Row>
 
-      {/* Edit User Form */}
+      {/* Form */}
       <Form onSubmit={handleSubmit} className="p-3 border rounded">
         <Form.Group className="mb-3" controlId="userName">
           <Form.Label>Name</Form.Label>
@@ -134,6 +122,7 @@ const EditUserForm = () => {
             required
           />
         </Form.Group>
+
         <Form.Group className="mb-3" controlId="userEmail">
           <Form.Label>Email</Form.Label>
           <Form.Control
@@ -141,10 +130,11 @@ const EditUserForm = () => {
             name="email"
             value={updatedUser.email}
             onChange={handleChange}
-            placeholder="Enter user email"
+            placeholder="Enter email"
             required
           />
         </Form.Group>
+
         <Form.Group className="mb-3" controlId="userPhone">
           <Form.Label>Phone Number</Form.Label>
           <Form.Control
@@ -156,8 +146,9 @@ const EditUserForm = () => {
             required
           />
         </Form.Group>
+
         <Form.Group className="mb-3" controlId="userPassword">
-          <Form.Label>Password</Form.Label>
+          <Form.Label>New Password</Form.Label>
           <Form.Control
             type="password"
             name="password"
@@ -167,6 +158,7 @@ const EditUserForm = () => {
             required
           />
         </Form.Group>
+
         <Form.Group className="mb-3" controlId="userRole">
           <Form.Label>Role</Form.Label>
           <Form.Control
@@ -174,18 +166,15 @@ const EditUserForm = () => {
             name="role"
             value={updatedUser.role}
             onChange={handleChange}
-            placeholder="Enter user role"
+            placeholder="Enter role"
             required
           />
         </Form.Group>
 
-        {/* Bottom Save/Cancel Buttons */}
+        {/* Bottom Buttons */}
         <Row className="mt-4">
-          <Col xs={6} className="text-start">
-            <Button
-              variant="secondary"
-              onClick={() => navigate("/admin/adminusers")}
-            >
+          <Col xs={6}>
+            <Button variant="secondary" onClick={() => navigate("/admin/adminusers")}>
               Cancel
             </Button>
           </Col>
