@@ -3,17 +3,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaHeart, FaTruck, FaUndo } from "react-icons/fa";
 import ReactImageMagnify from "react-image-magnify";
 import { useNavigate } from "react-router-dom";
-import { fetcheckeoutpagedata } from "../features/cart/cartActions";
-import { setSelectedProduct } from "../features/product/productActions";
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+import { setSelectedProduct } from '../features/product/productSlice';
+import { fetchCheckoutPageData } from '../features/cart/cartSlice';
 
-const ProductDetailPage = () => {
+
+
+const ProductPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { products = [], selectedProduct = {} } = useSelector(
     (state) => state.products || {}
   );
-console.log(products)
+
   const {
     name: title = "No Title",
     description = "No Description Available",
@@ -32,27 +36,40 @@ console.log(products)
 
   useEffect(() => {
     if (selectedProduct && Object.keys(selectedProduct).length > 0) {
-      dispatch(fetcheckeoutpagedata(selectedProduct));
+      dispatch(fetchCheckoutPageData(selectedProduct));
     }
   }, [selectedProduct, dispatch]);
 
   const relatedProducts = products.filter(
-    (product) => product.category_id === category_id && product.id !== selectedProduct.id
+    (product) =>
+      product.category_id === category_id && product.id !== selectedProduct.id
   );
 
   if (!selectedProduct || Object.keys(selectedProduct).length === 0) {
     return (
-      <div style={{ textAlign: "center", color: "red", fontSize: "20px", marginTop: "50px" }}>
+      <div
+        style={{
+          textAlign: "center",
+          color: "red",
+          fontSize: "20px",
+          marginTop: "50px",
+        }}
+      >
         No product selected!
       </div>
     );
   }
+
   const handleCardClick = (product) => {
     dispatch(setSelectedProduct(product));
-    navigate(`/productpage/${product.id}`); // Updates URL without refreshing
+    navigate(`/productpage/${product.id}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   const handleQuantityChange = (type) => {
-    setQuantity((prev) => (type === "increment" ? prev + 1 : prev > 1 ? prev - 1 : 1));
+    setQuantity((prev) =>
+      type === "increment" ? prev + 1 : prev > 1 ? prev - 1 : 1
+    );
   };
 
   const handleBuy = () => {
@@ -73,8 +90,32 @@ console.log(products)
       },
     ];
 
-    dispatch(fetcheckeoutpagedata(checkoutItem));
+    dispatch(fetchCheckoutPageData(checkoutItem));
     navigate("/CheckoutPage");
+  };
+
+  const handleWishlist = () => {
+    console.log("Add to wishlist clicked:", selectedProduct.id);
+    // Add dispatch for wishlist logic here if needed
+  };
+
+  const responsive = {
+    superLargeDesktop: {
+      breakpoint: { max: 4000, min: 1921 },
+      items: 5,
+    },
+    desktop: {
+      breakpoint: { max: 1920, min: 1024 },
+      items: 5,
+    },
+    tablet: {
+      breakpoint: { max: 1024, min: 768 },
+      items: 2,
+    },
+    mobile: {
+      breakpoint: { max: 768, min: 0 },
+      items: 1,
+    },
   };
 
   return (
@@ -86,7 +127,9 @@ console.log(products)
         flexDirection: "column",
         padding: "40px",
         background: "linear-gradient(to right, #2267ac, #37628d)",
-      }}>{/* Product Detail Section */}
+      }}
+    >
+      {/* Product Detail Section */}
       <div
         style={{
           display: "flex",
@@ -97,18 +140,19 @@ console.log(products)
           boxShadow: "0 6px 15px rgba(0, 0, 0, 0.2)",
           maxWidth: "1000px",
           minHeight: "550px",
-        }}>{/* Product Image */}
+        }}
+      >
+        {/* Product Image */}
         <div
           style={{
             flex: "1",
             display: "flex",
-            justifyContent: "center",  
-
-            
+            justifyContent: "center",
             alignItems: "center",
             padding: "30px",
-          }}>
-          {mainImage && (
+          }}
+        >
+          {mainImage ? (
             <ReactImageMagnify
               {...{
                 smallImage: {
@@ -117,32 +161,53 @@ console.log(products)
                   src: mainImage,
                   width: 380,
                   height: 380,
-                },largeImage: { src: mainImage, width: 1000, height: 800 },
+                },
+                largeImage: {
+                  src: mainImage,
+                  width: 1000,
+                  height: 800,
+                },
                 enlargedImagePosition: "beside",
               }}
             />
+          ) : (
+            <img
+              src="/placeholder.jpg"
+              alt="No Product"
+              width="380"
+              height="380"
+            />
           )}
         </div>
+
         {/* Product Details */}
         <div style={{ flex: "1", padding: "30px", textAlign: "center" }}>
           <h1 style={{ fontSize: "26px", fontWeight: "bold" }}>{title}</h1>
-          <h3 style={{ fontSize: "24px", color: "#28a745" }}>Rs. {(price * quantity).toFixed(2)}</h3>
+          <h3 style={{ fontSize: "24px", color: "#28a745" }}>
+            Rs. {(price * quantity).toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+            })}
+          </h3>
           <p style={{ color: "#555", fontSize: "16px" }}>{description}</p>
-          <p style={{
+          <p
+            style={{
               fontSize: "18px",
               fontWeight: "bold",
               color: stock > 0 ? "#28a745" : "#dc3545",
             }}
           >
             <strong>Stock:</strong> {stock > 0 ? stock : "Out of Stock"}
-          </p>{/* Quantity Selector & Buy Button */}
+          </p>
+
+          {/* Quantity & Buy Buttons */}
           <div
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               marginTop: "30px",
-            }}>
+            }}
+          >
             <div
               style={{
                 display: "flex",
@@ -152,14 +217,32 @@ console.log(products)
               }}
             >
               <button
-                style={{ background: "#28a745", color: "white", padding: "12px 18px", fontSize: "20px" }}
+                style={{
+                  background: "#28a745",
+                  color: "white",
+                  padding: "12px 18px",
+                  fontSize: "20px",
+                }}
                 onClick={() => handleQuantityChange("decrement")}
               >
                 -
               </button>
-              <span style={{ padding: "10px 25px", fontSize: "20px", fontWeight: "bold" }}>{quantity}</span>
+              <span
+                style={{
+                  padding: "10px 25px",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                }}
+              >
+                {quantity}
+              </span>
               <button
-                style={{ background: "#28a745", color: "white", padding: "12px 18px", fontSize: "20px" }}
+                style={{
+                  background: "#28a745",
+                  color: "white",
+                  padding: "12px 18px",
+                  fontSize: "20px", 
+                }}
                 onClick={() => handleQuantityChange("increment")}
               >
                 +
@@ -180,50 +263,85 @@ console.log(products)
             >
               Buy Now
             </button>
-            <button style={{ border: "2px solid #dc3545", color: "#dc3545", padding: "10px 15px", marginLeft: "10px" }}>
+
+            <button
+              style={{
+                border: "2px solid #dc3545",
+                color: "#dc3545",
+                padding: "10px 15px",
+                marginLeft: "10px",
+                borderRadius: "50%",
+              }}
+              onClick={handleWishlist}
+            >
               <FaHeart />
             </button>
           </div>
-          {/* Delivery & Return Info */}
-          <div style={{ marginTop: "30px", fontSize: "16px", color: "rgb(63, 38, 62)" }}>
-            <p><FaTruck /> Free Delivery</p>
-            <p><FaUndo /> Easy Returns</p>
+
+          {/* Delivery Info */}
+          <div
+            style={{
+              marginTop: "30px",
+              fontSize: "16px",
+              color: "rgb(63, 38, 62)",
+            }}
+          >
+            <p>
+              <FaTruck /> Free Delivery
+            </p>
+            <p>
+              <FaUndo /> Easy Returns
+            </p>
           </div>
         </div>
       </div>
-      {/* Related Products Section */}
+
+      {/* Related Products Carousel */}
       {relatedProducts.length > 0 && (
-        <div style={{ marginTop: "50px", textAlign: "center" }} >
-          <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>Related Products</h2>
-          <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+        <div style={{ marginTop: "50px", textAlign: "center", width: "100%" }}>
+          <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>
+            Related Products
+          </h2>
+          <Carousel responsive={responsive} infinite autoPlay={false} arrows>
             {relatedProducts.map((product) => (
               <div
                 key={product.id}
-                onClick={(e)=> {e.stopPropagation();handleCardClick(product)}}
-
-                style={{ 
-                  width: "200px",
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCardClick(product);
+                }}
+                style={{
                   background: "white",
                   padding: "15px",
                   borderRadius: "10px",
                   boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
                   cursor: "pointer",
+                  margin: "10px",
                 }}
               >
                 <img
                   src={product.image_url}
                   alt={product.name}
-                  style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }}
+                  style={{
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "cover",
+                    borderRadius: "10px",
+                  }}
                 />
-                <h3 style={{ fontSize: "16px", margin: "10px 0" }}>{product.name}</h3>
-                <p style={{ color: "#28a745", fontWeight: "bold" }}>Rs. {product.price}</p>
+                <h3 style={{ fontSize: "16px", margin: "10px 0" }}>
+                  {product.name}
+                </h3>
+                <p style={{ color: "#28a745", fontWeight: "bold" }}>
+                  Rs. {parseFloat(product.price).toLocaleString("en-IN")}
+                </p>
               </div>
             ))}
-          </div>
+          </Carousel>
         </div>
       )}
     </div>
   );
 };
 
-export default ProductDetailPage;
+export default ProductPage;

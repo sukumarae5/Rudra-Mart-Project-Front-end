@@ -43,7 +43,7 @@ const UserAddressBook = ({  }) => {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.12:8081/api/address/get", {
+      const response = await fetch("http://192.168.1.10:8081/api/address/get", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });

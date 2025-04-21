@@ -20,6 +20,8 @@ import Categories from './Categories';
 import ExploreOurProductspage from './ExploreOurProductspage';
 import NewArrivalpage from './NewArrivalpage';
 import { addToWishlistRequest, removeWishlistProductRequest} from '../features/wishlist/wishlistAction';
+import ProductPagenation from './ProductPagenation';
+
 
 
 const renderStars = (rating, onClick, productId) => {
@@ -248,7 +250,7 @@ const removeItem = (event, productid) => {
             </Carousel>
           </Col>
         </Row>
-        
+        <ProductPagenation/>
         
         <Container fluid className="mt-4">
         <div className="d-flex align-items-center">
