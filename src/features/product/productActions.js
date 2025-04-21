@@ -26,8 +26,6 @@ export const fetchproductsfailure = (error) => ({
   payload: error,
 });
 
-
-
 export const searchquryproduct=(searchproduct)=>({
   type:GET_SEARCH_PRODUCT,
   payload:searchproduct,

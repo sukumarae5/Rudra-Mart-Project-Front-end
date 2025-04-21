@@ -16,13 +16,15 @@ const EditUserForm = () => {
     role: "",
   });
 
+  const [successMessage, setSuccessMessage] = useState("");
+
   useEffect(() => {
     if (user) {
       setUpdatedUser({
         name: user.name || "",
         email: user.email || "",
         phone_number: user.phone_number || "",
-        password: "", // Keep it blank initially
+        password: "", // Password left blank initially
         role: user.role || "",
       });
     }
@@ -63,8 +65,11 @@ const EditUserForm = () => {
         return;
       }
 
-      alert("User updated successfully!");
-      navigate("/admin/adminusers");
+      setSuccessMessage("User updated successfully!");
+      setTimeout(() => {
+        setSuccessMessage("");
+        navigate("/admin/adminusers");
+      }, 2000); // 2-second delay before redirect
     } catch (error) {
       console.error("Error updating user:", error);
       alert("Error: Could not update user");
@@ -108,6 +113,13 @@ const EditUserForm = () => {
           </Button>
         </Col>
       </Row>
+
+      {/* Success Message Alert */}
+      {successMessage && (
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+      )}
 
       {/* Form */}
       <Form onSubmit={handleSubmit} className="p-3 border rounded">
@@ -179,7 +191,7 @@ const EditUserForm = () => {
             </Button>
           </Col>
           <Col xs={6} className="text-end">
-            <Button variant="primary" type="submit">
+            <Button variant="primary" type="submit" onClick={handleSubmit}>
               Save Changes
             </Button>
           </Col>
