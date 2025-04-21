@@ -36,7 +36,7 @@ const UserForgotpasswordOtpGeneratorpage = () => {
     };
 
     try {
-      const response = await fetch('http://192.168.1.12:8081/api/otp/send-otp', {
+      const response = await fetch('http://192.168.1.10:8081/api/otp/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

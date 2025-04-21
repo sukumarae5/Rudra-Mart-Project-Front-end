@@ -17,7 +17,7 @@ const OrderPlacedSuccessfullyPage = () => {
     const fetchPayment = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const paymentRes = await fetch("http://192.168.1.12:8081/api/payment", {
+        const paymentRes = await fetch("http://192.168.1.10:8081/api/payment", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ const OrderPlacedSuccessfullyPage = () => {
     const token = localStorage.getItem("authToken");
     const transactionId = payment.transaction_id;
 
-    fetch(`http://192.168.1.12:8081/api/invoice/pdf/${transactionId}`, {
+    fetch(`http://192.168.1.10:8081/api/invoice/pdf/${transactionId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -84,7 +84,7 @@ const OrderPlacedSuccessfullyPage = () => {
     const token = localStorage.getItem("authToken");
     const transactionId = payment.transaction_id;
 
-    fetch(`http://192.168.1.12:8081/api/invoice/pdf/${transactionId}`, {
+    fetch(`http://192.168.1.10:8081/api/invoice/pdf/${transactionId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
