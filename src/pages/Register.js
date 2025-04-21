@@ -51,7 +51,7 @@ const Register = () => {
       };
 
       const response = await fetch(
-        "http://192.168.1.10:8081/api/users/register",
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -43,7 +43,7 @@ const UserAddressBook = ({  }) => {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.1.12:8081/api/address/get", {
+      const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/address/get`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -114,7 +114,7 @@ const UserAddressBook = ({  }) => {
         country: formData.country,
         userId: userId,
       };
-      const response = await fetch("http://192.168.1.12:8081/api/address/add", {
+      const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/address/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -167,7 +167,7 @@ const UserAddressBook = ({  }) => {
         country: formData.country,
       };
       const response = await fetch(
-        `http://192.168.1.12:8081/api/address/updateaddress/${selectedAddress.id}`,
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/address/updateaddress/${selectedAddress.id}`,
         {
           method: "PUT",
           headers: {
@@ -206,7 +206,7 @@ const UserAddressBook = ({  }) => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://192.168.1.12:8081/api/address/delete/${addressId}`,
+          `http://${process.env.REACT_APP_IP_ADDRESS}/api/address/delete/${addressId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },

@@ -16,7 +16,7 @@ const fetchCartDataApi = async () => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User not authenticated. Please log in.");
 
-  const response = await fetch("http://192.168.1.12:8081/api/cart/my-cart", {
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/my-cart`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +47,7 @@ const removeCartItemApi = async (cartItemId) => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User not authenticated. Please log in.");
 
-  const response = await fetch(`http://192.168.1.10:8081/api/cart/${cartItemId}`, {
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/${cartItemId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${userToken}`,
@@ -81,7 +81,7 @@ const updateCartItemQuantityApi = async ({cartItemId, quantity }) => {
     throw new Error("Invalid Cart Item ID");
   }
 
-  const response = await fetch(`http://192.168.1.10:8081/api/cart/update/${cartItemId}`, {
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/update/${cartItemId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
