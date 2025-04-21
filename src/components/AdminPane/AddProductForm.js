@@ -164,7 +164,7 @@ const AddProductForm = () => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Price:</Form.Label>
+            <Form.Label>Price:</Form.Label> 
             <Form.Control
               type="number"
               name="price"

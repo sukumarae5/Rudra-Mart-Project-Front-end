@@ -12,7 +12,7 @@ import {
   INCREASE_QUANTITY,
   REMOVE_PRODUCT,
   DECREASE_QUANTITY
-} from "../cart/cartActions";
+} from "./cartActions";
 
 const initialState = {
   cartItems: [],

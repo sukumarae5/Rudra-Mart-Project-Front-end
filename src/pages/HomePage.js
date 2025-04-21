@@ -26,6 +26,7 @@ import {
   addToWishlistRequest,
   removeWishlistProductRequest,
 } from "../features/wishlist/wishlistAction";
+import ProductPagenation from "./ProductPagenation";
 
 const renderStars = (rating, onClick, productId) => {
   const stars = [];
@@ -273,7 +274,7 @@ const HomePage = () => {
             </Carousel>
           </Col>
         </Row>
-
+        <ProductPagenation/>
         <Container fluid className="mt-4">
           <div className="d-flex align-items-center">
             <Badge
@@ -287,12 +288,14 @@ const HomePage = () => {
             >
               {" "}
             </Badge>
+            
             <p
               style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px" }}
             >
-              todays
+              Today's
             </p>
           </div>
+         
           <Row className="align-items-center">
             <Col md={3}>
               <h1
