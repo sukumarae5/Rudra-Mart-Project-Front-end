@@ -64,7 +64,7 @@ const AddProductForm = () => {
       console.log("Product data being sent to API:", newProduct);
 
       const response = await fetch(
-        "http://192.168.1.10:8081/api/products/productregister",
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/productregister`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -164,7 +164,7 @@ const AddProductForm = () => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Price:</Form.Label>
+            <Form.Label>Price:</Form.Label> 
             <Form.Control
               type="number"
               name="price"

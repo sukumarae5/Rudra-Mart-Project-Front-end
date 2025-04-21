@@ -112,7 +112,7 @@ const ProductTable = () => {
       await Promise.all(
         selectedProducts.map(async (productId) => {
           const response = await fetch(
-            `http://192.168.1.10:8081/api/products/deleteproduct/${productId}`,
+            `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/deleteproduct/${productId}`,
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },

@@ -106,7 +106,7 @@ const Header = () => {
           </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="navbarNav" />
-
+ 
           <Navbar.Collapse id="navbarNav">
             <Nav className="mx-auto">
               <Nav.Link as={Link} to="/" className="text-dark">
@@ -226,9 +226,13 @@ const Header = () => {
                         top: "-5px",
                         right: "-10px",
                         fontSize: "0.7rem",
+                        cursor:"pointer"
                       }}
+                      onClick={() => navigate("/cartpage")}
+
                     >
                       {cartItems.length}
+
                     </Badge>
                   )}
                 </div>

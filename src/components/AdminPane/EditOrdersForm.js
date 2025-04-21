@@ -35,7 +35,7 @@ const EditOrdersForm = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://192.168.1.10:8081/api/orders/status/${order.order_id}`,
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/status/${order.order_id}`,
         {
           method: "PUT",
           headers: {
@@ -66,7 +66,7 @@ const EditOrdersForm = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://192.168.1.12:8081/api/orders/${order.order_id}`,
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/${order.order_id}`,
         {
           method: "DELETE",
         }

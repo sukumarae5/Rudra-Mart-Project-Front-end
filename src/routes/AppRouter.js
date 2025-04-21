@@ -22,8 +22,10 @@ import ExploreOurProductspage from "../pages/ExploreOurProductspage";
 import NewArrivalpage from "../pages/NewArrivalpage";
 import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook";
 import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory";
-import UserForgotPasswordpage from "../pages/UserAccontDetialsPage/UserForgotPasswordpage";
+
 import UserCancellationProductpage from "../pages/UserAccontDetialsPage/UserCancellationProductpage"
+import UserForgotPasswordPage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotPasswordpage";
+import UserForgotpasswordOtpGeneratorpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotpasswordOtpGeneratorpage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -86,7 +88,13 @@ const AppRouter = createBrowserRouter([
       },
       {path:"/NewArrivalpage",
         element:<NewArrivalpage/>},
-      
+        {
+          path: "userforgotpasswordpage",
+          element: <UserForgotPasswordPage />,
+        },  {
+          path:"UserForgotpasswordOtpGeneratorpage",
+          element:<UserForgotpasswordOtpGeneratorpage/>
+        },    
       
       {
         path: "/useraccountpage",
@@ -97,10 +105,7 @@ const AppRouter = createBrowserRouter([
             element: <UserProfile />,          
 
           },
-          {
-            path: "userforgotpasswordpage",
-            element: <UserForgotPasswordpage />,
-          },          
+                    
 
           {
             path: "usercheckoutpage",

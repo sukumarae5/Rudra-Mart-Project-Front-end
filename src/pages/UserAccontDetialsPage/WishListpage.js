@@ -87,7 +87,7 @@ console.log(wishlistData[0])
           console.log(cartItem)
       
           // API call to add product to cart
-          const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
+          const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

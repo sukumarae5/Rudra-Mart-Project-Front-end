@@ -23,80 +23,68 @@ const ExploreOurProductspage = () => {
   useEffect(() => {
     dispatch(fetchproductsrequest());
 
-    const handleResize = () => setScreenWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [dispatch]);
+        const handleResize = () => setScreenWidth(window.innerWidth);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [dispatch]);
 
-  const handleAddToCart = async (event, product) => {
-    event.stopPropagation();
-    try {
-      const userToken = localStorage.getItem("authToken");
-      if (!userToken) {
-        alert("Session expired. Please log in.");
-        navigate("/login");
-        return;
-      }
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.id) {
-        alert("User information is missing. Please log in.");
-        navigate("/login");
-        return;
-      }
+    const handleAddToCart = async (event, product) => {
+        event.stopPropagation();
+        try {
+            const userToken = localStorage.getItem("authToken");
+            if (!userToken) {
+                alert("Session expired. Please log in.");
+                navigate("/login");
+                return;
+            }
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (!user || !user.id) {
+                alert("User information is missing. Please log in.");
+                navigate("/login");
+                return;
+            }
+            const isProductInCart = cartItems.some((item) => item.user_id === user.id && item.product_id === product.id);
+            if (isProductInCart) {
+                alert("Product is already in the cart.");
+                return;
+            }
+            const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${userToken}`,
+                },
+                body: JSON.stringify({ user_id: user.id, product_id: product.id, quantity: 1 }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                alert(`Error: ${data.message || response.statusText}`);
+                return;
+            }
+            alert("Product successfully added to cart.");
+            dispatch(fetchApiCartDataRequest());
+        } catch (error) {
+            console.error("Error adding product to cart:", error);
+            alert(`Error: ${error.message}`);
+        }    };
 
-      const isProductInCart = cartItems.some(
-        (item) => item.user_id === user.id && item.product_id === product.id
-      );
-      if (isProductInCart) {
-        alert("Product is already in the cart.");
-        return;
-      }
-
-      const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: 1,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        alert(`Error: ${data.message || response.statusText}`);
-        return;
-      }
-
-      alert("Product successfully added to cart.");
-      dispatch(fetchApiCartDataRequest());
-    } catch (error) {
-      console.error("Error adding product to cart:", error);
-      alert(`Error: ${error.message}`);
-    }
-  };
-
-  const handleCardClick = (product) => {
-    dispatch(setSelectedProduct(product));
-    navigate("/productpage");
-  };
-
-  const handleWishlistClick = (e, product) => {
-    e.stopPropagation();
-    setClickedProducts((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(product.id)) {
-        newSet.delete(product.id);
-      } else {
-        newSet.add(product.id);
-        dispatch(addToWishlist(product));
-      }
-      return newSet;
-    });
-  };
+    const handleCardClick = (product) => {
+        dispatch(setSelectedProduct(product));
+        navigate("/productpage");
+    };
+    const handleWishlistClick = (e, product) => {
+        e.stopPropagation();
+        setClickedProducts((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(product.id)) {
+                newSet.delete(product.id);
+            } else {
+                newSet.add(product.id);
+                dispatch(addToWishlist(product));
+            }
+            return newSet;
+        });
+    };
 
   const displayCount = screenWidth < 768 ? 4 : viewAll ? products.length : 8;
 
