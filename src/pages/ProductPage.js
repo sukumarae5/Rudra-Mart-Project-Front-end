@@ -5,10 +5,9 @@ import ReactImageMagnify from "react-image-magnify";
 import { useNavigate } from "react-router-dom";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { setSelectedProduct } from '../features/product/productSlice';
-import { fetchCheckoutPageData } from '../features/cart/cartSlice';
+import { FETCH_CHECKEOUTPAGE_DATA } from "../features/cart/cartActions";
 
-
+// ✅ Corrected imports: use action creators instead of slice files
 
 const ProductPage = () => {
   const navigate = useNavigate();
@@ -36,7 +35,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (selectedProduct && Object.keys(selectedProduct).length > 0) {
-      dispatch(fetchCheckoutPageData(selectedProduct));
+      dispatch(FETCH_CHECKEOUTPAGE_DATA([selectedProduct]));
     }
   }, [selectedProduct, dispatch]);
 
@@ -61,7 +60,7 @@ const ProductPage = () => {
   }
 
   const handleCardClick = (product) => {
-    dispatch(setSelectedProduct(product));
+   
     navigate(`/productpage/${product.id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -90,7 +89,6 @@ const ProductPage = () => {
       },
     ];
 
-    dispatch(fetchCheckoutPageData(checkoutItem));
     navigate("/CheckoutPage");
   };
 
@@ -241,7 +239,7 @@ const ProductPage = () => {
                   background: "#28a745",
                   color: "white",
                   padding: "12px 18px",
-                  fontSize: "20px", 
+                  fontSize: "20px",
                 }}
                 onClick={() => handleQuantityChange("increment")}
               >
