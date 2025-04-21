@@ -200,7 +200,7 @@ const removeItem = (event, productid) => {
   
   
     const wishlistItem = wishlistItems.find((item) => Number(item.product_id) === Number(productid));
-  
+  console.log(wishlistItem)
     if (wishlistItem) {
       alert("Are you sure you want to remove the product from the wishlist?");
       console.log("Wishlist Item ID:", wishlistItem.id);

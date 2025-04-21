@@ -145,7 +145,7 @@ const navigate=useNavigate()
           </button>
           <Button
   variant="secondary"
-  onClick={() => navigate("/useraccountpage/userforgotpasswordpage")}
+  
 >
   forgot password
 </Button>
