@@ -16,20 +16,24 @@ import { CiMobile4 } from "react-icons/ci";
 import { fetchApiCartDataRequest } from "../cart/cartActions";
 import { FaEye } from "react-icons/fa";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
-import { addToWishlistRequest, removeWishlistProductRequest } from "../wishlist/wishlistAction";
+import {
+  addToWishlistRequest,
+  removeWishlistProductRequest,
+} from "../wishlist/wishlistAction";
 
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
   const { cartItems = [] } = useSelector((state) => state.cart || {});
-    const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
-    const wishlistItems = Array.isArray(wishlistData[0]) ? wishlistData[0] : wishlistData;
+  const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
+  const wishlistItems = Array.isArray(wishlistData[0])
+    ? wishlistData[0]
+    : wishlistData;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-// console.log(products)
+  // console.log(products)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
-  
 
   const categoryCardClick = (categoryid) => {
     const filtered = products.filter(
@@ -49,34 +53,33 @@ const ProductCategory = () => {
     }
   };
 
-  const handleCardClick = (productId,product) => {
+  const handleCardClick = (productId, product) => {
     dispatch(setSelectedProduct(product));
-    
+
     navigate("/productpage");
   };
 
   const handleWishlistClick = (e, product) => {
-      e.stopPropagation(); // Prevent card click navigation
-  
-      const userData = localStorage.getItem("user");
-      if (!userData) {
-          console.error("User not found in localStorage");
-          return;
-      }
-  
-      const user = JSON.parse(userData);
-      if (!user?.id || !product?.id) {
-          console.error("Invalid user or product data");
-          return;
-      }
-  console.log(product.id)
-      dispatch(addToWishlistRequest(product.id));
+    e.stopPropagation(); // Prevent card click navigation
+
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      console.error("User not found in localStorage");
+      return;
+    }
+
+    const user = JSON.parse(userData);
+    if (!user?.id || !product?.id) {
+      console.error("Invalid user or product data");
+      return;
+    }
+    console.log(product.id);
+    dispatch(addToWishlistRequest(product.id));
   };
-  
 
   const handleAddToCart = async (event, product) => {
     event.stopPropagation();
-  
+
     try {
       const userToken = localStorage.getItem("authToken");
       if (!userToken) {
@@ -84,45 +87,47 @@ const ProductCategory = () => {
         navigate("/login");
         return;
       }
-  
+
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user || !user.id) {
         alert("User information is missing or corrupted. Please log in.");
         navigate("/login");
         return;
       }
-  
-      
+
       const isProductInCart = cartItems.some(
         (item) => item.user_id === user.id && item.product_id === product.id
-      );  
+      );
       if (isProductInCart) {
         alert("Product is already in the cart.");
         return;
-      }      
+      }
       const cartItem = {
         user_id: user.id,
         product_id: product.id,
         quantity: 1,
       };
-  
+
       // API call to add product to cart
-      const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify(cartItem),
-      });
-  
+      const response = await fetch(
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify(cartItem),
+        }
+      );
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         alert(`Error: ${data.message || response.statusText}`);
         return;
       }
-  
+
       alert("Product successfully added to cart.");
       dispatch(fetchApiCartDataRequest());
     } catch (error) {
@@ -130,40 +135,40 @@ const ProductCategory = () => {
       alert(`Error: ${error.message}`);
     }
   };
-  
+
   const removeItem = (event, productid) => {
     event.stopPropagation(); // Prevents event bubbling if needed
     console.log("Received Product ID:", productid);
-  
+
     if (!productid) {
       console.error("Error: Product ID is undefined or null.");
       return;
     }
-  
-  
-    const wishlistItem = wishlistItems.find((item) => Number(item.product_id) === Number(productid));
-  
+
+    const wishlistItem = wishlistItems.find(
+      (item) => Number(item.product_id) === Number(productid)
+    );
+
     if (wishlistItem) {
       alert("Are you sure you want to remove the product from the wishlist?");
       console.log("Wishlist Item ID:", wishlistItem.id);
-      
+
       dispatch(removeWishlistProductRequest(wishlistItem.id));
     } else {
       console.log(`Product ID ${productid} not found in wishlist.`);
     }
   };
-  
-  
-  
-    
-  
-  
+
   const categories = [
     { categoryicon: <CiMobile4 />, context: "Phone", categoryid: "1" },
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },
     { categoryicon: <BsSmartwatch />, context: "Smartwatch", categoryid: "5" },
     { categoryicon: <CiCamera />, context: "Camera", categoryid: "3" },
-    { categoryicon: <IoHeadsetOutline />, context: "Headphone", categoryid: "6" },
+    {
+      categoryicon: <IoHeadsetOutline />,
+      context: "Headphone",
+      categoryid: "6",
+    },
     { categoryicon: <GiLighter />, context: "Lighter", categoryid: "4" },
     { categoryicon: <IoBagOutline />, context: "Handbag", categoryid: "7" },
     { categoryicon: <IoBookOutline />, context: "Books", categoryid: "8" },
@@ -171,23 +176,39 @@ const ProductCategory = () => {
   ];
 
   return (
-    <div> 
+    <div>
       <div className="d-flex align-items-center">
-  <Badge bg="danger" style={{ width: "20px", height: "50px",marginLeft: "30px" , marginRight:"10px"}}>  </Badge>
-  <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px", }}>
-  Categorys
-  </p>
-</div>     
+        <Badge
+          bg="danger"
+          style={{
+            width: "20px",
+            height: "50px",
+            marginLeft: "30px",
+            marginRight: "10px",
+          }}
+        >
+          {" "}
+        </Badge>
+        <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px" }}>
+          Categorys
+        </p>
+      </div>
       <div
         className="d-flex justify-content-between align-items-center"
         style={{ paddingLeft: "3%" }}
       >
-        <h2 style={{  fontSize: "30px" }}>Browse By Category</h2>
+        <h2 style={{ fontSize: "30px" }}>Browse By Category</h2>
         <div>
-          <button className="btn btn-light" onClick={() => scrollCategory("left")}>
+          <button
+            className="btn btn-light"
+            onClick={() => scrollCategory("left")}
+          >
             <ArrowBackIos />
           </button>
-          <button className="btn btn-light" onClick={() => scrollCategory("right")}>
+          <button
+            className="btn btn-light"
+            onClick={() => scrollCategory("right")}
+          >
             <ArrowForwardIos />
           </button>
         </div>
@@ -210,14 +231,23 @@ const ProductCategory = () => {
               {categories.map((category, index) => (
                 <div
                   key={index}
-                  onMouseEnter={(e)=>{e.currentTarget.style.background="#DB4444"}}
-                  onMouseLeave={(e) => e.currentTarget.style.background = activeCategory === category.categoryid ? "#a4a7ab" : "white"}
-
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#DB4444";
+                  }}
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background =
+                      activeCategory === category.categoryid
+                        ? "#a4a7ab"
+                        : "white")
+                  }
                   style={{
                     padding: "4%",
                     borderWidth: "2px",
                     borderStyle: "solid",
-                    background: activeCategory === category.categoryid ? "#a4a7ab" : "white",
+                    background:
+                      activeCategory === category.categoryid
+                        ? "#a4a7ab"
+                        : "white",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -271,33 +301,33 @@ const ProductCategory = () => {
                         marginBottom: "100px",
                       }}
                     >
-{
-wishlistItems.some((item) => item.product_id === product.id) 
-? (
-  <FaHeart
-    style={{
-      fontSize: "1.3rem",
-      padding: "10%",
-      width: "150%",
-      color: "red",
-      cursor: "pointer",
-      // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-      borderRadius: "50%",
-    }}
-    onClick={(e) => removeItem(e, product.id)}
-  />
-) : (
-  <FaRegHeart
-    style={{
-      fontSize: "1.2rem",
-      color: "#575B5A",
-      cursor: "pointer",
-      // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-      borderRadius: "40%",
-    }}
-    onClick={(e) => handleWishlistClick(e, product)}
-  />
-)}
+                      {wishlistItems.some(
+                        (item) => item.product_id === product.id
+                      ) ? (
+                        <FaHeart
+                          style={{
+                            fontSize: "1.3rem",
+                            padding: "10%",
+                            width: "150%",
+                            color: "red",
+                            cursor: "pointer",
+                            // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                            borderRadius: "50%",
+                          }}
+                          onClick={(e) => removeItem(e, product.id)}
+                        />
+                      ) : (
+                        <FaRegHeart
+                          style={{
+                            fontSize: "1.2rem",
+                            color: "#575B5A",
+                            cursor: "pointer",
+                            // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                            borderRadius: "40%",
+                          }}
+                          onClick={(e) => handleWishlistClick(e, product)}
+                        />
+                      )}
 
                       <FaEye
                         style={{
@@ -309,9 +339,8 @@ wishlistItems.some((item) => item.product_id === product.id)
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          
-                          handleCardClick(product.id, product ,
-                          );
+
+                          handleCardClick(product.id, product);
                         }}
                       />
                     </div>

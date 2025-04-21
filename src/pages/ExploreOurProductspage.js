@@ -45,7 +45,7 @@ const ExploreOurProductspage = () => {
                 alert("Product is already in the cart.");
                 return;
             }
-            const response = await fetch("http://192.168.1.12:8081/api/cart/add", {
+            const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

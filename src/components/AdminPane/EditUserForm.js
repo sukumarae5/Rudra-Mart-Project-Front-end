@@ -50,7 +50,7 @@ const EditUserForm = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.1.12:8081/api/users/admin/update/${user.id}`,
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/admin/update/${user.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
