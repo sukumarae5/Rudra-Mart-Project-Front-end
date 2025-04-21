@@ -4,7 +4,7 @@ import { fetchproductssuccess, fetchproductsfailure } from '../product/productAc
 
 const fetchTheApi = async () => {
   try {
-    const response = await fetch('http://192.168.1.12:8081/api/products/allproducts', {
+    const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/products/allproducts`, {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer YOUR_ACCESS_TOKEN', // Replace with your actual token
@@ -23,7 +23,7 @@ const fetchTheApi = async () => {
 
 function* fetchProductsWithCategorySaga() {
   try {
-    const response = yield call(fetch, 'http://192.168.1.12:8081/api/products/products', {
+    const response = yield call(fetch, `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/products`, {
       method: 'GET',
       headers: {
         'Authorization': 'Bearer YOUR_ACCESS_TOKEN',

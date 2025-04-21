@@ -10,7 +10,7 @@ import {
 
 const fetchBestSellingProductsApi = async () => { 
   try {
-    const response = await fetch("http://192.168.1.12:8081/api/dashboard/products/best-selling");
+    const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/dashboard/products/best-selling`);
     const data = await response.json();
     console.log("API Response:", data); // Debugging
     return data;
@@ -22,7 +22,7 @@ const fetchBestSellingProductsApi = async () => {
 
 
 const fetchTopCustomersApi = async () => {
-  const response = await fetch("http://192.168.1.12:8081/api/dashboard/customers/top");
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/dashboard/customers/top`);
   if (!response.ok) throw new Error("Failed to fetch top customers");
   const data = await response.json();
   return data;
