@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Container, Row, Form } from 'react-bootstrap';
+import React, { useEffect, useState } from "react";
 
 const UserForgotpasswordOtpGeneratorpage = () => {
-  const [selectedOption, setSelectedOption] = useState('email');
-  
-  const [userData, setUserData] = useState({
-    email: '',
-    phone_number: ''
-  });
+  const [selectedOption, setSelectedOption] = useState("email");
+  const [userData, setUserData] = useState({ email: "", phone_number: "" });
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState("");
 
   useEffect(() => {
     const userforgotdata = JSON.parse(localStorage.getItem("forgetuser"));
@@ -16,11 +13,19 @@ const UserForgotpasswordOtpGeneratorpage = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setUserData((prev) => ({
+      ...prev,
+      email: selectedOption === "email" ? prev.email : "",
+      phone_number: selectedOption === "phone" ? prev.phone_number : "",
+    }));
+  }, [selectedOption]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserData({
       ...userData,
-      [name === 'phone' ? 'phone_number' : name]: value
+      [name === "phone" ? "phone_number" : name]: value,
     });
   };
 
@@ -28,97 +33,182 @@ const UserForgotpasswordOtpGeneratorpage = () => {
     e.preventDefault();
 
     const contactValue =
-      selectedOption === 'email' ? userData.email : userData.phone_number;
+      selectedOption === "email"
+        ? userData.email.trim()
+        : userData.phone_number.trim();
+
+    if (!contactValue) {
+      alert(`Please enter a valid ${selectedOption}`);
+      return;
+    }
 
     const otpRequestData = {
       method: selectedOption,
-      value: contactValue
+      value: contactValue,
     };
 
     try {
-      const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/otp/send-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(otpRequestData),
-      });
+      const response = await fetch(
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/otp/send-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(otpRequestData),
+        }
+      );
 
       const result = await response.json();
 
       if (response.ok) {
-        alert(`OTP sent successfully via ${selectedOption}: ${contactValue}`);
-        localStorage.setItem('otpRequestData', JSON.stringify(otpRequestData));
+        alert(`OTP sent successfully via ${selectedOption}`);
+        localStorage.setItem("otpRequestData", JSON.stringify(otpRequestData));
+        setShowOtpModal(true);
       } else {
-        alert(`Failed to send OTP: ${result.message || 'Unknown error'}`);
+        alert(`Failed to send OTP: ${result.message || "Unknown error"}`);
       }
     } catch (error) {
       alert(`Error sending OTP: ${error.message}`);
     }
   };
 
+  const handleVerifyOtp = async () => {
+    const { method, value } = JSON.parse(
+      localStorage.getItem("otpRequestData")
+    );
+
+    const payload = {
+      otp,
+      email: method === "email" ? value : null,
+      phone: method === "phone" ? value : null,
+    };
+
+    try {
+      const response = await fetch(
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/otp/verify-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("OTP verified successfully!");
+        setShowOtpModal(false);
+      } else {
+        alert(result.message || "OTP verification failed");
+      }
+    } catch (error) {
+      alert(`Error verifying OTP: ${error.message}`);
+    }
+  };
+
   return (
-    <div className="bg-secondary min-vh-100 d-flex align-items-center">
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={6} lg={5}>
-            <Card className="p-4" style={{ borderRadius: '1rem', backgroundColor: '#d2fadd' }}>
-              <h4 className="text-center mb-4">OTP Generator</h4>
-              <Form onSubmit={handleGenerateOtp}>
-                {/* Email Row */}
-                <Form.Group as={Row} className="mb-3 align-items-center">
-                  <Col xs="auto">
-                    <Form.Check
-                      type="radio"
-                      name="contactOption"
-                      checked={selectedOption === 'email'}
-                      onChange={() => setSelectedOption('email')}
-                    />
-                  </Col>
-                  <Col>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter your email"
-                      name="email"
-                      value={userData.email}
-                      onChange={handleInputChange}
-                      disabled={selectedOption !== 'email'}
-                    />
-                  </Col>
-                </Form.Group>
+    <div className="container d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="card shadow w-100" style={{ maxWidth: "500px" }}>
+        <div className="card-body">
+          <h4 className="text-center mb-4">OTP Generator</h4>
+          <form onSubmit={handleGenerateOtp}>
+            <div className="mb-3">
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="contactOption"
+                  checked={selectedOption === "email"}
+                  onChange={() => setSelectedOption("email")}
+                />
+                <label className="form-check-label">Email</label>
+              </div>
+              <input
+                type="email"
+                className="form-control mt-2"
+                placeholder="Enter your email"
+                name="email"
+                value={userData.email}
+                onChange={handleInputChange}
+                disabled={selectedOption !== "email"}
+                required={selectedOption === "email"}
+              />
+            </div>
 
-                {/* Phone Row */}
-                <Form.Group as={Row} className="mb-3 align-items-center">
-                  <Col xs="auto">
-                    <Form.Check
-                      type="radio"
-                      name="contactOption"
-                      checked={selectedOption === 'phone'}
-                      onChange={() => setSelectedOption('phone')}
-                    />
-                  </Col>
-                  <Col>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter your phone number"
-                      name="phone"
-                      value={userData.phone_number}
-                      onChange={handleInputChange}
-                      disabled={selectedOption !== 'phone'}
-                    />
-                  </Col>
-                </Form.Group>
+            <div className="mb-4">
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="contactOption"
+                  checked={selectedOption === "phone"}
+                  onChange={() => setSelectedOption("phone")}
+                />
+                <label className="form-check-label">Phone</label>
+              </div>
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Enter your phone number"
+                name="phone"
+                value={userData.phone_number}
+                onChange={handleInputChange}
+                disabled={selectedOption !== "phone"}
+                required={selectedOption === "phone"}
+              />
+            </div>
 
-                <div className="text-center">
-                  <Button type="submit" variant="primary">
-                    Generate OTP
-                  </Button>
-                </div>
-              </Form>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+            <div className="text-center">
+              <button type="submit" className="btn btn-danger px-4">
+                Send OTP
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* OTP Modal */}
+      {showOtpModal && (
+        <div className="modal show d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Enter OTP</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowOtpModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <label className="form-label">OTP</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter the OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowOtpModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleVerifyOtp}
+                >
+                  Verify OTP
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
