@@ -120,9 +120,7 @@ const ProductCategory = () => {
           body: JSON.stringify(cartItem),
         }
       );
-
       const data = await response.json();
-
       if (!response.ok) {
         alert(`Error: ${data.message || response.statusText}`);
         return;
