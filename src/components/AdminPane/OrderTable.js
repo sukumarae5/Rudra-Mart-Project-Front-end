@@ -116,7 +116,6 @@ const OrderTable = () => {
               <Table striped bordered hover responsive className="rounded shadow-sm">
                 <thead className="bg-light">
                   <tr>
-                    
                     <th>Order ID</th>
                     <th>Customer ID</th>
                     <th>Status</th>
@@ -129,7 +128,6 @@ const OrderTable = () => {
                   {currentOrders.length > 0 ? (
                     currentOrders.map((order) => (
                       <tr key={order.order_id}>
-                       
                         <td className="fw-bold">{order.order_id}</td>
                         <td>{order.user_id || "N/A"}</td>
                         <td
@@ -165,6 +163,22 @@ const OrderTable = () => {
                             onClick={() => handleDeleteOrder(order.order_id)}
                           >
                             <MdOutlineDeleteOutline size={18} />
+                          </Button>
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            title="Update Tracking"
+                            onClick={() =>
+                              navigate("/admin/AdminUpdateTracking", {
+                                state: {
+                                  orderId: order.order_id,
+                                  email: order.email || "", // if available
+                                  phone: order.phone || "", // if available
+                                },
+                              })
+                            }
+                          >
+                            🚚
                           </Button>
                         </td>
                       </tr>

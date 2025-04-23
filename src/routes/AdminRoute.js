@@ -1,6 +1,7 @@
 import AddProductForm from "../components/AdminPane/AddProductForm";
 import AddUserForm from "../components/AdminPane/AddUserForm";
 import AdminCategories from "../components/AdminPane/AdminCategories";
+import AdminUpdateTracking from "../components/AdminPane/AdminUpdateTracking";
 import CategoryCard from "../components/AdminPane/CategoryCard";
 import Dashboard from "../components/AdminPane/Dashboard";
 import EditOrdersForm from "../components/AdminPane/EditOrdersForm";
@@ -60,6 +61,9 @@ const AdminRoute = [
   },{
     path:"adminreports",
     element:<AdminReportsPage/>
+  },{
+    path:"AdminUpdateTracking",
+    element:<AdminUpdateTracking/>
   }
 ];
 
