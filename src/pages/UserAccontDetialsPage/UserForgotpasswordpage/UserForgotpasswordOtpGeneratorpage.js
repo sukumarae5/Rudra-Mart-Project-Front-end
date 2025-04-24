@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 
 const UserForgotpasswordOtpGeneratorpage = () => {
   const [selectedOption, setSelectedOption] = useState("email");
   const [userData, setUserData] = useState({ email: "", phone_number: "" });
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-const navigate=useNavigate()
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const navigate = useNavigate();
+
   useEffect(() => {
     const userforgotdata = JSON.parse(localStorage.getItem("forgetuser"));
     if (userforgotdata) {
@@ -14,13 +18,14 @@ const navigate=useNavigate()
     }
   }, []);
 
-  useEffect(() => {
-    setUserData((prev) => ({
-      ...prev,
-      email: selectedOption === "email" ? prev.email :prev.email ,
-      phone_number: selectedOption === "phone" ? prev.phone_number : prev.phone_number,
-    }));
-  }, [selectedOption]);
+  const handleSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,21 +37,14 @@ const navigate=useNavigate()
 
   const handleGenerateOtp = async (e) => {
     e.preventDefault();
-
-    const contactValue =
-      selectedOption === "email"
-        ? userData.email.trim()
-        : userData.phone_number.trim();
+    const contactValue = selectedOption === "email" ? userData.email.trim() : userData.phone_number.trim();
 
     if (!contactValue) {
-      alert(`Please enter a valid ${selectedOption}`);
+      handleSnackbar(`Please enter a valid ${selectedOption}`, "error");
       return;
     }
 
-    const otpRequestData = {
-      method: selectedOption,
-      value: contactValue,
-    };
+    const otpRequestData = { method: selectedOption, value: contactValue };
 
     try {
       const response = await fetch(
@@ -57,31 +55,23 @@ const navigate=useNavigate()
           body: JSON.stringify(otpRequestData),
         }
       );
-
       const result = await response.json();
 
       if (response.ok) {
-        alert(`OTP sent successfully via ${selectedOption}`);
+        handleSnackbar(`OTP sent successfully via ${selectedOption}`, "success");
         localStorage.setItem("otpRequestData", JSON.stringify(otpRequestData));
         setShowOtpModal(true);
       } else {
-        alert(`Failed to send OTP: ${result.message || "Unknown error"}`);
+        handleSnackbar(result.message || "Failed to send OTP", "error");
       }
     } catch (error) {
-      alert(`Error sending OTP: ${error.message}`);
+      handleSnackbar(`Error: ${error.message}`, "error");
     }
   };
 
   const handleVerifyOtp = async () => {
-    const { method, value } = JSON.parse(
-      localStorage.getItem("otpRequestData")
-    );
-
-    const payload = {
-      otp,
-      
-      value
-    };
+    const { value } = JSON.parse(localStorage.getItem("otpRequestData"));
+    const payload = { otp, value };
 
     try {
       const response = await fetch(
@@ -92,18 +82,17 @@ const navigate=useNavigate()
           body: JSON.stringify(payload),
         }
       );
-
       const result = await response.json();
 
       if (response.ok) {
-        alert("OTP verified successfully!");        
+        handleSnackbar("OTP verified successfully!", "success");
         setShowOtpModal(false);
-        navigate("/UserSetNewpasswordpage")
+        navigate("/UserSetNewpasswordpage");
       } else {
-        alert(result.message || "OTP verification failed");
+        handleSnackbar(result.message || "OTP verification failed", "error");
       }
     } catch (error) {
-      alert(`Error verifying OTP: ${error.message}`);
+      handleSnackbar(`Error: ${error.message}`, "error");
     }
   };
 
@@ -168,7 +157,6 @@ const navigate=useNavigate()
         </div>
       </div>
 
-      {/* OTP Modal */}
       {showOtpModal && (
         <div className="modal show d-block" tabIndex="-1" role="dialog">
           <div className="modal-dialog modal-dialog-centered" role="document">
@@ -211,6 +199,23 @@ const navigate=useNavigate()
           </div>
         </div>
       )}
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "Top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
