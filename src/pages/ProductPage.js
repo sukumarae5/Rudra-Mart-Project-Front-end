@@ -5,12 +5,17 @@ import ReactImageMagnify from "react-image-magnify";
 import { useNavigate } from "react-router-dom";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { fetcheckeoutpagedata } from "../features/cart/cartActions";
+import { Container, Col, Card, Row, Button } from "react-bootstrap";
 
+// Helper to get consistent product ID
+const getProductId = (product) => product.id || product._id;
 
 const ProductPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isLiked, setIsLiked] = useState(false);
+  const [activeButton, setActiveButton] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const { products = [], selectedProduct = {} } = useSelector(
     (state) => state.products || {}
@@ -23,319 +28,314 @@ const ProductPage = () => {
     price = "0",
     stock = 0,
     category_id,
+    id,
   } = selectedProduct;
 
   const [mainImage, setMainImage] = useState(image_url);
-  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     setMainImage(image_url);
   }, [image_url]);
 
   useEffect(() => {
-    if (selectedProduct && Object.keys(selectedProduct).length > 0) {
-      dispatch(fetcheckeoutpagedata([selectedProduct]));
+    if (activeButton) {
+      const timeout = setTimeout(() => setActiveButton(""), 200);
+      return () => clearTimeout(timeout);
     }
-  }, [selectedProduct, dispatch]);
+  }, [activeButton]);
 
   const relatedProducts = products.filter(
     (product) =>
-      product.category_id === category_id && product.id !== selectedProduct.id
+      product.category_id === category_id &&
+      getProductId(product) !== getProductId(selectedProduct)
   );
 
   if (!selectedProduct || Object.keys(selectedProduct).length === 0) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          color: "red",
-          fontSize: "20px",
-          marginTop: "50px",
-        }}
-      >
+      <div style={{ textAlign: "center", color: "red", fontSize: "20px", marginTop: "50px" }}>
         No product selected!
       </div>
     );
   }
 
   const handleCardClick = (product) => {
-   
-    navigate(`/productpage/${product.id}`);
+    navigate(`/productpage/${getProductId(product)}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleQuantityChange = (type) => {
+    setActiveButton(type);
     setQuantity((prev) =>
       type === "increment" ? prev + 1 : prev > 1 ? prev - 1 : 1
     );
   };
 
   const handleBuy = () => {
-    if (!selectedProduct || Object.keys(selectedProduct).length === 0) {
-      console.error("No product selected to checkout!");
-      return;
-    }
+    if (!selectedProduct) return;
 
     const checkoutItem = [
       {
         userId: selectedProduct.user_id || "Guest",
-        productId: selectedProduct.id,
-        productName: selectedProduct.name || "Unknown",
-        productImage: selectedProduct.image_url || "",
-        productPrice: parseFloat(selectedProduct.price || 0),
+        productId: id,
+        productName: title,
+        productImage: image_url,
+        productPrice: parseFloat(price),
         quantity,
-        totalPrice: parseFloat(selectedProduct.price || 0) * quantity,
+        totalPrice: parseFloat(price) * quantity,
       },
     ];
 
+    // dispatch(FETCH_CHECKEOUTPAGE_DATA(checkoutItem)); // Optional
     navigate("/CheckoutPage");
   };
 
-  const handleWishlist = () => {
-    console.log("Add to wishlist clicked:", selectedProduct.id);
-    // Add dispatch for wishlist logic here if needed
-  };
-
   const responsive = {
-    superLargeDesktop: {
-      breakpoint: { max: 4000, min: 1921 },
-      items: 5,
-    },
-    desktop: {
-      breakpoint: { max: 1920, min: 1024 },
-      items: 5,
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 768 },
-      items: 2,
-    },
-    mobile: {
-      breakpoint: { max: 768, min: 0 },
-      items: 1,
-    },
+    superLargeDesktop: { breakpoint: { max: 4000, min: 1921 }, items: 5 },
+    desktop: { breakpoint: { max: 1920, min: 1024 }, items: 5 },
+    tablet: { breakpoint: { max: 1024, min: 768 }, items: 2 },
+    mobile: { breakpoint: { max: 768, min: 0 }, items: 1 },
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        padding: "40px",
-        background: "linear-gradient(to right, #2267ac, #37628d)",
-      }}
-    >
-      {/* Product Detail Section */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          background: "white",
-          padding: "30px",
-          borderRadius: "15px",
-          boxShadow: "0 6px 15px rgba(0, 0, 0, 0.2)",
-          maxWidth: "1000px",
-          minHeight: "550px",
-        }}
-      >
-        {/* Product Image */}
-        <div
-          style={{
-            flex: "1",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "30px",
-          }}
-        >
-          {mainImage ? (
-            <ReactImageMagnify
-              {...{
-                smallImage: {
-                  alt: "Product",
-                  isFluidWidth: false,
-                  src: mainImage,
-                  width: 380,
-                  height: 380,
-                },
-                largeImage: {
-                  src: mainImage,
-                  width: 1000,
-                  height: 800,
-                },
-                enlargedImagePosition: "beside",
-              }}
-            />
-          ) : (
-            <img
-              src="/placeholder.jpg"
-              alt="No Product"
-              width="380"
-              height="380"
-            />
-          )}
-        </div>
+    <div>
+     <Card
+  className="p-4 bg-white"
+  style={{
+    borderRadius: "10px",
+    boxShadow: "0 0 15px rgba(0, 0, 0, 0.15)", // uniform shadow
+  }}
+>
 
-        {/* Product Details */}
-        <div style={{ flex: "1", padding: "30px", textAlign: "center" }}>
-          <h1 style={{ fontSize: "26px", fontWeight: "bold" }}>{title}</h1>
-          <h3 style={{ fontSize: "24px", color: "#28a745" }}>
-            Rs. {(price * quantity).toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-            })}
-          </h3>
-          <p style={{ color: "#555", fontSize: "16px" }}>{description}</p>
-          <p
-            style={{
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: stock > 0 ? "#28a745" : "#dc3545",
-            }}
-          >
-            <strong>Stock:</strong> {stock > 0 ? stock : "Out of Stock"}
-          </p>
+        <Row>
+          {/* Image Section */}
+          <Col md={6} className="d-flex justify-content-center align-items-start p-3">
+            {mainImage && (
+              <div className="w-100" style={{ maxWidth: "400px", objectFit: "contain" }}>
+                <ReactImageMagnify
+                  {...{
+                    smallImage: {
+                      alt: "Product",
+                      isFluidWidth: true,
+                      src: mainImage,
+                      width: 400,
+                      height: 400,
+                    },
+                    largeImage: {
+                      src: mainImage,
+                      width: 1000,
+                      height: 1000,
+                    },
+                    enlargedImagePosition: "beside",
+                  }}
+                />
+              </div>
+            )}
+          </Col>
 
-          {/* Quantity & Buy Buttons */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: "30px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                borderRadius: "25px",
-                background: "#fff",
-              }}
-            >
+          {/* Details Section */}
+          <Col md={6} className="p-3 text-start">
+            <h1 className="fs-4 fw-bold mb-3">{title}</h1>
+            <h3 className="fs-4 text-dark mb-3">Rs. {(price * quantity).toFixed(2)}</h3>
+            <p className="text-muted fs-6 mb-3">{description}</p>
+            <hr />
+
+            <p className={`fs-5 fw-medium mb-3 ${stock > 0 ? "text-dark" : "text-danger"}`}>
+              <strong>Stock:</strong> {stock > 0 ? stock : "Out of Stock"}
+            </p>
+
+            {/* Color and Size */}
+            <div className="d-flex align-items-center gap-2 mb-3">
+              <span className="fw-medium me-2">Colors:</span>
+              {["blue", "pink"].map((color) => (
+                <div
+                  key={color}
+                  className="rounded-circle border border-dark"
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    backgroundColor: color,
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="d-flex align-items-center gap-2 mb-4">
+              <span className="fw-medium me-2">Size:</span>
+              {["XS", "S", "M", "L", "XL"].map((size) => (
+                <div
+                  key={size}
+                  className="px-3 py-1 border border-dark rounded fw-medium fs-6 user-select-none"
+                  style={{ cursor: "pointer" }}
+                >
+                  {size}
+                </div>
+              ))}
+            </div>
+
+            {/* Quantity & Buy */}
+            <div className="d-flex align-items-center mb-4">
+              <div className="d-flex align-items-center border border-secondary">
+                <button
+                  className="btn px-3 py-2 fs-6 border-end"
+                  style={{
+                    border: "none",
+                    borderRight: "1px solid black",
+                    backgroundColor: activeButton === "decrement" ? "#DB4444" : "transparent",
+                  }}
+                  onClick={() => handleQuantityChange("decrement")}
+                >
+                  -
+                </button>
+
+                <span className="px-4 py-2 fw-bold">{quantity}</span>
+
+                <button
+                  className="btn px-3 py-2 fs-6 border-start"
+                  style={{
+                    border: "none",
+                    borderLeft: "1px solid black",
+                    backgroundColor: activeButton === "increment" ? "#DB4444" : "transparent",
+                  }}
+                  onClick={() => handleQuantityChange("increment")}
+                >
+                  +
+                </button>
+              </div>
+
+              <Button
+                className="text-white px-4 py-2 ms-3"
+                style={{ backgroundColor: "#DB4444", fontSize: "16px" }}
+                onClick={handleBuy}
+                disabled={stock === 0}
+              >
+                Buy Now
+              </Button>
+
               <button
-                style={{
-                  background: "#28a745",
-                  color: "white",
-                  padding: "12px 18px",
-                  fontSize: "20px",
-                }}
-                onClick={() => handleQuantityChange("decrement")}
+                className="btn border ms-2"
+                style={{ color: "black", padding: "10px 15px" }}
+                onClick={() => setIsLiked(!isLiked)}
               >
-                -
-              </button>
-              <span
-                style={{
-                  padding: "10px 25px",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                }}
-              >
-                {quantity}
-              </span>
-              <button
-                style={{
-                  background: "#28a745",
-                  color: "white",
-                  padding: "12px 18px",
-                  fontSize: "20px",
-                }}
-                onClick={() => handleQuantityChange("increment")}
-              >
-                +
+                <FaHeart
+                  style={{
+                    fill: isLiked ? "#dc3545" : "transparent",
+                    stroke: "black",
+                    strokeWidth: "30px",
+                  }}
+                />
               </button>
             </div>
 
-            <button
+            {/* Delivery & Return Info */}
+            <div
+              className="border rounded mb-3"
               style={{
-                background: "linear-gradient(135deg, #ff9800, #ff5722)",
-                color: "white",
-                padding: "12px 25px",
-                marginLeft: "20px",
-                borderRadius: "8px",
-                fontSize: "16px",
+                fontSize: "17px",
+                color: "rgb(63, 38, 62)",
+                maxWidth: "350px",
               }}
-              onClick={handleBuy}
-              disabled={stock === 0}
             >
-              Buy Now
-            </button>
+              <div className="d-flex align-items-start p-2">
+                <FaTruck className="me-3 mt-1" />
+                <div>
+                  <div className="fw-bold">Free Delivery</div>
+                  <div className="text-muted" style={{ fontSize: "13px" }}>
+                    Enter your postal code for Delivery Availability
+                  </div>
+                </div>
+              </div>
+              <hr className="m-0 border-top border-dark" />
+              <div className="d-flex align-items-start p-2">
+                <FaUndo className="me-3 mt-1" />
+                <div>
+                  <div className="fw-bold">Easy Returns</div>
+                  <div className="text-muted" style={{ fontSize: "13px" }}>
+                    Free 30 Days Delivery Returns. Details
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </Card>
 
-            <button
-              style={{
-                border: "2px solid #dc3545",
-                color: "#dc3545",
-                padding: "10px 15px",
-                marginLeft: "10px",
-                borderRadius: "50%",
-              }}
-              onClick={handleWishlist}
-            >
-              <FaHeart />
-            </button>
-          </div>
-
-          {/* Delivery Info */}
-          <div
-            style={{
-              marginTop: "30px",
-              fontSize: "16px",
-              color: "rgb(63, 38, 62)",
-            }}
-          >
-            <p>
-              <FaTruck /> Free Delivery
-            </p>
-            <p>
-              <FaUndo /> Easy Returns
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Related Products Carousel */}
+      {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div style={{ marginTop: "50px", textAlign: "center", width: "100%" }}>
-          <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>
-            Related Products
-          </h2>
-          <Carousel responsive={responsive} infinite autoPlay={false} arrows>
+        <Container style={{ marginTop: "50px", textAlign: "center", position: "relative" }}>
+          <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>Related Products</h2>
+          <Carousel
+            responsive={responsive}
+            infinite
+            autoPlay={false}
+            arrows
+            customLeftArrow={<button className="custom-arrow custom-left">‹</button>}
+            customRightArrow={<button className="custom-arrow custom-right">›</button>}
+          >
             {relatedProducts.map((product) => (
-              <div
-                key={product.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCardClick(product);
-                }}
-                style={{
-                  background: "white",
-                  padding: "15px",
-                  borderRadius: "10px",
-                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-                  cursor: "pointer",
-                  margin: "10px",
-                }}
-              >
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  style={{
-                    width: "100%",
-                    height: "150px",
-                    objectFit: "cover",
-                    borderRadius: "10px",
+              <div key={getProductId(product)} style={{ padding: "10px", height: "100%" }}>
+                <Card
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCardClick(product);
                   }}
-                />
-                <h3 style={{ fontSize: "16px", margin: "10px 0" }}>
-                  {product.name}
-                </h3>
-                <p style={{ color: "#28a745", fontWeight: "bold" }}>
-                  Rs. {parseFloat(product.price).toLocaleString("en-IN")}
-                </p>
+                  style={{
+                    height: "300px",
+                    width: "100%",
+                    cursor: "pointer",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  <div style={{ height: "180px", overflow: "hidden" }}>
+                    <Card.Img
+                      variant="top"
+                      src={product.image_url}
+                      onError={(e) => (e.target.src = "/placeholder.jpg")}
+                      alt={product.name}
+                      style={{ height: "100%", width: "100%", objectFit: "cover" }}
+                    />
+                  </div>
+                  <Card.Body style={{ padding: "10px" }}>
+                    <Card.Title style={{ fontSize: "14px", fontWeight: "600" }}>
+                      {product.name}
+                    </Card.Title>
+                    <Card.Text style={{ color: "#28a745", fontWeight: "bold", fontSize: "14px" }}>
+                      Rs. {parseFloat(product.price).toLocaleString("en-IN")}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
               </div>
             ))}
           </Carousel>
-        </div>
+
+          {/* Carousel Arrow Styles */}
+          <style>{`
+            .custom-arrow {
+              position: absolute;
+              top: 50%;
+              transform: translateY(-50%);
+              z-index: 10;
+              background: #fff;
+              border: 1px solid #ccc;
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              font-size: 22px;
+              font-weight: bold;
+              cursor: pointer;
+              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            }
+            .custom-left {
+              left: 10px;
+            }
+            .custom-right {
+              right: 10px;
+            }
+          `}</style>
+        </Container>
       )}
     </div>
   );
