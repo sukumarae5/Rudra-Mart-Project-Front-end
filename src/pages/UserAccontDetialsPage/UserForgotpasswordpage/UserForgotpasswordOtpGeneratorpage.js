@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UserForgotpasswordOtpGeneratorpage = () => {
   const [selectedOption, setSelectedOption] = useState("email");
   const [userData, setUserData] = useState({ email: "", phone_number: "" });
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-
+const navigate=useNavigate()
   useEffect(() => {
     const userforgotdata = JSON.parse(localStorage.getItem("forgetuser"));
     if (userforgotdata) {
@@ -16,8 +17,8 @@ const UserForgotpasswordOtpGeneratorpage = () => {
   useEffect(() => {
     setUserData((prev) => ({
       ...prev,
-      email: selectedOption === "email" ? prev.email : "",
-      phone_number: selectedOption === "phone" ? prev.phone_number : "",
+      email: selectedOption === "email" ? prev.email :prev.email ,
+      phone_number: selectedOption === "phone" ? prev.phone_number : prev.phone_number,
     }));
   }, [selectedOption]);
 
@@ -78,8 +79,8 @@ const UserForgotpasswordOtpGeneratorpage = () => {
 
     const payload = {
       otp,
-      email: method === "email" ? value : null,
-      phone: method === "phone" ? value : null,
+      
+      value
     };
 
     try {
@@ -95,8 +96,9 @@ const UserForgotpasswordOtpGeneratorpage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("OTP verified successfully!");
+        alert("OTP verified successfully!");        
         setShowOtpModal(false);
+        navigate("/UserSetNewpasswordpage")
       } else {
         alert(result.message || "OTP verification failed");
       }

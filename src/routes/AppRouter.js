@@ -22,10 +22,10 @@ import ExploreOurProductspage from "../pages/ExploreOurProductspage";
 import NewArrivalpage from "../pages/NewArrivalpage";
 import UserAddressBook from"../pages/UserAccontDetialsPage/UserAddressBook";
 import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory";
-
 import UserCancellationProductpage from "../pages/UserAccontDetialsPage/UserCancellationProductpage"
 import UserForgotPasswordPage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotPasswordpage";
 import UserForgotpasswordOtpGeneratorpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotpasswordOtpGeneratorpage";
+import UserSetNewpasswordpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserSetNewpasswordpage"
 const AppRouter = createBrowserRouter([
 
   { 
@@ -94,7 +94,11 @@ const AppRouter = createBrowserRouter([
         },  {
           path:"UserForgotpasswordOtpGeneratorpage",
           element:<UserForgotpasswordOtpGeneratorpage/>
-        },    
+        },{
+          path:"UserSetNewpasswordpage",
+          element:<UserSetNewpasswordpage/>
+
+        }, 
       
       {
         path: "/useraccountpage",
@@ -104,8 +108,7 @@ const AppRouter = createBrowserRouter([
             path: "userprofile",
             element: <UserProfile />,          
 
-          },
-                    
+          },                  
 
           {
             path: "usercheckoutpage",
@@ -125,11 +128,7 @@ const AppRouter = createBrowserRouter([
             path:"UserCancellationProductpage",
             element:<UserCancellationProductpage/>
 
-          },
-          
-          
-          
-        ],
+          },],
       },
      
 
