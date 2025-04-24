@@ -1,36 +1,37 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UserSetNewpasswordpage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const forgetuser = JSON.parse(localStorage.getItem('forgetuser'));
   const userId = forgetuser?.id;
-  console.log('User ID:', userId);
-  console.log('Password:', newPassword);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match');
-      setSuccess('');
       return;
     }
 
     if (newPassword.length < 6) {
       setError('Password should be at least 6 characters');
-      setSuccess('');
       return;
     }
 
+    setError('');
     setLoading(true);
+
     try {
       const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/update-password/${userId}`,
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/updatepassword/${userId}`,
         {
           method: 'PUT',
           headers: {
@@ -41,27 +42,27 @@ const UserSetNewpasswordpage = () => {
       );
 
       const text = await response.text();
+      console.log('Server response:', text);
+
       try {
         const data = JSON.parse(text);
+        console.log(data)
         if (response.ok) {
-          setSuccess('Password updated successfully!');
-          setError('');
-          setNewPassword('');
-          setConfirmPassword('');
+          alert('Password updated successfully!');
+          setLoading(false);
+          setTimeout(() => navigate('/login'), 0);
         } else {
           setError(data.message || 'Failed to update password');
-          setSuccess('');
+          setLoading(false);
         }
       } catch (parseError) {
-        console.error('Invalid JSON from server:', text);
+        console.error('Invalid JSON:', text);
         setError('Unexpected server response');
-        setSuccess('');
+        setLoading(false);
       }
     } catch (err) {
       console.error('Request failed:', err);
       setError('Something went wrong while updating the password');
-      setSuccess('');
-    } finally {
       setLoading(false);
     }
   };
@@ -75,7 +76,6 @@ const UserSetNewpasswordpage = () => {
         <h2 className="text-2xl font-semibold mb-6 text-center">Set New Password</h2>
 
         {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
-        {success && <p className="text-green-600 mb-4 text-sm">{success}</p>}
 
         <div className="mb-4">
           <label className="block mb-1 text-sm font-medium">New Password</label>
