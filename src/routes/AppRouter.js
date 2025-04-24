@@ -25,6 +25,7 @@ import UserOrderHistory from "../pages/UserAccontDetialsPage/UserOrderHistory";
 import UserCancellationProductpage from "../pages/UserAccontDetialsPage/UserCancellationProductpage"
 import UserForgotPasswordPage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotPasswordpage";
 import UserForgotpasswordOtpGeneratorpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotpasswordOtpGeneratorpage";
+import UserTrackingpage from "../pages/UserAccontDetialsPage/UserTrackingpage";
 import UserSetNewpasswordpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserSetNewpasswordpage"
 const AppRouter = createBrowserRouter([
 
@@ -86,8 +87,14 @@ const AppRouter = createBrowserRouter([
         path: "/productpage/:id", 
         element: <ProductDetailPage />,
       },
-      {path:"/NewArrivalpage",
-        element:<NewArrivalpage/>},
+      {
+        path:"/UserTrackingpage",
+        element:<UserTrackingpage/>
+      },
+      {
+        path:"/NewArrivalpage",
+        element:<NewArrivalpage/>
+      },
         {
           path: "userforgotpasswordpage",
           element: <UserForgotPasswordPage />,
