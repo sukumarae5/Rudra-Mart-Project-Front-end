@@ -19,12 +19,12 @@ const ProductPagenation = () => {
   const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [addedProductIds, setAddedProductIds] = useState([]); // ✅ track locally added products
 
   const productsPerPage = 6;
-  const totalPages = 6;
-
   const maxProducts = 36;
   const paginatedProducts = products.slice(0, maxProducts);
+  const totalPages = Math.ceil(paginatedProducts.length / productsPerPage);
 
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = paginatedProducts.slice(
@@ -47,16 +47,17 @@ const ProductPagenation = () => {
       }
 
       const isProductInCart = cartItems.some(
-        (item) =>
-          item.user_id === user.id && item.product_id === product.id
+        (item) => item.user_id === user.id && item.product_id === product.id
       );
-      if (isProductInCart) {
+
+      const isAlreadyAdded = addedProductIds.includes(product.id);
+      if (isProductInCart || isAlreadyAdded) {
         alert('Already in cart.');
         return;
       }
 
       const response = await fetch(
-        'http://192.168.1.12:8081/api/cart/add',
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
         {
           method: 'POST',
           headers: {
@@ -78,6 +79,7 @@ const ProductPagenation = () => {
       }
 
       alert('Added to cart!');
+      setAddedProductIds((prev) => [...prev, product.id]); // ✅ update local tracking
       dispatch(fetchApiCartDataRequest());
     } catch (error) {
       console.error('Cart error:', error);
@@ -105,12 +107,12 @@ const ProductPagenation = () => {
   };
 
   const handleCardClick = (id, product) => {
-    dispatch(setSelectedProduct(product)); 
-    navigate("/productpage", { state: product });
+    dispatch(setSelectedProduct(product));
+    navigate('/productpage', { state: product });
   };
 
   const ProductCard = ({ product }) => {
-    const isInWishlist = wishlistData.some( 
+    const isInWishlist = wishlistData.some(
       (item) => item.product_id === product.id
     );
 
@@ -126,44 +128,42 @@ const ProductPagenation = () => {
         }}
         onClick={() => handleCardClick(product.id, product)}
       >
-        {/* Icons (Wishlist + Eye) */}
         <div
-  style={{
-    position: 'absolute',
-    top: '15px',
-    right: '15px',
-    display: 'flex',
-    flexDirection: 'column',  // Stack the icons vertically
-    gap: '10px',  // Space between the icons
-    zIndex: 1,
-  }}
-  onClick={(e) => e.stopPropagation()}
->
-  {isInWishlist ? (
-    <FaHeart
-      color="red"
-      onClick={(e) => handleWishlistClick(e, product, true)}
-      style={{ cursor: 'pointer' }}  // Add pointer cursor for better UX
-    />
-  ) : (
-    <FaRegHeart
-      color="black"
-      onClick={(e) => handleWishlistClick(e, product, false)}
-      style={{ cursor: 'pointer' }}  // Add pointer cursor for better UX
-    />
-  )}
+          style={{
+            position: 'absolute',
+            top: '15px',
+            right: '15px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            zIndex: 1,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {isInWishlist ? (
+            <FaHeart
+              color="red"
+              onClick={(e) => handleWishlistClick(e, product, true)}
+              style={{ cursor: 'pointer' }}
+            />
+          ) : (
+            <FaRegHeart
+              color="black"
+              onClick={(e) => handleWishlistClick(e, product, false)}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
 
-  <FaEye
-    color="gray"
-    onClick={(e) => {
-      e.stopPropagation();
-      handleCardClick(product.id, product);
-    }}
-    style={{ cursor: 'pointer' }}  // Add pointer cursor for better UX
-  />
-</div>
+          <FaEye
+            color="gray"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCardClick(product.id, product);
+            }}
+            style={{ cursor: 'pointer' }}
+          />
+        </div>
 
-        {/* Product Image */}
         <img
           src={product.image_url}
           alt={product.name}
@@ -175,7 +175,6 @@ const ProductPagenation = () => {
           }}
         />
 
-        {/* Product Info */}
         <div className="card-body d-flex flex-column justify-content-between p-2">
           <div>
             <h5 className="card-title">{product.name}</h5>
@@ -195,17 +194,15 @@ const ProductPagenation = () => {
             </p>
           </div>
 
-          {/* Add to Cart Button */}
           <Button
-  variant="dark"
-  size="sm"
-  className="mt-2"
-  style={{ backgroundColor: 'red', borderColor: 'red' }}
-  onClick={(e) => handleAddToCart(e, product)}
->
-  Add to Cart
-</Button>
-
+            variant="dark"
+            size="sm"
+            className="mt-2"
+            style={{ backgroundColor: 'red', borderColor: 'red' }}
+            onClick={(e) => handleAddToCart(e, product)}
+          >
+            Add to Cart
+          </Button>
         </div>
       </div>
     );
@@ -213,8 +210,6 @@ const ProductPagenation = () => {
 
   return (
     <Container className="py-4">
-      <h2 className="text-center mb-4"></h2>
-
       <Row className="g-3">
         {currentProducts.map((product) => (
           <Col key={product.id} xs={12} sm={6} md={4} lg={2}>
@@ -223,7 +218,6 @@ const ProductPagenation = () => {
         ))}
       </Row>
 
-      {/* Pagination */}
       <div className="text-center mt-4">
         {Array.from({ length: totalPages }, (_, i) => (
           <Button
