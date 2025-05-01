@@ -43,7 +43,7 @@ const AddUserForm = () => {
 
     try {
       const response = await fetch(
-        "http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register",
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

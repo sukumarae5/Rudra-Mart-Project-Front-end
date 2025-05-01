@@ -124,7 +124,7 @@ const menuItems = [
   { path: "/admin/categories", icon: <BiSolidCategory />, label: "Categories" },
   { path: "/admin/adminusers", icon: <FaUser />, label: "Customers" },
   { path: "/admin/adminreports", icon: <HiOutlineDocumentReport />, label: "Reports" },
-  { path: "/admin/inbox", icon: <IoMdMail />, label: "Inbox" },
+  { path: "/admin/admininbox", icon: <IoMdMail />, label: "Inbox" },
   { path: "/admin/adminprofile", icon: <FaUser />, label: "Personal Settings" },
   { path: "/login", icon: <FaUser />, label: "Logout" },
 ];
