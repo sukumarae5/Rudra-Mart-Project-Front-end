@@ -146,12 +146,12 @@ const ProductCategory = () => {
     const wishlistItem = wishlistItems.find(
       (item) => Number(item.product_id) === Number(productid)
     );
-
+console.log(wishlistItem)
     if (wishlistItem) {
       alert("Are you sure you want to remove the product from the wishlist?");
-      console.log("Wishlist Item ID:", wishlistItem.id);
+      console.log("Wishlist Item ID:", wishlistItem.wishlist_id);
 
-      dispatch(removeWishlistProductRequest(wishlistItem.id));
+      dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));
     } else {
       console.log(`Product ID ${productid} not found in wishlist.`);
     }
@@ -162,11 +162,7 @@ const ProductCategory = () => {
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },
     { categoryicon: <BsSmartwatch />, context: "Smartwatch", categoryid: "5" },
     { categoryicon: <CiCamera />, context: "Camera", categoryid: "3" },
-    {
-      categoryicon: <IoHeadsetOutline />,
-      context: "Headphone",
-      categoryid: "6",
-    },
+    { categoryicon: <IoHeadsetOutline />,context: "Headphone",categoryid: "6",},
     { categoryicon: <GiLighter />, context: "Lighter", categoryid: "4" },
     { categoryicon: <IoBagOutline />, context: "Handbag", categoryid: "7" },
     { categoryicon: <IoBookOutline />, context: "Books", categoryid: "8" },
@@ -374,6 +370,7 @@ const ProductCategory = () => {
                     </div>
                     <h5 style={{ margin: "10px 0" }}>{product.name}</h5>
                     <p>Price: ${product.price}</p>
+                    <p>${product.description}</p>
                   </div>
                 ))}
               </div>

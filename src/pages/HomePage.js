@@ -169,22 +169,6 @@ const HomePage = () => {
     navigate("/productpage");
   };
 
-  // const handleWishlistClick = (e, product) => {
-  //   console.log(product)
-  //   e.stopPropagation(); // Prevent card click navigation
-  //   const isClicked = clickedProducts.has(product.id);
-  //   if (isClicked) {
-  //     setClickedProducts((prev) => {
-  //       const newSet = new Set(prev);
-  //       newSet.delete(product.id);
-  //       return newSet;
-  //     });
-  //   } else {
-  //     setClickedProducts((prev) => new Set(prev).add(product.id));
-  //     dispatch(addToWishlist(product));
-  //   }
-  // };
-
   const handleWishlistClick = (e, product) => {
     e.stopPropagation(); // Prevent card click navigation
 
@@ -217,9 +201,11 @@ const HomePage = () => {
     console.log(wishlistItem);
     if (wishlistItem) {
       alert("Are you sure you want to remove the product from the wishlist?");
-      console.log("Wishlist Item ID:", wishlistItem.id);
+      console.log("Wishlist Item ID:", wishlistItem.wishlist_id
+       );
 
-      dispatch(removeWishlistProductRequest(wishlistItem.id));
+      dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id
+      ));
     } else {
       console.log(`Product ID ${productid} not found in wishlist.`);
     }

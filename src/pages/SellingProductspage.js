@@ -79,9 +79,13 @@ const SellingProductspage = () => {
 
     const removeItem = (event, productId) => {
         event.stopPropagation();
+        console.log(productId)
         const wishlistItem = wishlistItems.find((item) => Number(item.product_id) === Number(productId));
+        console.log(wishlistItems.product_id)
+
         if (wishlistItem && window.confirm("Remove product from wishlist?")) {
-            dispatch(removeWishlistProductRequest(wishlistItem.id));
+            dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id
+            ));
         }
     };
 
@@ -141,6 +145,8 @@ const ProductCard = ({ product, handleWishlistClick, removeItem, handleAddToCart
             <Card.Body>
                 <Card.Title>{product.name}</Card.Title>
                 <Card.Text>Price: ₹{product.price}</Card.Text>
+                <Card.Text>Price: ₹{product.description}</Card.Text>
+
                 <Button variant="danger" className="w-100" onClick={(e) => handleAddToCart(e, product)}>
                     Add to Cart
                 </Button>

@@ -138,7 +138,7 @@ const Header = () => {
                 placeholder="What are you looking for?"
                 className="form-control"
                 style={{ width: "300px" }}
-                value={searchQuery}
+                // value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <SearchIcon

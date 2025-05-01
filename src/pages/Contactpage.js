@@ -40,7 +40,7 @@ const ContactPage = () => {
         alert("Failed to send message. Try again later.");
       }
     );
-   
+    
   };
 
   return (

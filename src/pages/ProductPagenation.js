@@ -25,15 +25,12 @@ const ProductPagenation = () => {
   const maxProducts = 36;
   const paginatedProducts = products.slice(0, maxProducts);
   const totalPages = Math.ceil(paginatedProducts.length / productsPerPage);
-
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = paginatedProducts.slice(
     startIndex,
     startIndex + productsPerPage
   );
-
   const handlePageChange = (pageNum) => setCurrentPage(pageNum);
-
   const handleAddToCart = async (event, product) => {
     event.stopPropagation();
     try {
@@ -100,7 +97,8 @@ const ProductPagenation = () => {
         (item) => item.product_id === product.id
       );
       if (wishlistItem)
-        dispatch(removeWishlistProductRequest(wishlistItem.id));
+        dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id
+        ));
     } else {
       dispatch(addToWishlistRequest(product.id));
     }
