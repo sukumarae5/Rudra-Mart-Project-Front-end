@@ -107,7 +107,6 @@ const OrderTable = () => {
                 </InputGroup>
               </Col>
             </Row>
-
             {loading ? (
               <p>Loading orders...</p>
             ) : error ? (
@@ -164,22 +163,7 @@ const OrderTable = () => {
                           >
                             <MdOutlineDeleteOutline size={18} />
                           </Button>
-                          <Button
-                            variant="outline-success"
-                            size="sm"
-                            title="Update Tracking"
-                            onClick={() =>
-                              navigate("/admin/AdminUpdateTracking", {
-                                state: {
-                                  orderId: order.order_id,
-                                  email: order.email || "", // if available
-                                  phone: order.phone || "", // if available
-                                },
-                              })
-                            }
-                          >
-                            🚚
-                          </Button>
+                          
                         </td>
                       </tr>
                     ))
