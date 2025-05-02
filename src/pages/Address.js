@@ -8,18 +8,23 @@ import {
   Form,
   Button,
   Card,
-  Image,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaMapMarkerAlt, FaHome } from "react-icons/fa";
 import Accordion from "react-bootstrap/Accordion";
-import { FaHome } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+
+const MuiSnackbarAlert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const Address = ({ scrollToOrderSummary }) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [newAddress, setNewAddress] = useState(false);
@@ -32,20 +37,24 @@ const Address = ({ scrollToOrderSummary }) => {
     postal_code: "",
     country: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // Payment-related states (unchanged)
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-  }); // Reusable function to fetch saved addresses
+
+  // Snackbar state
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState('success');
+
+  const showAlert = (message, severity = 'success') => {
+    setAlertMessage(message);
+    setAlertSeverity(severity);
+    setAlertOpen(true);
+  };
+
   const fetchSavedAddresses = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
-      alert("You need to log in first.");
+      showAlert('Please log in first.', 'warning');
       navigate("/login");
       return;
     }
@@ -59,18 +68,19 @@ const Address = ({ scrollToOrderSummary }) => {
       if (response.ok && data.success) {
         setSavedAddresses(data.addresses);
       } else {
-        setError(data.message || "Failed to fetch saved addresses.");
+        showAlert(data.message || "Failed to fetch saved addresses.", 'error');
       }
     } catch (err) {
-      setError("An error occurred while fetching saved addresses.");
+      showAlert("An error occurred while fetching saved addresses.", 'error');
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchSavedAddresses();
   }, [navigate]);
-  // Cancel handler for both Add and Edit forms
+
   const handleCancel = () => {
     setNewAddress(false);
     setSelectedAddress(null);
@@ -84,34 +94,32 @@ const Address = ({ scrollToOrderSummary }) => {
       country: "",
     });
   };
-  // Handler for adding a new address (POST)
+
   const handleAddAddress = async (e) => {
     e.preventDefault();
-    const token =
-      localStorage.getItem("authToken") || localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
-    console.log(userId);
+
     if (!token) {
-      alert("You need to log in first.");
+      showAlert('Please log in first.', 'warning');
       navigate("/login");
       return;
     }
     if (!userId) {
-      alert("User ID is not available.");
+      showAlert('User ID not found.', 'warning');
       return;
     }
-    // Validate that every field is filled
+
     for (const [key, value] of Object.entries(formData)) {
       if (!value) {
-        alert(`Please fill in the ${key.replace("_", " ")}`);
+        showAlert(`Please fill in the ${key.replace("_", " ")}`, 'warning');
         return;
       }
     }
+
     setLoading(true);
     try {
-      // Build payload with keys expected by backend:
-      // Map street_address → address and postal_code → postalcode.
       const payload = {
         full_name: formData.full_name,
         phone_number: formData.phone_number,
@@ -132,46 +140,44 @@ const Address = ({ scrollToOrderSummary }) => {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Address added successfully!");
-        // Reload addresses automatically
+        showAlert("Address added successfully!");
         fetchSavedAddresses();
         handleCancel();
       } else {
-        alert(data.message || "Failed to add address.");
+        showAlert(data.message || "Failed to add address.", 'error');
       }
     } catch (err) {
-      alert("An error occurred while adding the address.");
+      showAlert("An error occurred while adding the address.", 'error');
     } finally {
       setLoading(false);
     }
-  }; // Handler for updating an existing address (PUT)
+  };
+
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
-
     if (!selectedAddress || !selectedAddress.id) {
-      alert("No address selected for update.");
+      showAlert("No address selected for update.", 'warning');
       return;
     }
-
     const token = localStorage.getItem("authToken");
     const user = JSON.parse(localStorage.getItem("user"));
-    console.log(user.id);
-    if (!token && user?.id) {
-      alert("You need to log in first.");
+
+    if (!token || !user?.id) {
+      showAlert("You need to log in first.", 'warning');
       navigate("/login");
       return;
     }
 
     setLoading(true);
     try {
-      const payload = { 
-        id:(JSON.parse(selectedAddress.id)),
+      const payload = {
+        id: selectedAddress.id,
         full_name: formData.full_name,
         phone_number: formData.phone_number,
-        address: formData.street_address, // Match backend field name
+        address: formData.street_address,
         city: formData.city,
         state: formData.state,
-        postalcode: formData.postal_code, // Match backend field name
+        postalcode: formData.postal_code,
         country: formData.country,
       };
       const response = await fetch(
@@ -187,28 +193,29 @@ const Address = ({ scrollToOrderSummary }) => {
       );
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Address updated successfully!");
+        showAlert("Address updated successfully!");
         fetchSavedAddresses();
         handleCancel();
       } else {
-        alert(data.message || "Failed to update address.");
+        showAlert(data.message || "Failed to update address.", 'error');
       }
     } catch (err) {
-      alert("An error occurred while updating the address.");
+      showAlert("An error occurred while updating the address.", 'error');
     } finally {
       setLoading(false);
     }
   };
-  // Handler for deleting an address
+
   const handleDeleteAddress = async (addressId) => {
     const token = localStorage.getItem("authToken");
     if (!token) {
-      alert("You need to log in first.");
+      showAlert("You need to log in first.", 'warning');
       navigate("/login");
       return;
     }
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this address?"
+      
     );
     if (confirmDelete) {
       setLoading(true);
@@ -222,58 +229,61 @@ const Address = ({ scrollToOrderSummary }) => {
         );
         const data = await response.json();
         if (response.ok && data.success) {
-          alert("Address deleted successfully!");
+          showAlert("Address deleted successfully!");
           fetchSavedAddresses();
         } else {
-          alert(data.message || "Failed to delete address.");
+          showAlert(data.message || "Failed to delete address.", 'error');
         }
       } catch (err) {
-        alert("An error occurred. Please try again.");
+        showAlert("An error occurred. Please try again.", 'error');
       } finally {
         setLoading(false);
       }
     }
-  }; // When editing, populate the form with the address data.
+  };
+
   const handleEditAddress = (address) => {
-    console.log("Editing address:", address); // Debugging
     setSelectedAddress(address);
     setFormData({
       id: address.id || "",
       full_name: address.full_name || "",
       phone_number: address.phone_number || "",
-      street_address: address.street_address || "",
+      street_address: address.address || "",
       city: address.city || "",
       state: address.state || "",
-      postal_code: address.postal_code || "",
+      postal_code: address.postalcode || "",
       country: address.country || "",
     });
     setNewAddress(true);
-  }; // Update form state when an input changes.
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  }; // (Optional) Select an address for payment.
+  };
+
   const handleSelectAddressForPayment = (address) => {
     setSelectedAddress(address);
   };
+
   useEffect(() => {
     if (savedAddresses.length > 0) {
       setSelectedAddress(savedAddresses[0]);
     }
   }, [savedAddresses]);
+
   return (
     <Container
       fluid
-      style={{ background: "#e3f2fd", padding: "10px 0px 0px 40px",width:"97%" }}
+      style={{ background: "#e3f2fd", padding: "10px 0px 0px 40px", width: "97%" }}
     >
       <Row className="justify-content-center my-2">
-        <Accordion defaultActiveKey="0" >
+        <Accordion defaultActiveKey="0">
           <Accordion.Item eventKey="0">
             <Accordion.Header>
               <FaHome />
               Select The Address
             </Accordion.Header>
             <Accordion.Body>
-              {/* Address Section */}
               <Col
                 md={12}
                 style={{
@@ -289,68 +299,57 @@ const Address = ({ scrollToOrderSummary }) => {
                 </h3>
                 {loading && <Spinner animation="border" />}
                 {error && <Alert variant="danger">{error}</Alert>}
+
                 {savedAddresses.length > 0 ? (
                   savedAddresses.map((addr) => (
-                    <div>
-                      <Card key={addr.id} className="mb-3">
-                        <Card.Body>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                              <Form.Check
-                                type="radio"
-                                name="address"
-                                checked={selectedAddress?.id === addr.id}
-                                onChange={() => {
-                                  handleSelectAddressForPayment(addr);
-                                  if (selectedAddress?.id === addr.id) {
-                                    localStorage.setItem(
-                                      "addressId",
-                                      selectedAddress.id
-                                    );
-                                  } else {
-                                    localStorage.removeItem("addressId");
-                                  }
-                                }}
-                                label={
-                                  <>
-                                    <strong>{addr.full_name}</strong> (
-                                    {addr.phone_number})
-                                    <br />
-                                    {addr.street_address}, {addr.city},{" "}
-                                    {addr.state}, {addr.postal_code},{" "}
-                                    {addr.country},{" "}
-                                    {handleSelectAddressForPayment}
-                                  </>
-                                }
-                              />
-                            </div>
-                            <div>
-                              <Button
-                                variant="warning"
-                                size="sm"
-                                onClick={() => handleEditAddress(addr)}
-                                className="mr-2"
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => handleDeleteAddress(addr.id)}
-                              >
-                                Delete
-                              </Button>
-                            </div>
+                    <Card key={addr.id} className="mb-3">
+                      <Card.Body>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <Form.Check
+                              type="radio"
+                              name="address"
+                              checked={selectedAddress?.id === addr.id}
+                              onChange={() => {
+                                handleSelectAddressForPayment(addr);
+                                localStorage.setItem("addressId", addr.id);
+                              }}
+                              label={
+                                <>
+                                  <strong>{addr.full_name}</strong> ({addr.phone_number})
+                                  <br />
+                                  {addr.address}, {addr.city}, {addr.state}, {addr.postalcode}, {addr.country}
+                                </>
+                              }
+                            />
                           </div>
-                        </Card.Body>
-                      </Card>
-                    </div>
+                          <div>
+                            <Button
+                              variant="warning"
+                              size="sm"
+                              onClick={() => handleEditAddress(addr)}
+                              className="me-2"
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteAddress(addr.id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </Card.Body>
+                    </Card>
                   ))
                 ) : (
                   <p className="text-muted">
                     No saved addresses. Please add a new address.
                   </p>
                 )}
+
                 <Button
                   variant="link"
                   className="text-primary"
@@ -370,6 +369,7 @@ const Address = ({ scrollToOrderSummary }) => {
                 >
                   + Add New Address
                 </Button>
+
                 <div className="d-flex justify-content-end">
                   <Button
                     onClick={() => {
@@ -377,201 +377,39 @@ const Address = ({ scrollToOrderSummary }) => {
                         localStorage.setItem("addressId", selectedAddress.id);
                         scrollToOrderSummary();
                       } else {
-                        alert("Please select an address before continuing.");
+                        showAlert("Please select an address before continuing.", "warning");
                       }
                     }}
                     className="px-4 py-2 fw-bold"
                   >
                     Next
                   </Button>
-                </div>{" "}
-                {/* Form for Adding a New Address */}
-                {newAddress && !selectedAddress && (
+                </div>
+
+                {newAddress && (
                   <Card className="mt-3">
                     <Card.Body>
-                      <h4 className="text-primary mb-3">Add New Address</h4>
-                      <Form onSubmit={handleAddAddress}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Full Name</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="full_name"
-                            value={formData.full_name}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Phone Number</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="phone_number"
-                            value={formData.phone_number}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Street Address</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="street_address"
-                            value={formData.street_address}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>City</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>State</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="state"
-                            value={formData.state}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Postal Code</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="postal_code"
-                            value={formData.postal_code}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Country</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="country"
-                            value={formData.country}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
+                      <h4 className="text-primary mb-3">
+                        {selectedAddress ? "Edit Address" : "Add New Address"}
+                      </h4>
+                      <Form onSubmit={selectedAddress ? handleUpdateAddress : handleAddAddress}>
+                        {["full_name", "phone_number", "street_address", "city", "state", "postal_code", "country"].map((field) => (
+                          <Form.Group className="mb-3" key={field}>
+                            <Form.Label>{field.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name={field}
+                              value={formData[field]}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        ))}
                         <div className="d-flex">
-                          <Button
-                            variant="primary"
-                            type="submit"
-                            disabled={loading}
-                          >
-                            {loading ? "Saving..." : "Save Address"}
+                          <Button variant="primary" type="submit" disabled={loading}>
+                            {loading ? (selectedAddress ? "Updating..." : "Saving...") : (selectedAddress ? "Update Address" : "Save Address")}
                           </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={handleCancel}
-                            disabled={loading}
-                            className="ml-2"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </Form>
-                    </Card.Body>
-                  </Card>
-                )}
-                {/* Form for Editing an Address */}
-                {newAddress && selectedAddress && (
-                  <Card className="mt-3">
-                    <Card.Body>
-                      <h4 className="text-primary mb-3">Edit Address</h4>
-                      <Form onSubmit={handleUpdateAddress}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Full Name</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="full_name"
-                            value={formData.full_name}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Phone Number</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="phone_number"
-                            value={formData.phone_number}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Street Address</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="street_address"
-                            value={formData.street_address}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>City</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>State</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="state"
-                            value={formData.state}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Postal Code</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="postal_code"
-                            value={formData.postal_code}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Country</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="country"
-                            value={formData.country}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                        <div className="d-flex">
-                          <Button
-                            variant="primary"
-                            type="submit"
-                            disabled={loading}
-                          >
-                            {loading ? "Updating..." : "Update Address"}
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={handleCancel}
-                            disabled={loading}
-                            className="ml-2"
-                          >
+                          <Button variant="secondary" onClick={handleCancel} disabled={loading} className="ms-2">
                             Cancel
                           </Button>
                         </div>
@@ -580,11 +418,26 @@ const Address = ({ scrollToOrderSummary }) => {
                   </Card>
                 )}
               </Col>
-              {/* Order Summary & Payment Section */}
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
       </Row>
+
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={3000}
+        onClose={() => setAlertOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiSnackbarAlert
+          onClose={() => setAlertOpen(false)}
+          severity={alertSeverity}
+          sx={{ width: "100%" }}
+        >
+          {alertMessage}
+        </MuiSnackbarAlert>
+      </Snackbar>
     </Container>
   );
 };

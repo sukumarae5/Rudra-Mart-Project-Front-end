@@ -32,7 +32,7 @@ const ChatWidget = () => {
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId) return;
 
-    const socket = new WebSocket("ws://192.168.121.55:8081");
+    const socket = new WebSocket("ws://192.168.1.7:8081");
     setWs(socket);
 
     socket.onopen = () => {

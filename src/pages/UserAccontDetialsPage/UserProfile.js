@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
-const ProfileEdit = () => {
-  const { data = []} = useSelector((state) => state.users);
+const UserProfile = () => {
+  const { data = [] } = useSelector((state) => state.users);
+  const navigate = useNavigate();
+
   const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
@@ -14,18 +19,30 @@ const ProfileEdit = () => {
     confirmNewPassword: "",
   });
 
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
   useEffect(() => {
-    const user=JSON.parse(localStorage.getItem("user"))
-    // Populate the profile state with user data when component mounts
-    setProfile({
-      firstName: user.name || "",
-      lastName: "",
-      email: user.email || "",
-      phoneNo: user.phone_number || "",
-      currentPassword: "",
-      newPassword: "",
-      confirmNewPassword: "",
-    });
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setProfile({
+        firstName: user.name || "",
+        lastName: "",
+        email: user.email || "",
+        phoneNo: user.phone_number || "",
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+    }
   }, [data]);
 
   const handleInputChange = (e) => {
@@ -36,15 +53,17 @@ const ProfileEdit = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (profile.newPassword !== profile.confirmNewPassword) {
-      alert("New passwords do not match!");
+      showSnackbar("New passwords do not match!", "error");
       return;
     }
-    alert("Profile updated successfully!");
+
+    // Simulate profile update
+    showSnackbar("Profile updated successfully!", "success");
   };
 
   const handleCancel = () => {
-    alert("Changes canceled!");
-  }; 
+    showSnackbar("Changes canceled!", "info");
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white shadow rounded-2xl">
@@ -141,13 +160,7 @@ const ProfileEdit = () => {
           >
             Cancel
           </button>
-          <Button
-  variant="secondary"
-  
->
-  forgot password
-</Button>
-
+          <Button variant="secondary">Forgot Password</Button>
           <button
             type="submit"
             className="px-6 py-2 bg-red-500 text-white font-semibold rounded-md"
@@ -156,8 +169,26 @@ const ProfileEdit = () => {
           </button>
         </div>
       </form>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          elevation={6}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 };
 
-export default ProfileEdit;
+export default UserProfile;
