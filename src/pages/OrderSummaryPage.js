@@ -1,5 +1,13 @@
-import React, { forwardRef } from "react";
-import {Accordion,Card,Row, Col,Button,Image,Container} from "react-bootstrap";
+import React, { useState, forwardRef } from "react";
+import {
+  Accordion,
+  Card,
+  Row,
+  Col,
+  Button,
+  Image,
+  Container,
+} from "react-bootstrap";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,10 +16,27 @@ import {
   removeProduct,
 } from "../features/cart/cartActions";
 
+// ✅ MUI components
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+// ✅ Snackbar Alert component for MUI
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const dispatch = useDispatch();
-  // const userId = localStorage.getItem("userId") // Get user ID from localStorage or Redux
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // "error", "info", etc.
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   const handleIncreaseQuantity = (productId) => {
     dispatch(increaseQuantity(productId));
   };
@@ -27,28 +52,32 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const totalCost = checkoutData.reduce(
     (total, item) => total + item.productPrice * item.quantity,
     0
-  ); 
-  // Function to handle order confirmation and scroll to payment page
-  const handleConfirmOrder = async (totalcost) => {
+  );
+
+  const handleConfirmOrder = async () => {
     if (checkoutData.length === 0) {
-      alert("Your cart is empty. Add items before confirming the order.");
+      setSnackbarMessage("Your cart is empty. Add items before confirming the order.");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
       return;
     }
-  
-    if (onConfirmOrder) {
-    
-       alert("Order confirmed! Moving to the payment page...");
+
+    setSnackbarMessage("Order confirmed! Moving to the payment page...");
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+
+    setTimeout(() => {
+      if (onConfirmOrder) {
         onConfirmOrder();
-        
-      
-    } else {
-      const paymentSection = document.getElementById("payment-section");
-      if (paymentSection) {
-        paymentSection.scrollIntoView({ behavior: "smooth" });
+      } else {
+        const paymentSection = document.getElementById("payment-section");
+        if (paymentSection) {
+          paymentSection.scrollIntoView({ behavior: "smooth" });
+        }
       }
-    }
+    }, 3000); // Wait for snackbar to finish
   };
-  
+
   return (
     <div ref={ref} className="container mt-4">
       <Container fluid style={{ background: "#e3f2fd", padding: "4px" }}>
@@ -136,7 +165,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                       </h5>
                       <Button
                         variant="success"
-                        onClick={()=>handleConfirmOrder(totalCost)}
+                        onClick={handleConfirmOrder}
                         className="px-4 py-2 fw-bold"
                       >
                         Next
@@ -149,6 +178,22 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
           </Col>
         </Row>
       </Container>
+
+      {/* ✅ Snackbar Alert */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 });

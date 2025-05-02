@@ -10,6 +10,14 @@ import {
 } from '../features/wishlist/wishlistAction';
 import { setSelectedProduct } from '../features/product/productActions';
 
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+
+// Custom Alert wrapper
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const ProductPagenation = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -19,13 +27,22 @@ const ProductPagenation = () => {
   const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [addedProductIds, setAddedProductIds] = useState([]); // ✅ track locally added products
+  const [addedProductIds, setAddedProductIds] = useState([]);
+
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState('success');
+
+  const showAlert = (message, severity = 'success') => {
+    setAlertMessage(message);
+    setAlertSeverity(severity);
+    setAlertOpen(true);
+  };
 
   const productsPerPage = 6;
   const maxProducts = 36;
   const paginatedProducts = products.slice(0, maxProducts);
   const totalPages = Math.ceil(paginatedProducts.length / productsPerPage);
-
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = paginatedProducts.slice(
     startIndex,
@@ -41,7 +58,7 @@ const ProductPagenation = () => {
       const user = JSON.parse(localStorage.getItem('user'));
 
       if (!userToken || !user?.id) {
-        alert('Please log in first.');
+        showAlert('Please log in first.', 'warning');
         navigate('/login');
         return;
       }
@@ -52,7 +69,7 @@ const ProductPagenation = () => {
 
       const isAlreadyAdded = addedProductIds.includes(product.id);
       if (isProductInCart || isAlreadyAdded) {
-        alert('Already in cart.');
+        showAlert('Product is already in cart!', 'info');
         return;
       }
 
@@ -74,16 +91,16 @@ const ProductPagenation = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        alert(`Error: ${data.message || response.statusText}`);
+        showAlert(`Error: ${data.message || response.statusText}`, 'error');
         return;
       }
 
-      alert('Added to cart!');
-      setAddedProductIds((prev) => [...prev, product.id]); // ✅ update local tracking
+      showAlert('Added to cart!', 'success');
+      setAddedProductIds((prev) => [...prev, product.id]);
       dispatch(fetchApiCartDataRequest());
     } catch (error) {
       console.error('Cart error:', error);
-      alert('An error occurred.');
+      showAlert('An error occurred while adding to cart.', 'error');
     }
   };
 
@@ -91,7 +108,7 @@ const ProductPagenation = () => {
     e.stopPropagation();
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user?.id || !product?.id) {
-      alert('Invalid user or product.');
+      showAlert('Invalid user or product.', 'warning');
       return;
     }
 
@@ -99,10 +116,13 @@ const ProductPagenation = () => {
       const wishlistItem = wishlistData.find(
         (item) => item.product_id === product.id
       );
-      if (wishlistItem)
-        dispatch(removeWishlistProductRequest(wishlistItem.id));
+      if (wishlistItem) {
+        dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));
+        showAlert('Removed from wishlist', 'info');
+      }
     } else {
       dispatch(addToWishlistRequest(product.id));
+      showAlert('Added to wishlist', 'success');
     }
   };
 
@@ -230,6 +250,22 @@ const ProductPagenation = () => {
           </Button>
         ))}
       </div>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={3000}
+        onClose={() => setAlertOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setAlertOpen(false)}
+          severity={alertSeverity}
+          sx={{ width: '100%' }}
+        >
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
