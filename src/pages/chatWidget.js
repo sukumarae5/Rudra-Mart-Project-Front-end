@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, InputGroup, FormControl } from "react-bootstrap";
 import { BsChatDots } from "react-icons/bs";
-import { v4 as uuidv4 } from "uuid"; // Install with: npm install uuid
 
 const ChatWidget = () => {
   const navigate = useNavigate();
@@ -20,10 +19,10 @@ const ChatWidget = () => {
   const storedConversationId = localStorage.getItem("conversationId");
   const [conversationId, setConversationId] = useState(storedConversationId);
 
-  // Set or generate conversation ID
+  // Generate conversation ID if not set
   useEffect(() => {
     if (!conversationId && userId) {
-      const newId = `user-${userId}-admin`; // or use uuidv4()
+      const newId = `user-${userId}-admin`;
       localStorage.setItem("conversationId", newId);
       setConversationId(newId);
     }
@@ -33,7 +32,7 @@ const ChatWidget = () => {
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId) return;
 
-    const socket = new WebSocket("ws://localhost:8081");
+    const socket = new WebSocket("ws://192.168.121.55:8081");
     setWs(socket);
 
     socket.onopen = () => {
@@ -42,7 +41,11 @@ const ChatWidget = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setMessages((prev) => [...prev, data]);
+
+      // Filter messages to current conversation only
+      if (data.conversation_id === conversationId) {
+        setMessages((prev) => [...prev, data]);
+      }
     };
 
     return () => {
@@ -63,7 +66,7 @@ const ChatWidget = () => {
       sender_name: senderName,
       receiver_id: "admin",
       message: text.trim(),
-      conversation_id: conversationId
+      conversation_id: conversationId,
     };
 
     ws.send(JSON.stringify(msg));
