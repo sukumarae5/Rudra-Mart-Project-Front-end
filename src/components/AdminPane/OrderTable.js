@@ -107,7 +107,6 @@ const OrderTable = () => {
                 </InputGroup>
               </Col>
             </Row>
-
             {loading ? (
               <p>Loading orders...</p>
             ) : error ? (
@@ -116,7 +115,6 @@ const OrderTable = () => {
               <Table striped bordered hover responsive className="rounded shadow-sm">
                 <thead className="bg-light">
                   <tr>
-                    
                     <th>Order ID</th>
                     <th>Customer ID</th>
                     <th>Status</th>
@@ -129,7 +127,6 @@ const OrderTable = () => {
                   {currentOrders.length > 0 ? (
                     currentOrders.map((order) => (
                       <tr key={order.order_id}>
-                       
                         <td className="fw-bold">{order.order_id}</td>
                         <td>{order.user_id || "N/A"}</td>
                         <td
@@ -166,6 +163,7 @@ const OrderTable = () => {
                           >
                             <MdOutlineDeleteOutline size={18} />
                           </Button>
+                          
                         </td>
                       </tr>
                     ))
