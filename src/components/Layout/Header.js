@@ -14,6 +14,7 @@ import { FaUser } from "react-icons/fa";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { FaHeart } from "react-icons/fa";
 import { FaCartArrowDown } from "react-icons/fa6";
+import ChatWidget from "../../pages/chatWidget";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -243,6 +244,7 @@ const Header = () => {
       </Navbar>
 
       <Outlet />
+      <ChatWidget/>
       <Footer />
     </div>
   );
