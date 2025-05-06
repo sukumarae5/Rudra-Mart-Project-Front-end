@@ -15,11 +15,10 @@ const ChatWidget = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
   const senderName = user?.name;
-
   const storedConversationId = localStorage.getItem("conversationId");
   const [conversationId, setConversationId] = useState(storedConversationId);
 
-  // Generate conversation ID if not set
+  // Setup conversationId
   useEffect(() => {
     if (!conversationId && userId) {
       const newId = `user-${userId}-admin`;
@@ -28,11 +27,28 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
-  // Handle WebSocket connection
+  // Fetch previous messages from API
+  useEffect(() => {
+    if (!conversationId) return;
+
+    fetch(`http://192.168.1.10:8081/api/user/messages/${conversationId}`,{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })  
+    .then((res) => res.json())
+      .then((data) => {
+        const filtered = data.filter((msg) => msg.conversation_id === conversationId);
+        setMessages(filtered);
+      })
+      .catch((err) => console.error("Fetch error:", err));
+  }, [conversationId]);
+
+  // Setup WebSocket connection
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId) return;
 
-    const socket = new WebSocket("ws://192.168.121.55:8081");
+    const socket = new WebSocket("ws://192.168.1.10:8081");
     setWs(socket);
 
     socket.onopen = () => {
@@ -41,8 +57,6 @@ const ChatWidget = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      // Filter messages to current conversation only
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
       }
@@ -53,7 +67,6 @@ const ChatWidget = () => {
     };
   }, [token, userId, senderName, conversationId]);
 
-  // Scroll to bottom on new message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -93,26 +106,16 @@ const ChatWidget = () => {
           <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
             <h5 className="mb-3">Chat with Support</h5>
 
-            <div
-              className="border rounded mb-3 p-2 bg-white"
-              style={{ height: 300, overflowY: "auto" }}
-            >
+            <div className="border rounded mb-3 p-2 bg-white" style={{ height: 300, overflowY: "auto" }}>
               {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`text-${msg.sender_id === userId ? "end" : "start"}`}
-                >
+                <div key={idx} className={`text-${msg.sender_id === userId ? "end" : "start"}`}>
                   <div
                     className={`d-inline-block p-2 rounded mb-1 ${
-                      msg.sender_id === userId
-                        ? "bg-primary text-white"
-                        : "bg-light"
+                      msg.sender_id === userId ? "bg-primary text-white" : "bg-light"
                     }`}
                     style={{ maxWidth: "80%" }}
                   >
-                    {msg.sender_id !== userId && (
-                      <strong>{msg.sender_name}</strong>
-                    )}
+                    {msg.sender_id !== userId && <strong>{msg.sender_name}</strong>}
                     <div>{msg.message}</div>
                   </div>
                 </div>
