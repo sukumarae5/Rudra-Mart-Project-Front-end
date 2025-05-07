@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Accordion, Card, Form, Row, Col, Button, Spinner } from "react-bootstrap";
+import {
+  Accordion,
+  Card,
+  Form,
+  Row,
+  Col,
+  Button,
+  Spinner,
+} from "react-bootstrap";
 import { FaRegCreditCard } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
-const PaymentPage = ({ref}) => {
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const PaymentPage = ({ ref }) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +27,20 @@ const PaymentPage = ({ref}) => {
     email: "guest@example.com",
     contact: "0000000000",
   });
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info", // "success", "error", "warning", "info"
+  });
+
+  const showAlert = (message, severity = "info") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const navigate = useNavigate();
 
@@ -27,99 +55,103 @@ const PaymentPage = ({ref}) => {
     }
   }, []);
 
-  // Calculate total cost based on checkoutData
   const totalCost = checkoutData.reduce(
     (total, item) => total + item.productPrice * item.quantity,
     0
   );
-console.log(checkoutData)
+
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
   };
 
-  // Function to place order and payment record, then navigate on success
-  // Function to place order and payment record, then navigate on success
-const placeOrder = async (userId, addressId, token, paymentStatus, transactionId, paymentMethodType) => {
-  try {
-    console.log("Starting order placement...");
+  const placeOrder = async (
+    userId,
+    addressId,
+    token,
+    paymentStatus,
+    transactionId,
+    paymentMethodType
+  ) => {
+    try {
+      console.log("Starting order placement...");
 
-    // Step 1: Place Order (including order items)
-    const orderResponse = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        userId,
-        totalPrice: totalCost,
-        status: "Pending", // Adjust this if you have other statuses
-        addressId,
-        items: checkoutData.map(item => ({
-          product_id: item.productId, // Backend format check
-          quantity: item.quantity,
-          price: item.productPrice,
-        })),
-      }),
-    });
+      const orderResponse = await fetch(
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId,
+            totalPrice: totalCost,
+            status: "Pending",
+            addressId,
+            items: checkoutData.map((item) => ({
+              product_id: item.productId,
+              quantity: item.quantity,
+              price: item.productPrice,
+            })),
+          }),
+        }
+      );
 
-    const orderResult = await orderResponse.json();
-    console.log("Order API response:", orderResult);
+      const orderResult = await orderResponse.json();
+      console.log("Order API response:", orderResult);
 
-    if (!orderResponse.ok) {
-      alert(orderResult.message || "Failed to place order");
-      throw new Error(orderResult.message || "Failed to place order");
+      if (!orderResponse.ok) {
+        showAlert(orderResult.message || "Failed to place order", "error");
+        throw new Error(orderResult.message || "Failed to place order");
+      }
+
+      showAlert("Order placed successfully!", "success");
+
+      const paymentResponse = await fetch(
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/payment/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            amount: totalCost,
+            payment_status: paymentStatus,
+            payment_method: paymentMethodType,
+            transaction_id: transactionId,
+          }),
+        }
+      );
+
+      const paymentResult = await paymentResponse.json();
+      console.log("Payment API response:", paymentResult);
+
+      if (!paymentResponse.ok) {
+        showAlert(paymentResult.message || "Failed to process payment", "error");
+        throw new Error(paymentResult.message || "Failed to process payment");
+      }
+
+      showAlert("Payment processed successfully!", "success");
+
+      localStorage.removeItem("cart");
+
+      setTimeout(() => {
+        navigate("/OrderPlacedSuccessfullyPage");
+      }, 1500);
+    } catch (error) {
+      console.error("Error during order/payment:", error);
+      showAlert(error.message || "Something went wrong!", "error");
+    } finally {
+      setIsLoading(false);
     }
-
-    // ✅ Order placed successfully
-    alert(orderResult.message);
-    
-    // Step 2: Create Payment Record
-    console.log("Proceeding to create payment record...");
-    const paymentResponse = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/payment/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        amount: totalCost,
-        payment_status: paymentStatus,
-        payment_method: paymentMethodType,
-        transaction_id: transactionId,
-      }),
-    });
-
-    const paymentResult = await paymentResponse.json();
-    console.log("Payment API response:", paymentResult);
-
-    if (!paymentResponse.ok) {
-      alert(paymentResult.message || "Failed to process payment");
-      throw new Error(paymentResult.message || "Failed to process payment");
-    }
-    navigate("/OrderPlacedSuccessfullyPage");
-
-    // ✅ Payment recorded successfully
-    alert("Payment processed successfully!");
-  
-    // Final steps
-    localStorage.removeItem("cart");
-    alert("Order and payment completed successfully. Redirecting now...");
-
-  } catch (error) {
-    console.error("Error during order/payment:", error);
-    alert(error.message || "Something went wrong!");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   const generateUniqueTransactionId = () => {
     return `COD_${Date.now()}`;
   };
-  
+
   const handleCashOnDelivery = async () => {
     setIsLoading(true);
     try {
@@ -127,22 +159,27 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
       const userId = user?.id;
       const addressId = JSON.parse(localStorage.getItem("addressId"));
       const token = localStorage.getItem("authToken");
-  
+
       if (!user || !addressId || !token) {
-        alert("User, Address, or Token missing! Please login again.");
+        showAlert("User, Address, or Token missing! Please login again.", "warning");
         setIsLoading(false);
         return;
       }
-  
-      console.log("Handling Cash on Delivery for userId:", userId);
-      await placeOrder(userId, addressId, token, "Pending", generateUniqueTransactionId(), "Cash on Delivery");
-  
+
+      await placeOrder(
+        userId,
+        addressId,
+        token,
+        "Pending",
+        generateUniqueTransactionId(),
+        "Cash on Delivery"
+      );
     } catch (error) {
       console.error("Error placing COD order:", error);
-      alert(error.message || "Something went wrong during COD!");
+      showAlert(error.message || "Something went wrong during COD!", "error");
     }
   };
-  
+
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) return resolve(true);
@@ -163,7 +200,7 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
       const addressId = JSON.parse(localStorage.getItem("addressId"));
 
       if (!user || !addressId || !token) {
-        alert("User, Address, or Token missing! Please login again.");
+        showAlert("User, Address, or Token missing! Please login again.", "warning");
         setIsLoading(false);
         return;
       }
@@ -178,8 +215,14 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
         name: "Your Store",
         description: "Payment for Order",
         handler: async (response) => {
-          console.log("Razorpay payment response:", response);
-          await placeOrder(userId, addressId, token, "Paid", response.razorpay_payment_id, "Razorpay");
+          await placeOrder(
+            userId,
+            addressId,
+            token,
+            "Paid",
+            response.razorpay_payment_id,
+            "Razorpay"
+          );
         },
         prefill: {
           name: userDetails.name,
@@ -192,17 +235,17 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
       new window.Razorpay(options).open();
     } catch (error) {
       console.error("Razorpay Error:", error);
-      alert(error.message);
+      showAlert(error.message, "error");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div ref={ref} className="container mt-4 " >
-      <Row style={{width:"103%"}}>
+    <div ref={ref} className="container mt-4">
+      <Row style={{ width: "103%" }}>
         <Col>
-          <Accordion defaultActiveKey="0" >
+          <Accordion defaultActiveKey="0">
             <Accordion.Item eventKey="0">
               <Accordion.Header>Payment Method</Accordion.Header>
               <Accordion.Body>
@@ -230,14 +273,32 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
                   </Form>
 
                   {paymentMethod === "cod" && (
-                    <Button onClick={handleCashOnDelivery} disabled={isLoading} variant="success" className="w-100">
-                      {isLoading ? <Spinner animation="border" size="sm" /> : "Place Order (COD)"}
+                    <Button
+                      onClick={handleCashOnDelivery}
+                      disabled={isLoading}
+                      variant="success"
+                      className="w-100"
+                    >
+                      {isLoading ? (
+                        <Spinner animation="border" size="sm" />
+                      ) : (
+                        "Place Order (COD)"
+                      )}
                     </Button>
                   )}
 
                   {paymentMethod === "razorpay" && (
-                    <Button onClick={handleRazorpayPayment} disabled={isLoading} variant="primary" className="w-100">
-                      {isLoading ? <Spinner animation="border" size="sm" /> : "Pay with Razorpay"}
+                    <Button
+                      onClick={handleRazorpayPayment}
+                      disabled={isLoading}
+                      variant="primary"
+                      className="w-100"
+                    >
+                      {isLoading ? (
+                        <Spinner animation="border" size="sm" />
+                      ) : (
+                        "Pay with Razorpay"
+                      )}
                     </Button>
                   )}
                 </Card>
@@ -246,6 +307,22 @@ const placeOrder = async (userId, addressId, token, paymentStatus, transactionId
           </Accordion>
         </Col>
       </Row>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

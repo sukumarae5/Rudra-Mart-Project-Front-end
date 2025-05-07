@@ -21,6 +21,10 @@ import {
   removeWishlistProductRequest,
 } from "../wishlist/wishlistAction";
 
+// Material UI imports
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
 const ProductCategory = () => {
   const { products = [] } = useSelector((state) => state.products || {});
   const { cartItems = [] } = useSelector((state) => state.cart || {});
@@ -30,10 +34,21 @@ const ProductCategory = () => {
     : wishlistData;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // console.log(products)
+
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   const categoryCardClick = (categoryid) => {
     const filtered = products.filter(
@@ -55,26 +70,25 @@ const ProductCategory = () => {
 
   const handleCardClick = (productId, product) => {
     dispatch(setSelectedProduct(product));
-
     navigate("/productpage");
   };
 
   const handleWishlistClick = (e, product) => {
-    e.stopPropagation(); // Prevent card click navigation
-
+    e.stopPropagation();
     const userData = localStorage.getItem("user");
     if (!userData) {
-      console.error("User not found in localStorage");
+      showSnackbar("User not found. Please log in.", "error");
       return;
     }
 
     const user = JSON.parse(userData);
     if (!user?.id || !product?.id) {
-      console.error("Invalid user or product data");
+      showSnackbar("Invalid user or product data", "error");
       return;
     }
-    console.log(product.id);
+
     dispatch(addToWishlistRequest(product.id));
+    showSnackbar("Added to wishlist!", "success");
   };
 
   const handleAddToCart = async (event, product) => {
@@ -83,14 +97,14 @@ const ProductCategory = () => {
     try {
       const userToken = localStorage.getItem("authToken");
       if (!userToken) {
-        alert("Session expired or user not authenticated. Please log in.");
+        showSnackbar("Session expired. Please log in.", "error");
         navigate("/login");
         return;
       }
 
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user || !user.id) {
-        alert("User information is missing or corrupted. Please log in.");
+        showSnackbar("User info missing. Please log in.", "error");
         navigate("/login");
         return;
       }
@@ -99,16 +113,16 @@ const ProductCategory = () => {
         (item) => item.user_id === user.id && item.product_id === product.id
       );
       if (isProductInCart) {
-        alert("Product is already in the cart.");
+        showSnackbar("Product already in cart", "warning");
         return;
       }
+
       const cartItem = {
         user_id: user.id,
         product_id: product.id,
         quantity: 1,
       };
 
-      // API call to add product to cart
       const response = await fetch(
         `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
         {
@@ -122,38 +136,30 @@ const ProductCategory = () => {
       );
       const data = await response.json();
       if (!response.ok) {
-        alert(`Error: ${data.message || response.statusText}`);
+        showSnackbar(`Error: ${data.message || response.statusText}`, "error");
         return;
       }
 
-      alert("Product successfully added to cart.");
       dispatch(fetchApiCartDataRequest());
+      showSnackbar("Product added to cart!", "success");
     } catch (error) {
-      console.error("Error adding product to cart:", error);
-      alert(`Error: ${error.message}`);
+      console.error("Add to cart error:", error);
+      showSnackbar(`Error: ${error.message}`, "error");
     }
   };
 
   const removeItem = (event, productid) => {
-    event.stopPropagation(); // Prevents event bubbling if needed
-    console.log("Received Product ID:", productid);
-
-    if (!productid) {
-      console.error("Error: Product ID is undefined or null.");
-      return;
-    }
+    event.stopPropagation();
 
     const wishlistItem = wishlistItems.find(
       (item) => Number(item.product_id) === Number(productid)
     );
 console.log(wishlistItem)
     if (wishlistItem) {
-      alert("Are you sure you want to remove the product from the wishlist?");
-      console.log("Wishlist Item ID:", wishlistItem.wishlist_id);
-
-      dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));
+      dispatch(removeWishlistProductRequest(wishlistItem.id));
+      showSnackbar("Removed from wishlist", "info");
     } else {
-      console.log(`Product ID ${productid} not found in wishlist.`);
+      showSnackbar("Product not found in wishlist", "warning");
     }
   };
 
@@ -162,7 +168,7 @@ console.log(wishlistItem)
     { categoryicon: <IoIosDesktop />, context: "Computer", categoryid: "2" },
     { categoryicon: <BsSmartwatch />, context: "Smartwatch", categoryid: "5" },
     { categoryicon: <CiCamera />, context: "Camera", categoryid: "3" },
-    { categoryicon: <IoHeadsetOutline />,context: "Headphone",categoryid: "6",},
+    { categoryicon: <IoHeadsetOutline />, context: "Headphone", categoryid: "6" },
     { categoryicon: <GiLighter />, context: "Lighter", categoryid: "4" },
     { categoryicon: <IoBagOutline />, context: "Handbag", categoryid: "7" },
     { categoryicon: <IoBookOutline />, context: "Books", categoryid: "8" },
@@ -172,41 +178,18 @@ console.log(wishlistItem)
   return (
     <div>
       <div className="d-flex align-items-center">
-        <Badge
-          bg="danger"
-          style={{
-            width: "20px",
-            height: "50px",
-            marginLeft: "30px",
-            marginRight: "10px",
-          }}
-        >
-          {" "}
-        </Badge>
-        <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px" }}>
-          Categorys
-        </p>
+        <Badge bg="danger" style={{ width: "20px", height: "50px", marginLeft: "30px", marginRight: "10px" }}></Badge>
+        <p style={{ color: "#DB4444", fontWeight: "bold", fontSize: "20px" }}>Categorys</p>
       </div>
-      <div
-        className="d-flex justify-content-between align-items-center"
-        style={{ paddingLeft: "3%" }}
-      >
+
+      <div className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "3%" }}>
         <h2 style={{ fontSize: "30px" }}>Browse By Category</h2>
         <div>
-          <button
-            className="btn btn-light"
-            onClick={() => scrollCategory("left")}
-          >
-            <ArrowBackIos />
-          </button>
-          <button
-            className="btn btn-light"
-            onClick={() => scrollCategory("right")}
-          >
-            <ArrowForwardIos />
-          </button>
+          <button className="btn btn-light" onClick={() => scrollCategory("left")}><ArrowBackIos /></button>
+          <button className="btn btn-light" onClick={() => scrollCategory("right")}><ArrowForwardIos /></button>
         </div>
       </div>
+
       <Container>
         <Row>
           <Col>
@@ -225,23 +208,16 @@ console.log(wishlistItem)
               {categories.map((category, index) => (
                 <div
                   key={index}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#DB4444";
-                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#DB4444"}
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.background =
-                      activeCategory === category.categoryid
-                        ? "#a4a7ab"
-                        : "white")
+                    e.currentTarget.style.background =
+                      activeCategory === category.categoryid ? "#a4a7ab" : "white"
                   }
                   style={{
                     padding: "4%",
                     borderWidth: "2px",
                     borderStyle: "solid",
-                    background:
-                      activeCategory === category.categoryid
-                        ? "#a4a7ab"
-                        : "white",
+                    background: activeCategory === category.categoryid ? "#a4a7ab" : "white",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -250,9 +226,7 @@ console.log(wishlistItem)
                   }}
                   onClick={() => categoryCardClick(category.categoryid)}
                 >
-                  <span style={{ fontSize: "40px", padding: "15px" }}>
-                    {category.categoryicon}
-                  </span>
+                  <span style={{ fontSize: "40px", padding: "15px" }}>{category.categoryicon}</span>
                   <p style={{ margin: 0 }}>{category.context}</p>
                 </div>
               ))}
@@ -263,13 +237,7 @@ console.log(wishlistItem)
         <Row>
           <Col>
             {filteredProducts.length > 0 ? (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: "20px",
-                }}
-              >
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
                 {filteredProducts.map((product, index) => (
                   <div
                     key={index}
@@ -283,8 +251,7 @@ console.log(wishlistItem)
                       background: "#f9f9f9",
                       textAlign: "center",
                       position: "relative",
-                    }}
-                  >
+                    }}>
                     <div
                       style={{
                         position: "absolute",
@@ -295,60 +262,31 @@ console.log(wishlistItem)
                         marginBottom: "100px",
                       }}
                     >
-                      {wishlistItems.some(
-                        (item) => item.product_id === product.id
-                      ) ? (
+                      {wishlistItems.some(item => item.product_id === product.id) ? (
                         <FaHeart
-                          style={{
-                            fontSize: "1.3rem",
-                            padding: "10%",
-                            width: "150%",
-                            color: "red",
-                            cursor: "pointer",
-                            // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                            borderRadius: "50%",
-                          }}
+                          style={{ fontSize: "1.3rem", padding: "10%", width: "150%", color: "red", cursor: "pointer", borderRadius: "50%" }}
                           onClick={(e) => removeItem(e, product.id)}
                         />
                       ) : (
                         <FaRegHeart
-                          style={{
-                            fontSize: "1.2rem",
-                            color: "#575B5A",
-                            cursor: "pointer",
-                            // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                            borderRadius: "40%",
-                          }}
+                          style={{ fontSize: "1.2rem", color: "#575B5A", cursor: "pointer", borderRadius: "40%" }}
                           onClick={(e) => handleWishlistClick(e, product)}
                         />
                       )}
 
                       <FaEye
-                        style={{
-                          fontSize: "1.2rem",
-                          color: "gray",
-                          cursor: "pointer",
-                          // boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-                          borderRadius: "40%",
-                        }}
+                        style={{ fontSize: "1.2rem", color: "gray", cursor: "pointer", borderRadius: "40%" }}
                         onClick={(e) => {
                           e.stopPropagation();
-
                           handleCardClick(product.id, product);
                         }}
                       />
                     </div>
+
                     <img
                       src={product.image_url}
                       alt={product.name}
-                      style={{
-                        width: "99%",
-                        padding: "10px",
-                        height: "170px",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                        marginBottom: "10px",
-                      }}
+                      style={{ width: "99%", padding: "10px", height: "170px", objectFit: "cover", borderRadius: "8px", marginBottom: "10px" }}
                     />
 
                     <div
@@ -380,6 +318,25 @@ console.log(wishlistItem)
           </Col>
         </Row>
       </Container>
+
+      {/* Snackbar Component */}
+      <Snackbar
+  open={snackbarOpen}
+  autoHideDuration={3000}
+  onClose={() => setSnackbarOpen(false)}
+  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+>
+  <MuiAlert
+    onClose={() => setSnackbarOpen(false)}
+    severity={snackbarSeverity}
+    elevation={6}
+    variant="filled"
+    sx={{ width: "100%", textAlign: "center" }}
+  >
+    {snackbarMessage}
+  </MuiAlert>
+</Snackbar>
+
     </div>
   );
 };

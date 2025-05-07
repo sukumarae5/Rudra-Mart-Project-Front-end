@@ -24,7 +24,7 @@ const AdminInbox = () => {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    fetch("http://192.168.121.55:8081/api/admin/messages/all")
+    fetch("http://192.168.1.7:8081/api/admin/messages/all")
       .then((res) => res.json())
       .then((data) => {
         const grouped = data.reduce((acc, msg) => {
@@ -46,7 +46,7 @@ const AdminInbox = () => {
     const message = replyMessages[conversationId];
     if (!message) return;
 
-    fetch("http://192.168.121.55:8081/api/messages/adminsend", {
+    fetch("http://192.168.1.7:8081/api/messages/adminsend", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -59,7 +59,7 @@ const AdminInbox = () => {
       .then((res) => res.json())
       .then(() => {
         setReplyMessages({ ...replyMessages, [conversationId]: "" });
-        return fetch("http://192.168.121.55:8081/api/admin/messages/all");
+        return fetch("http://192.168.1.7:8081/api/admin/messages/all");
       })
       .then((res) => res.json())
       .then((data) => {
