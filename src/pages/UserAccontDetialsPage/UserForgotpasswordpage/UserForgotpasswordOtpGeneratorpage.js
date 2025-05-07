@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 const UserForgotpasswordOtpGeneratorpage = () => {
   const [selectedOption, setSelectedOption] = useState("email");
   const [userData, setUserData] = useState({ email: "", phone_number: "" });
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState("");
-const navigate=useNavigate()
+  const navigate = useNavigate();
+
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+
+  const showSnackbar = (message, severity = "info") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
   useEffect(() => {
     const userforgotdata = JSON.parse(localStorage.getItem("forgetuser"));
     if (userforgotdata) {
@@ -17,7 +31,7 @@ const navigate=useNavigate()
   useEffect(() => {
     setUserData((prev) => ({
       ...prev,
-      email: selectedOption === "email" ? prev.email :prev.email ,
+      email: selectedOption === "email" ? prev.email : prev.email,
       phone_number: selectedOption === "phone" ? prev.phone_number : prev.phone_number,
     }));
   }, [selectedOption]);
@@ -33,13 +47,12 @@ const navigate=useNavigate()
   const handleGenerateOtp = async (e) => {
     e.preventDefault();
 
-    const contactValue =
-      selectedOption === "email"
-        ? userData.email.trim()
-        : userData.phone_number.trim();
+    const contactValue = selectedOption === "email"
+      ? userData.email.trim()
+      : userData.phone_number.trim();
 
     if (!contactValue) {
-      alert(`Please enter a valid ${selectedOption}`);
+      showSnackbar(`Please enter a valid ${selectedOption}`, "warning");
       return;
     }
 
@@ -61,26 +74,23 @@ const navigate=useNavigate()
       const result = await response.json();
 
       if (response.ok) {
-        alert(`OTP sent successfully via ${selectedOption}`);
+        showSnackbar(`OTP sent via ${selectedOption}`, "success");
         localStorage.setItem("otpRequestData", JSON.stringify(otpRequestData));
         setShowOtpModal(true);
       } else {
-        alert(`Failed to send OTP: ${result.message || "Unknown error"}`);
+        showSnackbar(`Failed: ${result.message || "Unknown error"}`, "error");
       }
     } catch (error) {
-      alert(`Error sending OTP: ${error.message}`);
+      showSnackbar(`Error: ${error.message}`, "error");
     }
   };
 
   const handleVerifyOtp = async () => {
-    const { method, value } = JSON.parse(
-      localStorage.getItem("otpRequestData")
-    );
+    const { method, value } = JSON.parse(localStorage.getItem("otpRequestData"));
 
     const payload = {
       otp,
-      
-      value
+      value,
     };
 
     try {
@@ -96,14 +106,14 @@ const navigate=useNavigate()
       const result = await response.json();
 
       if (response.ok) {
-        alert("OTP verified successfully!");        
+        showSnackbar("OTP verified successfully!", "success");
         setShowOtpModal(false);
-        navigate("/UserSetNewpasswordpage")
+        navigate("/UserSetNewpasswordpage");
       } else {
-        alert(result.message || "OTP verification failed");
+        showSnackbar(result.message || "OTP verification failed", "error");
       }
     } catch (error) {
-      alert(`Error verifying OTP: ${error.message}`);
+      showSnackbar(`Error verifying OTP: ${error.message}`, "error");
     }
   };
 
@@ -211,6 +221,23 @@ const navigate=useNavigate()
           </div>
         </div>
       )}
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 };

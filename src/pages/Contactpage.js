@@ -2,10 +2,10 @@ import React, { useRef, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { FaPhone, FaEnvelope } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
+import { Snackbar, Alert } from "@mui/material"; // Import Snackbar and Alert from MUI
 
 const ContactPage = () => {
   const formRef = useRef();
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -13,34 +13,41 @@ const ContactPage = () => {
     message: "",
   });
 
+  const [openSnackbar, setOpenSnackbar] = useState(false); // State to control Snackbar visibility
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // State to store the message for Snackbar
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
-      e.preventDefault(); // Prevent form from refreshing the page
+    e.preventDefault(); // Prevent form from refreshing the page
 
-      emailjs
+    emailjs
       .send(
-        "service_psruo8l", 
-        "template_334gnmg", 
+        "service_psruo8l",
+        "template_334gnmg",
         formData,
-        "mBpMLaypCOJsTVE_x" 
+        "mBpMLaypCOJsTVE_x"
       )
+      .then(
+        (response) => {
+          console.log("Email sent successfully!", response);
+          setSnackbarMessage("Message Sent Successfully!");
+          setOpenSnackbar(true); // Show the Snackbar
+          setFormData({ name: "", email: "", phone: "", message: "" });
+        },
+        (error) => {
+          console.error("Failed to send email:", error);
+          setSnackbarMessage("Failed to send message. Try again later.");
+          setOpenSnackbar(true); // Show the Snackbar
+        }
+      );
+  };
 
-      
-    .then(
-      (response) => {
-        console.log("Email sent successfully!", response);
-        alert("Message Sent Successfully!");
-        setFormData({ name: "", email: "", phone: "", message: "" });
-      },
-      (error) => {
-        console.error("Failed to send email:", error);
-        alert("Failed to send message. Try again later.");
-      }
-    );
-   
+  // Function to close the Snackbar after 3 seconds
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -48,7 +55,8 @@ const ContactPage = () => {
       style={{
         display: "flex",
         alignItems: "center",
-      padding: "3%",
+        padding: "3%",
+        position: "relative", // Ensure that the Snackbar is above the content
       }}
     >
       <Container className="p-5 bg-light border rounded" style={{ maxWidth: "1200px" }}>
@@ -61,7 +69,7 @@ const ContactPage = () => {
               <p>We are available 24/7, 7 days a week.</p>
               <p>Phone: +88011112222</p>
               <hr />
-              <h4 className="text-danger" >
+              <h4 className="text-danger">
                 <FaEnvelope className="me-2" /> Write To Us
               </h4>
               <p>Fill out our form, and we will contact you within 24 hours.</p>
@@ -124,10 +132,10 @@ const ContactPage = () => {
                 <Button
                   variant="danger"
                   type="submit"
-                  style={{                     
+                  style={{
                     border: "none",
-                    marginLeft:"75%",
-                    padding: "10px 20px ",
+                    marginLeft: "75%",
+                    padding: "10px 20px",
                     fontSize: "18px",
                   }}
                 >
@@ -138,6 +146,19 @@ const ContactPage = () => {
           </Col>
         </Row>
       </Container>
+      
+      {/* Snackbar component for showing messages at the top */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000} // Automatically close after 3 seconds
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} // Position at top-center
+        sx={{ position: "absolute", top: 20, left: "50%", transform: "translateX(-50%)" }} // Styling to ensure it's centered at the top
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

@@ -7,12 +7,15 @@ import {
   Paper,
   List,
   ListItem,
+  ListItemButton,
+  ListItemIcon,
   ListItemText,
   Avatar,
   Divider,
+  Badge,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import moment from 'moment';
 
 const AdminInbox = () => {
   const [conversations, setConversations] = useState([]);
@@ -22,150 +25,161 @@ const AdminInbox = () => {
   const ws = useRef(null);
   const messageBoxRef = useRef(null);
 
-  const adminId = 'admin';
+  const adminId = 2;
   const adminName = 'Admin';
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    fetchConversations();
-    setupWebSocket();
-    return () => ws.current?.close();
+    (async () => {
+      try {
+        const res = await fetch(
+          'http://192.168.1.10:8081/api/admin/messages/all',
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const convs = await res.json();
+        const withHistory = await Promise.all(
+          convs.map(async (conv) => {
+            const convId = `user-${conv.sender}-admin`;
+            const r2 = await fetch(
+              `http://192.168.1.10:8081/api/user/messages/${convId}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            let msgs = await r2.json();
+            msgs = Array.isArray(msgs) ? msgs : [];
+            return { ...conv, messages: msgs };
+          })
+        );
+        setConversations(withHistory);
+      } catch (err) {
+        console.error(err);
+      }
+
+      ws.current = new WebSocket('ws://192.168.1.10:8081');
+      ws.current.onopen = () =>
+        ws.current.send(JSON.stringify({ type: 'init', userId: adminId }));
+
+      ws.current.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if (
+          selectedUser &&
+          msg.conversation_id === `user-${selectedUser.id}-admin`
+        ) {
+          setAllMessages((prev) => [...prev, msg]);
+        }
+
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.sender === msg.sender_id || c.sender === msg.receiver_id) {
+              return {
+                ...c,
+                last_message: msg.message,
+                is_read: msg.is_read,
+                messages: [...c.messages, msg],
+              };
+            }
+            return c;
+          })
+        );
+      };
+
+      return () => ws.current?.close();
+    })();
   }, []);
 
   useEffect(() => {
-    if (selectedUser?.id) fetchMessages(selectedUser.id);
-  }, [selectedUser]);
+    if (selectedUser) {
+      const conv = conversations.find((c) => c.sender === selectedUser.id);
+      setAllMessages(conv?.messages || []);
+    }
+  }, [selectedUser, conversations]);
 
   useEffect(() => {
-    scrollToBottom();
+    messageBoxRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [allMessages]);
 
-  const setupWebSocket = () => {
-    ws.current = new WebSocket('ws://localhost:8081');
-
-    ws.current.onopen = () => {
-      console.log('WebSocket connected');
-      ws.current.send(JSON.stringify({ type: 'init', userId: adminId }));
-    };
-
-    ws.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (!msg.conversation_id) return;
-
-      // Only append messages for the selected conversation
-      if (
-        selectedUser &&
-        msg.conversation_id === getConversationId(selectedUser.id)
-      ) {
-        setAllMessages((prev) => [...prev, msg]);
-      }
-    };
-
-    ws.current.onclose = () => {
-      console.log('WebSocket closed');
-    };
+  const handleSelect = (conv) => {
+    setSelectedUser({ id: conv.sender, name: conv.sender_name });
   };
-
-  const fetchConversations = async () => {
-    try {
-      const res = await fetch('http://192.168.1.10:8081/api/admin/messages/all');
-      const data = await res.json();
-      setConversations(data);
-    } catch (err) {
-      console.error('Error fetching conversations:', err);
-    }
-  };
-
-  const fetchMessages = async (userId) => {
-    try {
-      const conversationId = getConversationId(userId);
-      const res = await fetch(`http://192.168.1.10:8081/api/user/messages/${conversationId}`);
-      const data = await res.json();
-      setAllMessages(data);
-    } catch (err) {
-      console.error('Error fetching messages:', err);
-    }
-  };
-
-  const getConversationId = (userId) => `user-${userId}-${adminId}`;
 
   const handleSendMessage = () => {
     if (!msgInput.trim() || !selectedUser) return;
-
-    const messageObj = {
+    const newMsg = {
       sender_id: adminId,
       sender_name: adminName,
       receiver_id: selectedUser.id,
       message: msgInput.trim(),
-      conversation_id: getConversationId(selectedUser.id),
+      conversation_id: `user-${selectedUser.id}-admin`,
+      is_read: false,
     };
-
-    ws.current.send(JSON.stringify(messageObj));
+    ws.current.send(JSON.stringify(newMsg));
     setAllMessages((prev) => [
       ...prev,
-      { ...messageObj, created_at: new Date().toISOString() },
+      { ...newMsg, created_at: new Date().toISOString() },
     ]);
     setMsgInput('');
   };
 
-  const scrollToBottom = () => {
-    messageBoxRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const deduped = Array.from(
+    new Map(conversations.map((c) => [c.sender, c])).values()
+  ).sort((a, b) => {
+    const aDate = a.messages.at(-1)?.created_at || '';
+    const bDate = b.messages.at(-1)?.created_at || '';
+    return new Date(bDate) - new Date(aDate);
+  });
 
-  // ✅ Filter messages based on selected user conversation
   const displayedMessages = selectedUser
-    ? allMessages.filter(
-        (msg) => msg.conversation_id === getConversationId(selectedUser.id)
-      )
+    ? allMessages
+        .filter((m) => m.conversation_id === `user-${selectedUser.id}-admin`)
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
     : [];
 
   return (
     <Box display="flex" height="90vh" boxShadow={3}>
-      {/* Sidebar */}
+      {/* Sidebar - Inbox */}
       <Paper sx={{ width: 300, overflowY: 'auto' }}>
         <Box p={2}>
           <Typography variant="h6">Inbox</Typography>
         </Box>
         <Divider />
         <List>
-          {conversations.map((user, index) => {
-            const userId = user?.sender;
-            const userName = user?.sender_name || 'Unknown';
-            return (
-              <ListItem
-                key={index}
-                button
-                selected={selectedUser?.id === userId}
-                onClick={() => setSelectedUser({ id: userId, name: userName })}
+          {deduped.map((conv, i) => (
+            <ListItem key={i} disablePadding>
+              <ListItemButton
+                selected={selectedUser?.id === conv.sender}
+                onClick={() => handleSelect(conv)}
               >
-                <Avatar sx={{ mr: 2 }}>
-                  {userName.charAt(0).toUpperCase()}
-                </Avatar>
+                <ListItemIcon>
+                  <Avatar>{conv.sender_name?.[0].toUpperCase()}</Avatar>
+                </ListItemIcon>
                 <ListItemText
-                  primary={userName}
-                  secondary={user.last_message || ''}
+                  primary={conv.sender_name}
+                  secondary={conv.last_message || ''}
                 />
-              </ListItem>
-            );
-          })}
+                {!conv.is_read && <Badge color="secondary" variant="dot" />}
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Paper>
 
       {/* Chat Window */}
       <Box flex={1} display="flex" flexDirection="column">
-        <Box display="flex" alignItems="center" p={2} bgcolor="#f5f5f5" borderBottom="1px solid #ddd">
-          <AdminPanelSettingsIcon sx={{ mr: 1 }} />
+        <Box p={2} bgcolor="#f5f5f5" borderBottom="1px solid #ddd">
           <Typography variant="h6">
-            {selectedUser ? `Chat with ${selectedUser.name}` : 'Select a conversation'}
+            {selectedUser
+              ? `Chat with ${selectedUser.name}`
+              : 'Select a conversation'}
           </Typography>
         </Box>
 
-        {/* Messages */}
         <Box flex={1} p={2} overflow="auto">
           {displayedMessages.map((msg, idx) => (
             <Box
               key={idx}
               display="flex"
-              justifyContent={msg.sender_id === adminId ? 'flex-end' : 'flex-start'}
+              justifyContent={
+                msg.sender_id === adminId ? 'flex-end' : 'flex-start'
+              }
               mb={1}
             >
               <Box
@@ -177,18 +191,21 @@ const AdminInbox = () => {
                 maxWidth="60%"
               >
                 <Typography variant="body2">{msg.message}</Typography>
-                <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
-                  {new Date(msg.created_at).toLocaleTimeString()}
+                <Typography
+                  variant="caption"
+                  display="block"
+                  textAlign="right"
+                >
+                  {moment(msg.created_at).format('h:mm A')}
                 </Typography>
               </Box>
             </Box>
           ))}
-          <div ref={messageBoxRef}></div>
+          <div ref={messageBoxRef} />
         </Box>
 
-        {/* Input */}
         {selectedUser && (
-          <Box display="flex" p={2} borderTop="1px solid #ccc">
+          <Box display="flex" alignItems="center" p={2} borderTop="1px solid #ccc">
             <TextField
               fullWidth
               variant="outlined"
@@ -197,7 +214,7 @@ const AdminInbox = () => {
               onChange={(e) => setMsgInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
-            <IconButton color="primary" onClick={handleSendMessage}>
+            <IconButton onClick={handleSendMessage}>
               <SendIcon />
             </IconButton>
           </Box>
