@@ -23,9 +23,7 @@ const Header = () => {
       const wishlistItems = Array.isArray(wishlistData[0]) ? wishlistData[0] : wishlistData;
   
   const [searchQuery, setSearchQuery] = useState("");
-  // const { data = {} } = useSelector((state) => state.users);
-  // const { addToWishlist = [] } = useSelector((state) => state.products);
-  // const { cartProducts = [] } = useSelector((state) => state.cart); // Default empty array
+ 
   const [user, setUser] = useState(null);
   const location = useLocation();
   const { cartItems = [] } = useSelector((state) => state.cart || {});
@@ -33,7 +31,6 @@ const Header = () => {
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/signup";
 
-  // const checkout = location.pathname.includes("/CheckoutPage");
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
@@ -59,6 +56,8 @@ const Header = () => {
     dispatch(userlogoutdata());
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+    localStorage.removeItem("conversationId");
+
     setUser(null);
     navigate("/login");
     window.dispatchEvent(new Event("storage"));
@@ -161,26 +160,26 @@ const Header = () => {
                       <FaRegUserCircle size={24} className="me-2" />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item onClick={handleProfile}>
-                     <a style={{display:"flex", gap:"5px", position:"relative"}}> <FaUser />Profile</a>
+                      <Dropdown.Item onClick={handleProfile} >
+                     <p style={{display:"flex", gap:"5px", position:"relative"}}> <FaUser />Profile</p>
                       </Dropdown.Item>
                       <Dropdown.Item onClick={handleLogout}>
-                        <a style={{display:"flex",gap:"5px",position:"relative"}}> <RiLogoutCircleLine />
-                        Logout</a>
+                        <p style={{display:"flex",gap:"5px",position:"relative"}}> <RiLogoutCircleLine />
+                        Logout</p>
                         
                       </Dropdown.Item>
                       <Dropdown.Item   onClick={() => navigate("/useraccountpage/UserOrderHistory")}
                       >
-                        <a style={{display:"flex",gap:"5px",position:"relative"}}> <FaCartArrowDown />
+                        <p style={{display:"flex",gap:"5px",position:"relative"}}> <FaCartArrowDown />
 
-                        Orders</a>
+                        Orders</p>
                         
                       </Dropdown.Item>
                       <Dropdown.Item onClick={handleLogout}>
-                        <a style={{display:"flex",gap:"5px",position:"relative"}}  onClick={() => navigate("/useraccountpage/WishListpage")}
+                        <p style={{display:"flex",gap:"5px",position:"relative"}}  onClick={() => navigate("/useraccountpage/WishListpage")}
                         > <FaHeart />
 
-                        Wishlist</a>
+                        Wishlist</p>
                         
                       </Dropdown.Item>
 

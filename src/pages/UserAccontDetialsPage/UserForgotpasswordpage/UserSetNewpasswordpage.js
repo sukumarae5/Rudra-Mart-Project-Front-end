@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const UserSetNewpasswordpage = () => {
@@ -12,8 +12,16 @@ const UserSetNewpasswordpage = () => {
   const forgetuser = JSON.parse(localStorage.getItem('forgetuser'));
   const userId = forgetuser?.id;
 
+  useEffect(() => {
+    if (!userId) {
+      setError('User ID not found. Please restart the password reset process.');
+    }
+  }, [userId]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!userId) return;
 
     // Basic validation
     if (newPassword !== confirmPassword) {
@@ -40,24 +48,15 @@ const UserSetNewpasswordpage = () => {
           body: JSON.stringify({ password: newPassword }),
         }
       );
-
-      const text = await response.text();
-      console.log('Server response:', text);
-
-      try {
-        const data = JSON.parse(text);
-        console.log(data)
-        if (response.ok) {
-          alert('Password updated successfully!');
-          setLoading(false);
-          setTimeout(() => navigate('/login'), 0);
-        } else {
-          setError(data.message || 'Failed to update password');
-          setLoading(false);
-        }
-      } catch (parseError) {
-        console.error('Invalid JSON:', text);
-        setError('Unexpected server response');
+console.log(response)
+      const data =  response.json();
+console.log(data.response)
+      if (response.ok) {
+        alert('Password updated successfully!');
+        setLoading(false);
+        navigate('/login');
+      } else {
+        setError(data.message || 'Failed to update password');
         setLoading(false);
       }
     } catch (err) {

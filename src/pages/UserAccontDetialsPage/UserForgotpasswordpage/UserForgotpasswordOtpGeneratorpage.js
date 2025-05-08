@@ -56,10 +56,7 @@ const UserForgotpasswordOtpGeneratorpage = () => {
       return;
     }
 
-    const otpRequestData = {
-      method: selectedOption,
-      value: contactValue,
-    };
+    const otpRequestData = { method: selectedOption, value: contactValue };
 
     try {
       const response = await fetch(
@@ -70,7 +67,6 @@ const UserForgotpasswordOtpGeneratorpage = () => {
           body: JSON.stringify(otpRequestData),
         }
       );
-
       const result = await response.json();
 
       if (response.ok) {
@@ -102,7 +98,6 @@ const UserForgotpasswordOtpGeneratorpage = () => {
           body: JSON.stringify(payload),
         }
       );
-
       const result = await response.json();
 
       if (response.ok) {
@@ -178,7 +173,6 @@ const UserForgotpasswordOtpGeneratorpage = () => {
         </div>
       </div>
 
-      {/* OTP Modal */}
       {showOtpModal && (
         <div className="modal show d-block" tabIndex="-1" role="dialog">
           <div className="modal-dialog modal-dialog-centered" role="document">

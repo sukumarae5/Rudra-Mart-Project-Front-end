@@ -259,6 +259,8 @@ const ProductCard = ({
       <Card.Body className="d-flex flex-column justify-content-between">
         <Card.Title className="text-center">{product.name}</Card.Title>
         <Card.Text className="text-center">Price: ₹{product.price}</Card.Text>
+        <Card.Text className="text-center">Description :{product.description}</Card.Text>
+
         <Button
           variant="danger"
           style={{
