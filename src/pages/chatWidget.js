@@ -10,6 +10,7 @@ const ChatWidget = () => {
   const [text, setText] = useState("");
   const bottomRef = useRef();
   const [showChat, setShowChat] = useState(false);
+  const chatBoxRef = useRef(); // Ref for chat container
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -27,7 +28,6 @@ const ChatWidget = () => {
       setConversationId(newId);
     }
   }, [conversationId, userId]);
-  
 
   // Fetch old messages from REST API
   const fetchMessages = useCallback(async () => {
@@ -109,18 +109,35 @@ const ChatWidget = () => {
     }
     setShowChat((prev) => !prev);
   };
+
+  // Polling messages when chat is open
   useEffect(() => {
     if (!showChat) return;
-  
+
     const interval = setInterval(() => {
       fetchMessages();
     }, 1000);
-  
+
     return () => clearInterval(interval);
   }, [showChat, fetchMessages]);
-  
 
-  console.log(messages)
+  // Close chat on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showChat &&
+        chatBoxRef.current &&
+        !chatBoxRef.current.contains(event.target)
+      ) {
+        setShowChat(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showChat]);
 
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
@@ -129,7 +146,7 @@ const ChatWidget = () => {
       </Button>
 
       {showChat && (
-        <div style={{ marginTop: 10 }}>
+        <div style={{ marginTop: 10 }} ref={chatBoxRef}>
           <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
             <h5 className="mb-3">Chat with Support</h5>
 
@@ -137,7 +154,6 @@ const ChatWidget = () => {
               className="border rounded mb-3 p-2 bg-white"
               style={{ height: 300, overflowY: "auto" }}
             >
-              
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
@@ -151,7 +167,7 @@ const ChatWidget = () => {
                     }`}
                     style={{ maxWidth: "80%" }}
                   >
-                    {msg.receiver === ('admin' || 'Admin')   && (
+                    {msg.receiver === ("admin" || "Admin") && (
                       <strong>{msg.receiver}</strong>
                     )}
                     <div>{msg.message}</div>
