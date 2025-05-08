@@ -189,22 +189,6 @@ const HomePage = () => {
     navigate("/productpage");
   };
 
-  // const handleWishlistClick = (e, product) => {
-  //   console.log(product)
-  //   e.stopPropagation(); // Prevent card click navigation
-  //   const isClicked = clickedProducts.has(product.id);
-  //   if (isClicked) {
-  //     setClickedProducts((prev) => {
-  //       const newSet = new Set(prev);
-  //       newSet.delete(product.id);
-  //       return newSet;
-  //     });
-  //   } else {
-  //     setClickedProducts((prev) => new Set(prev).add(product.id));
-  //     dispatch(addToWishlist(product));
-  //   }
-  // };
-
   const handleWishlistClick = (e, product) => {
     e.stopPropagation(); // Prevent card click navigation
 

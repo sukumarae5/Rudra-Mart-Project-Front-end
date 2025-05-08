@@ -154,7 +154,7 @@ const ProductCategory = () => {
     const wishlistItem = wishlistItems.find(
       (item) => Number(item.product_id) === Number(productid)
     );
-
+console.log(wishlistItem)
     if (wishlistItem) {
       dispatch(removeWishlistProductRequest(wishlistItem.id));
       showSnackbar("Removed from wishlist", "info");
@@ -251,8 +251,7 @@ const ProductCategory = () => {
                       background: "#f9f9f9",
                       textAlign: "center",
                       position: "relative",
-                    }}
-                  >
+                    }}>
                     <div
                       style={{
                         position: "absolute",
@@ -309,6 +308,7 @@ const ProductCategory = () => {
                     </div>
                     <h5 style={{ margin: "10px 0" }}>{product.name}</h5>
                     <p>Price: ${product.price}</p>
+                    <p>${product.description}</p>
                   </div>
                 ))}
               </div>

@@ -48,9 +48,7 @@ const ProductPagenation = () => {
     startIndex,
     startIndex + productsPerPage
   );
-
   const handlePageChange = (pageNum) => setCurrentPage(pageNum);
-
   const handleAddToCart = async (event, product) => {
     event.stopPropagation();
     try {

@@ -1,4 +1,3 @@
-// AdminInbox.jsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
@@ -25,6 +24,7 @@ const AdminInbox = () => {
   const [msgInput, setMsgInput] = useState("");
   const ws = useRef(null);
   const messageBoxRef = useRef(null);
+  const intervalRef = useRef(null);
 
   const adminId = 2;
   const adminName = "admin";
@@ -32,58 +32,110 @@ const AdminInbox = () => {
 
   useEffect(() => {
     const fetchConversations = async () => {
-      const res = await fetch("http://192.168.1.10:8081/api/admin/messages/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const convs = await res.json();
-      const withHistory = await Promise.all(
-        convs.map(async (conv) => {
-          const convId = `user-${conv.sender}-admin`;
-          const r2 = await fetch(
-            `http://192.168.1.10:8081/api/user/messages/${convId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          const msgs = await r2.json();
-          return { ...conv, messages: Array.isArray(msgs) ? msgs : [] };
-        })
-      );
-      setConversations(withHistory);
+      try {
+        const res = await fetch(
+          "http://192.168.1.10:8081/api/admin/messages/all",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const convs = await res.json();
+        const withHistory = await Promise.all(
+          convs.map(async (conv) => {
+            const convId = `user-${conv.sender}-admin`;
+            const r2 = await fetch(
+              `http://192.168.1.10:8081/api/user/messages/${convId}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            let msgs = await r2.json();
+            msgs = Array.isArray(msgs) ? msgs : [];
+            return { ...conv, messages: msgs };
+          })
+        );
+        setConversations(withHistory);
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     fetchConversations();
 
     ws.current = new WebSocket("ws://192.168.1.10:8081");
-    ws.current.onopen = () => {
+    ws.current.onopen = () =>
       ws.current.send(JSON.stringify({ type: "init", userId: adminId }));
-    };
+
     ws.current.onmessage = (e) => {
       const msg = JSON.parse(e.data);
+
+      // Delay received messages (from users)
       const isAdminSender = msg.sender === adminId || msg.sender_id === adminId;
 
-      setTimeout(() => {
-        setConversations((prev) =>
-          prev.map((c) => {
-            if (c.sender === msg.sender_id || c.sender === msg.receiver_id) {
-              const updatedMessages = [...c.messages, msg];
-              return {
-                ...c,
-                last_message: msg.message,
-                is_read: selectedUser?.id === msg.sender,
-                messages: updatedMessages,
-              };
-            }
-            return c;
-          })
-        );
-
-        if (selectedUser && msg.conversation_id === `user-${selectedUser.id}-admin`) {
-          setAllMessages((prev) => [...prev, msg]);
-        }
-      }, isAdminSender ? 0 : 2000);
+      if (isAdminSender) {
+        // Show sent messages immediately (already handled elsewhere too)
+        handleIncomingMessage(msg);
+      } else {
+        // Delay received messages by 2 seconds
+        setTimeout(() => {
+          handleIncomingMessage(msg);
+        }, 2000);
+      }
     };
 
     return () => ws.current?.close();
   }, [selectedUser]);
+
+  const handleIncomingMessage = (msg) => {
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.sender === msg.sender_id || c.sender === msg.receiver_id) {
+          const updatedMessages = [...c.messages, msg];
+          return {
+            ...c,
+            last_message: msg.message,
+            is_read: selectedUser?.id === msg.sender ? true : false,
+            messages: updatedMessages,
+          };
+        }
+        return c;
+      })
+    );
+
+    if (
+      selectedUser &&
+      msg.conversation_id === `user-${selectedUser.id}-admin`
+    ) {
+      setAllMessages((prev) => [...prev, msg]);
+    }
+  };
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      (async () => {
+        try {
+          const res = await fetch(
+            "http://192.168.1.10:8081/api/admin/messages/all",
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const convs = await res.json();
+          const withHistory = await Promise.all(
+            convs.map(async (conv) => {
+              const convId = `user-${conv.sender}-admin`;
+              const r2 = await fetch(
+                `http://192.168.1.10:8081/api/user/messages/${convId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              let msgs = await r2.json();
+              msgs = Array.isArray(msgs) ? msgs : [];
+              return { ...conv, messages: msgs };
+            })
+          );
+          setConversations(withHistory);
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+    }, 2000);
+
+    return () => clearInterval(intervalRef.current);
+  }, []);
 
   useEffect(() => {
     if (selectedUser) {
@@ -99,13 +151,14 @@ const AdminInbox = () => {
   const handleSelect = (conv) => {
     setSelectedUser({ id: conv.sender, name: conv.sender_name });
     setConversations((prev) =>
-      prev.map((c) => (c.sender === conv.sender ? { ...c, is_read: true } : c))
+      prev.map((c) =>
+        c.sender === conv.sender ? { ...c, is_read: true } : c
+      )
     );
   };
 
   const handleSendMessage = () => {
     if (!msgInput.trim() || !selectedUser) return;
-
     const newMsg = {
       sender_id: adminId,
       sender_name: adminName,
@@ -119,6 +172,7 @@ const AdminInbox = () => {
     const newMsgWithTime = { ...newMsg, created_at: new Date().toISOString() };
 
     setAllMessages((prev) => [...prev, newMsgWithTime]);
+
     setConversations((prev) =>
       prev.map((c) =>
         c.sender === selectedUser.id
@@ -134,9 +188,13 @@ const AdminInbox = () => {
     setMsgInput("");
   };
 
-  const deduped = Array.from(new Map(conversations.map((c) => [c.sender, c])).values()).sort(
-    (a, b) => new Date(b.messages.at(-1)?.created_at || 0) - new Date(a.messages.at(-1)?.created_at || 0)
-  );
+  const deduped = Array.from(
+    new Map(conversations.map((c) => [c.sender, c])).values()
+  ).sort((a, b) => {
+    const aDate = new Date(a.messages.at(-1)?.created_at || 0);
+    const bDate = new Date(b.messages.at(-1)?.created_at || 0);
+    return bDate - aDate;
+  });
 
   const displayedMessages = selectedUser
     ? allMessages
@@ -172,9 +230,17 @@ const AdminInbox = () => {
             );
             return (
               <ListItem key={i} disablePadding>
-                <ListItemButton selected={isSelected} onClick={() => handleSelect(conv)}>
+                <ListItemButton
+                  selected={isSelected}
+                  onClick={() => handleSelect(conv)}
+                >
                   <ListItemIcon>
-                    <Badge color="secondary" variant="dot" invisible={!hasUnread} overlap="circular">
+                    <Badge
+                      color="secondary"
+                      variant="dot"
+                      invisible={!hasUnread}
+                      overlap="circular"
+                    >
                       <Avatar>{conv.sender_name?.[0]?.toUpperCase()}</Avatar>
                     </Badge>
                   </ListItemIcon>
@@ -197,7 +263,9 @@ const AdminInbox = () => {
       <Box flex={1} display="flex" flexDirection="column">
         <Box p={2} bgcolor="#f5f5f5" borderBottom="1px solid #ddd">
           <Typography variant="h6">
-            {selectedUser ? `Chat with ${selectedUser.name}` : "Select a conversation"}
+            {selectedUser
+              ? `Chat with ${selectedUser.name}`
+              : "Select a conversation"}
           </Typography>
         </Box>
 
@@ -224,7 +292,6 @@ const AdminInbox = () => {
                       ? "flex-end"
                       : "flex-start"
                   }
-                  my={0.5}
                 >
                   <Box
                     bgcolor={
@@ -271,7 +338,7 @@ const AdminInbox = () => {
               placeholder="Type a message"
               value={msgInput}
               onChange={(e) => setMsgInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             />
             <IconButton onClick={handleSendMessage}>
               <SendIcon />

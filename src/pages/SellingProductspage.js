@@ -103,6 +103,7 @@ const SellingProductspage = () => {
 
     const removeItem = (event, productId) => {
         event.stopPropagation();
+        console.log(productId)
         const wishlistItem = wishlistItems.find((item) => Number(item.product_id) === Number(productId));
         if (wishlistItem) {
             dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));

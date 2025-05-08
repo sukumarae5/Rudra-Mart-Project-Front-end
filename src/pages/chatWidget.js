@@ -10,6 +10,7 @@ const ChatWidget = () => {
   const [text, setText] = useState("");
   const bottomRef = useRef();
   const [showChat, setShowChat] = useState(false);
+  const chatBoxRef = useRef(); // Ref for chat container
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -109,7 +110,34 @@ const ChatWidget = () => {
     setShowChat((prev) => !prev);
   };
 
-  console.log(messages);
+  // Polling messages when chat is open
+  useEffect(() => {
+    if (!showChat) return;
+
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showChat, fetchMessages]);
+
+  // Close chat on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showChat &&
+        chatBoxRef.current &&
+        !chatBoxRef.current.contains(event.target)
+      ) {
+        setShowChat(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showChat]);
 
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
@@ -118,39 +146,34 @@ const ChatWidget = () => {
       </Button>
 
       {showChat && (
-        <div style={{ marginTop: 10 }}>
-          <div
-            className="card shadow p-3"
-            style={{ width: 400, maxHeight: 500 }}
-          >
+        <div style={{ marginTop: 10 }} ref={chatBoxRef}>
+          <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
             <h5 className="mb-3">Chat with Support</h5>
 
             <div
               className="border rounded mb-3 p-2 bg-white"
               style={{ height: 300, overflowY: "auto" }}
             >
-              {messages.map((msg, idx) => {
-                const isSentByUser = msg.sender === userId;
-                return (
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`text-${msg.sender === userId ? "end" : "start"}`}
+                >
                   <div
-                    key={idx}
-                    className={`text-${isSentByUser ? "end" : "start"}`}
+                    className={`d-inline-block p-2 rounded mb-1 ${
+                      msg.sender === userId
+                        ? "bg-primary text-white"
+                        : "bg-light"
+                    }`}
+                    style={{ maxWidth: "80%" }}
                   >
-                    <div
-                      className={`d-inline-block p-2 rounded mb-1 ${
-                        isSentByUser ? "bg-primary text-white" : "bg-light"
-                      }`}
-                      style={{ maxWidth: "80%" }}
-                    >
-                      {!isSentByUser && (
-                        <strong>{msg.sender_name || "Admin"}</strong>
-                      )}
-                      <div>{msg.message}</div>
-                    </div>
+                    {msg.receiver === ("admin" || "Admin") && (
+                      <strong>{msg.receiver}</strong>
+                    )}
+                    <div>{msg.message}</div>
                   </div>
-                );
-              })}
-
+                </div>
+              ))}
               <div ref={bottomRef} />
             </div>
 
