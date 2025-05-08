@@ -56,6 +56,8 @@ const Header = () => {
     dispatch(userlogoutdata());
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+    localStorage.removeItem("conversationId");
+
     setUser(null);
     navigate("/login");
     window.dispatchEvent(new Event("storage"));

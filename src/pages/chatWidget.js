@@ -27,10 +27,34 @@ const ChatWidget = () => {
       setConversationId(newId);
     }
   }, [conversationId, userId]);
+  
 
-  // Handle WebSocket connection
+  // Fetch old messages from REST API
+  const fetchMessages = useCallback(async () => {
+    if (!conversationId || !token) return;
+
+    try {
+      const response = await fetch(
+        `http://192.168.1.10:8081/api/user/messages/${conversationId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await response.json();
+      const filtered = Array.isArray(data)
+        ? data.filter((msg) => msg.conversation_id === conversationId)
+        : [];
+      setMessages(filtered);
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
+  }, [conversationId, token]);
+
+  // WebSocket connection + listener
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId) return;
+
+    fetchMessages();
 
     const socket = new WebSocket("ws://192.168.1.10:8081");
     setWs(socket);
@@ -41,23 +65,26 @@ const ChatWidget = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      // Filter messages to current conversation only
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
       }
     };
 
+    socket.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
     return () => {
       socket.close();
     };
-  }, [token, userId, senderName, conversationId]);
+  }, [token, userId, senderName, conversationId, fetchMessages]);
 
-  // Scroll to bottom on new message
+  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Send message
   const handleSend = useCallback(() => {
     if (!text.trim() || !ws || !conversationId) return;
 
@@ -73,6 +100,7 @@ const ChatWidget = () => {
     setText("");
   }, [ws, text, userId, senderName, conversationId]);
 
+  // Open/Close chat widget
   const toggleChat = () => {
     if (!token || !userId || !senderName) {
       alert("You need to log in first.");
@@ -81,6 +109,18 @@ const ChatWidget = () => {
     }
     setShowChat((prev) => !prev);
   };
+  useEffect(() => {
+    if (!showChat) return;
+  
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  }, [showChat, fetchMessages]);
+  
+
+  console.log(messages)
 
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
@@ -97,21 +137,22 @@ const ChatWidget = () => {
               className="border rounded mb-3 p-2 bg-white"
               style={{ height: 300, overflowY: "auto" }}
             >
+              
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`text-${msg.sender_id === userId ? "end" : "start"}`}
+                  className={`text-${msg.sender === userId ? "end" : "start"}`}
                 >
                   <div
                     className={`d-inline-block p-2 rounded mb-1 ${
-                      msg.sender_id === userId
+                      msg.sender === userId
                         ? "bg-primary text-white"
                         : "bg-light"
                     }`}
                     style={{ maxWidth: "80%" }}
                   >
-                    {msg.sender_id !== userId && (
-                      <strong>{msg.sender_name}</strong>
+                    {msg.receiver === ('admin' || 'Admin')   && (
+                      <strong>{msg.receiver}</strong>
                     )}
                     <div>{msg.message}</div>
                   </div>
