@@ -28,9 +28,32 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
-  // Handle WebSocket connection
+  // Fetch old messages from REST API
+  const fetchMessages = useCallback(async () => {
+    if (!conversationId || !token) return;
+
+    try {
+      const response = await fetch(
+        `http://192.168.1.10:8081/api/user/messages/${conversationId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await response.json();
+      const filtered = Array.isArray(data)
+        ? data.filter((msg) => msg.conversation_id === conversationId)
+        : [];
+      setMessages(filtered);
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
+  }, [conversationId, token]);
+
+  // WebSocket connection + listener
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId) return;
+
+    fetchMessages();
 
     const socket = new WebSocket("ws://192.168.1.10:8081");
     setWs(socket);
@@ -41,23 +64,26 @@ const ChatWidget = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      // Filter messages to current conversation only
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
       }
     };
 
+    socket.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
     return () => {
       socket.close();
     };
-  }, [token, userId, senderName, conversationId]);
+  }, [token, userId, senderName, conversationId, fetchMessages]);
 
-  // Scroll to bottom on new message
+  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Send message
   const handleSend = useCallback(() => {
     if (!text.trim() || !ws || !conversationId) return;
 
@@ -73,6 +99,7 @@ const ChatWidget = () => {
     setText("");
   }, [ws, text, userId, senderName, conversationId]);
 
+  // Open/Close chat widget
   const toggleChat = () => {
     if (!token || !userId || !senderName) {
       alert("You need to log in first.");
@@ -82,6 +109,8 @@ const ChatWidget = () => {
     setShowChat((prev) => !prev);
   };
 
+  console.log(messages);
+
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
       <Button variant="primary" onClick={toggleChat}>
@@ -90,33 +119,38 @@ const ChatWidget = () => {
 
       {showChat && (
         <div style={{ marginTop: 10 }}>
-          <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
+          <div
+            className="card shadow p-3"
+            style={{ width: 400, maxHeight: 500 }}
+          >
             <h5 className="mb-3">Chat with Support</h5>
 
             <div
               className="border rounded mb-3 p-2 bg-white"
               style={{ height: 300, overflowY: "auto" }}
             >
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`text-${msg.sender_id === userId ? "end" : "start"}`}
-                >
+              {messages.map((msg, idx) => {
+                const isSentByUser = msg.sender === userId;
+                return (
                   <div
-                    className={`d-inline-block p-2 rounded mb-1 ${
-                      msg.sender_id === userId
-                        ? "bg-primary text-white"
-                        : "bg-light"
-                    }`}
-                    style={{ maxWidth: "80%" }}
+                    key={idx}
+                    className={`text-${isSentByUser ? "end" : "start"}`}
                   >
-                    {msg.sender_id !== userId && (
-                      <strong>{msg.sender_name}</strong>
-                    )}
-                    <div>{msg.message}</div>
+                    <div
+                      className={`d-inline-block p-2 rounded mb-1 ${
+                        isSentByUser ? "bg-primary text-white" : "bg-light"
+                      }`}
+                      style={{ maxWidth: "80%" }}
+                    >
+                      {!isSentByUser && (
+                        <strong>{msg.sender_name || "Admin"}</strong>
+                      )}
+                      <div>{msg.message}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
               <div ref={bottomRef} />
             </div>
 
