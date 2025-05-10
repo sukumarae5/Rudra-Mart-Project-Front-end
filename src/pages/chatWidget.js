@@ -120,7 +120,6 @@ const ChatWidget = () => {
   }, [showChat, fetchMessages]);
   
 
-  console.log(messages)
 
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
