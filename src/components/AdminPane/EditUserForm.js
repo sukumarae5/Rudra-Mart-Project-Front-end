@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { IoArrowBack } from "react-icons/io5";
+import { useDispatch } from "react-redux";
 
 const EditUserForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = location.state || {};
-
+  const dispatch=useDispatch()
   const [updatedUser, setUpdatedUser] = useState({
     name: "",
     email: "",
@@ -24,7 +25,7 @@ const EditUserForm = () => {
         name: user.name || "",
         email: user.email || "",
         phone_number: user.phone_number || "",
-        password: "", // Password left blank initially
+        password:user.password || "", 
         role: user.role || "",
       });
     }
@@ -59,17 +60,15 @@ const EditUserForm = () => {
       );
 
       const data = await response.json();
-
       if (!response.ok) {
         alert(`Error: ${data.error || "Failed to update user"}`);
         return;
       }
-
-      setSuccessMessage("User updated successfully!");
+      alert("Selected user updated successfully!");
       setTimeout(() => {
         setSuccessMessage("");
         navigate("/admin/adminusers");
-      }, 2000); // 2-second delay before redirect
+      }, 2000); 
     } catch (error) {
       console.error("Error updating user:", error);
       alert("Error: Could not update user");
@@ -104,17 +103,9 @@ const EditUserForm = () => {
             Edit User
           </h1>
         </Col>
-        <Col xs={6} className="d-flex justify-content-end">
-          <Button variant="secondary" onClick={() => navigate("/admin/adminusers")} className="me-2">
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            Save Changes
-          </Button>
-        </Col>
+        
       </Row>
 
-      {/* Success Message Alert */}
       {successMessage && (
         <div className="alert alert-success" role="alert">
           {successMessage}

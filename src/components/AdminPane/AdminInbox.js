@@ -12,7 +12,6 @@ import {
   ListItemText,
   Avatar,
   Divider,
-  Badge,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import moment from "moment";
@@ -25,12 +24,15 @@ const AdminInbox = () => {
   const ws = useRef(null);
   const messageBoxRef = useRef(null);
   const intervalRef = useRef(null);
+  const audioRef = useRef(null); // Notification audio reference
 
   const adminId = 2;
   const adminName = "admin";
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    audioRef.current = new Audio("/mixkit-software-interface-start-2574.mp3");
+
     const fetchConversations = async () => {
       try {
         const res = await fetch(
@@ -64,18 +66,12 @@ const AdminInbox = () => {
 
     ws.current.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-
-      // Delay received messages (from users)
       const isAdminSender = msg.sender === adminId || msg.sender_id === adminId;
 
       if (isAdminSender) {
-        // Show sent messages immediately (already handled elsewhere too)
         handleIncomingMessage(msg);
       } else {
-        // Delay received messages by 2 seconds
-        setTimeout(() => {
-          handleIncomingMessage(msg);
-        }, 2000);
+        setTimeout(() => handleIncomingMessage(msg), 0);
       }
     };
 
@@ -83,15 +79,23 @@ const AdminInbox = () => {
   }, [selectedUser]);
 
   const handleIncomingMessage = (msg) => {
+    if (
+      msg.sender !== adminId &&
+      msg.sender_id !== adminId &&
+      msg.receiver_id === adminId &&
+      audioRef.current
+    ) {
+      audioRef.current.play().catch((err) => console.log("Audio play error:", err));
+    }
+
     setConversations((prev) =>
       prev.map((c) => {
         if (c.sender === msg.sender_id || c.sender === msg.receiver_id) {
-          const updatedMessages = [...c.messages, msg];
           return {
             ...c,
             last_message: msg.message,
             is_read: selectedUser?.id === msg.sender ? true : false,
-            messages: updatedMessages,
+            messages: [...c.messages, msg],
           };
         }
         return c;
@@ -151,9 +155,7 @@ const AdminInbox = () => {
   const handleSelect = (conv) => {
     setSelectedUser({ id: conv.sender, name: conv.sender_name });
     setConversations((prev) =>
-      prev.map((c) =>
-        c.sender === conv.sender ? { ...c, is_read: true } : c
-      )
+      prev.map((c) => (c.sender === conv.sender ? { ...c, is_read: true } : c))
     );
   };
 
@@ -168,11 +170,8 @@ const AdminInbox = () => {
       is_read: false,
     };
     ws.current.send(JSON.stringify(newMsg));
-
     const newMsgWithTime = { ...newMsg, created_at: new Date().toISOString() };
-
     setAllMessages((prev) => [...prev, newMsgWithTime]);
-
     setConversations((prev) =>
       prev.map((c) =>
         c.sender === selectedUser.id
@@ -184,7 +183,6 @@ const AdminInbox = () => {
           : c
       )
     );
-
     setMsgInput("");
   };
 
@@ -235,14 +233,7 @@ const AdminInbox = () => {
                   onClick={() => handleSelect(conv)}
                 >
                   <ListItemIcon>
-                    <Badge
-                      color="secondary"
-                      variant="dot"
-                      invisible={!hasUnread}
-                      overlap="circular"
-                    >
-                      <Avatar>{conv.sender_name?.[0]?.toUpperCase()}</Avatar>
-                    </Badge>
+                    <Avatar>{conv.sender_name?.[0]?.toUpperCase()}</Avatar>
                   </ListItemIcon>
                   <ListItemText
                     primary={
@@ -292,6 +283,7 @@ const AdminInbox = () => {
                       ? "flex-end"
                       : "flex-start"
                   }
+                  mb={1}
                 >
                   <Box
                     bgcolor={
@@ -339,7 +331,10 @@ const AdminInbox = () => {
               value={msgInput}
               onChange={(e) => setMsgInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              multiline
+              maxRows={4}
             />
+
             <IconButton onClick={handleSendMessage}>
               <SendIcon />
             </IconButton>

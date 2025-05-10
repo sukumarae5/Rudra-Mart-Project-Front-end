@@ -44,7 +44,7 @@ const AdminHeader = () => {
       <Navbar
         className="fixed-top w-100"
         style={{
-          backgroundColor: " #070B1D",
+          backgroundColor: "rgb(9, 137, 168)",
           color: "white",
           padding: "10px 20px",
           height: "60px",

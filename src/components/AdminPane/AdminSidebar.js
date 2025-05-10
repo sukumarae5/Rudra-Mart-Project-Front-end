@@ -30,7 +30,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
             position: "fixed",
             top: "60px",
             left: 0,
-            backgroundColor: " #1E2753", // Corrected color
+            backgroundColor: "rgb(6, 107, 133)", // Corrected color
             boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
             padding: "20px",
             zIndex: 1040,
@@ -61,7 +61,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
         placement="start"
         style={{
           width: "250px",
-          backgroundColor: " #1E2753", // Same as large screen sidebar
+          backgroundColor: "rgb(6, 107, 133)", // Same as large screen sidebar
           top: "60px",
           height: "calc(100vh - 60px)",
           zIndex: 1040,
@@ -93,7 +93,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
       {/* Main Content Area */}
       <div
         style={{
-          marginLeft: isLargeScreen ? "150px" : "0", // Adjust dynamically
+          marginLeft: isLargeScreen ? "150px" : "0", 
           marginTop: "40px",
           minHeight: "calc(100vh - 60px)",
           overflowY: "auto",
