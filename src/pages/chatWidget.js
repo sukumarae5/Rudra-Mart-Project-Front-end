@@ -9,8 +9,10 @@ const ChatWidget = () => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const bottomRef = useRef();
+  const chatBoxRef = useRef();
+  const audioRef = useRef(null);
+  const sendaudioRef=useRef(null)
   const [showChat, setShowChat] = useState(false);
-  const chatBoxRef = useRef(); // Ref for chat container
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -20,7 +22,6 @@ const ChatWidget = () => {
   const storedConversationId = localStorage.getItem("conversationId");
   const [conversationId, setConversationId] = useState(storedConversationId);
 
-  // Generate conversation ID if not set
   useEffect(() => {
     if (!conversationId && userId) {
       const newId = `user-${userId}-admin`;
@@ -29,13 +30,12 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
-  // Fetch old messages from REST API
   const fetchMessages = useCallback(async () => {
     if (!conversationId || !token) return;
 
     try {
       const response = await fetch(
-        `http://192.168.1.10:8081/api/user/messages/${conversationId}`,
+        `http://192.168.1.8:8081/api/user/messages/${conversationId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -50,13 +50,12 @@ const ChatWidget = () => {
     }
   }, [conversationId, token]);
 
-  // WebSocket connection + listener
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId) return;
 
     fetchMessages();
 
-    const socket = new WebSocket("ws://192.168.1.10:8081");
+    const socket = new WebSocket("ws://192.168.1.8:8081");
     setWs(socket);
 
     socket.onopen = () => {
@@ -67,9 +66,18 @@ const ChatWidget = () => {
       const data = JSON.parse(event.data);
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
+
+        // ✅ Play sound if message is from admin (not current user)
+        if (data.sender_id !== userId && audioRef.current) {
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((e) => {
+              console.warn("Audio autoplay blocked:", e);
+            });
+          }
+        }
       }
     };
-
     socket.onerror = (err) => {
       console.error("WebSocket error:", err);
     };
@@ -79,15 +87,13 @@ const ChatWidget = () => {
     };
   }, [token, userId, senderName, conversationId, fetchMessages]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message
   const handleSend = useCallback(() => {
     if (!text.trim() || !ws || !conversationId) return;
-
+  
     const msg = {
       sender_id: userId,
       sender_name: senderName,
@@ -95,22 +101,38 @@ const ChatWidget = () => {
       message: text.trim(),
       conversation_id: conversationId,
     };
-
+  
     ws.send(JSON.stringify(msg));
     setText("");
+  
+    // ✅ Play send sound
+    if (sendaudioRef.current) {
+      const playPromise = sendaudioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((e) => {
+          console.warn("Send sound blocked:", e);
+        });
+      }
+    }
   }, [ws, text, userId, senderName, conversationId]);
-
-  // Open/Close chat widget
+  
   const toggleChat = () => {
     if (!token || !userId || !senderName) {
       alert("You need to log in first.");
       navigate("/login");
       return;
     }
+
+    // ✅ Try to unlock audio
+    if (audioRef.current) {
+      audioRef.current.play().catch((e) => {
+        console.warn("Audio play blocked:", e);
+      });
+    }
+
     setShowChat((prev) => !prev);
   };
 
-  // Polling messages when chat is open
   useEffect(() => {
     if (!showChat) return;
 
@@ -121,7 +143,6 @@ const ChatWidget = () => {
     return () => clearInterval(interval);
   }, [showChat, fetchMessages]);
 
-  // Close chat on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -145,6 +166,13 @@ const ChatWidget = () => {
         <BsChatDots size={24} />
       </Button>
 
+      <Button onClick={() => audioRef.current?.play()} style={{ display: "none" }}>
+        Init Sound
+      </Button>
+
+      <audio ref={audioRef} src="/notification.mp3" preload="auto" />
+      <audio ref ={sendaudioRef} src="/sendingnotification.mp3" preload="auto" />
+
       {showChat && (
         <div style={{ marginTop: 10 }} ref={chatBoxRef}>
           <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
@@ -167,9 +195,6 @@ const ChatWidget = () => {
                     }`}
                     style={{ maxWidth: "80%" }}
                   >
-                    {msg.receiver === ("admin" || "Admin") && (
-                      <strong>{msg.receiver}</strong>
-                    )}
                     <div>{msg.message}</div>
                   </div>
                 </div>

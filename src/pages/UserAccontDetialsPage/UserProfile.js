@@ -160,7 +160,6 @@ const UserProfile = () => {
           >
             Cancel
           </button>
-          <Button variant="secondary">Forgot Password</Button>
           <button
             type="submit"
             className="px-6 py-2 bg-red-500 text-white font-semibold rounded-md"
