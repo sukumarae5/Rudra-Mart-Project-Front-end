@@ -1,16 +1,23 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, InputGroup, FormControl } from "react-bootstrap";
+import {
+  Button,
+  InputGroup,
+  FormControl,
+  Badge,
+  Spinner,
+} from "react-bootstrap";
 import { BsChatDots } from "react-icons/bs";
 
 const ChatWidget = () => {
   const navigate = useNavigate();
-  const [ws, setWs] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const bottomRef = useRef();
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showChat, setShowChat] = useState(false);
-  const chatBoxRef = useRef(); // Ref for chat container
+  const bottomRef = useRef();
+  const chatBoxRef = useRef();
+  const wsRef = useRef(null);
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -20,7 +27,7 @@ const ChatWidget = () => {
   const storedConversationId = localStorage.getItem("conversationId");
   const [conversationId, setConversationId] = useState(storedConversationId);
 
-  // Generate conversation ID if not set
+  // Setup conversation ID
   useEffect(() => {
     if (!conversationId && userId) {
       const newId = `user-${userId}-admin`;
@@ -29,44 +36,86 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
-  // Fetch old messages from REST API
+  // Fetch and mark messages as read
   const fetchMessages = useCallback(async () => {
     if (!conversationId || !token) return;
 
     try {
       const response = await fetch(
-        `http://192.168.1.10:8081/api/user/messages/${conversationId}`,
+        `http://192.168.1.16:8081/api/user/messages/${conversationId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       const data = await response.json();
+
       const filtered = Array.isArray(data)
-        ? data.filter((msg) => msg.conversation_id === conversationId)
+        ? data.filter(
+            (msg) =>
+              (msg.sender === userId || msg.receiver_id === userId) &&
+              msg.conversation_id === conversationId
+          )
         : [];
+
       setMessages(filtered);
+
+      const unread = filtered.filter((msg) => !msg.is_read && msg.sender !== userId);
+      setUnreadCount(unread.length);
+
+      // 🔁 Mark unread messages as read
+      if (unread.length > 0) {
+        await fetch(`http://192.168.1.16:8081/api/user/messages/mark-read`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            user_id: userId,
+          }),
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch messages:", error);
     }
-  }, [conversationId, token]);
+  }, [conversationId, token, userId]);
 
-  // WebSocket connection + listener
+  // WebSocket initialization
   useEffect(() => {
-    if (!token || !userId || !senderName || !conversationId) return;
+    if (!token || !userId || !senderName || !conversationId || wsRef.current) return;
 
     fetchMessages();
 
-    const socket = new WebSocket("ws://192.168.1.10:8081");
-    setWs(socket);
+    const socket = new WebSocket("ws://192.168.1.16:8081");
+    wsRef.current = socket;
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: "init", userId }));
     };
 
-    socket.onmessage = (event) => {
+    socket.onmessage = async (event) => {
       const data = JSON.parse(event.data);
+
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
+
+        if (!data.is_read && data.sender !== userId) {
+          setUnreadCount((prev) => prev + 1);
+
+          // 🔁 Auto mark new incoming messages as read
+          await fetch(`http://192.168.1.16:8081/api/user/messages/mark-read`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              conversation_id: conversationId,
+              user_id: userId,
+            }),
+          });
+        }
       }
     };
 
@@ -76,31 +125,36 @@ const ChatWidget = () => {
 
     return () => {
       socket.close();
+      wsRef.current = null;
     };
   }, [token, userId, senderName, conversationId, fetchMessages]);
 
-  // Scroll to bottom on new messages
+  // Auto scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Send message
   const handleSend = useCallback(() => {
-    if (!text.trim() || !ws || !conversationId) return;
+    if (!text.trim() || !wsRef.current || !conversationId) return;
 
     const msg = {
       sender_id: userId,
       sender_name: senderName,
-      receiver_id: "admin",
+      receiver: "admin",
+      receiver_id: 660026,
       message: text.trim(),
       conversation_id: conversationId,
+      created_at: new Date().toISOString(),
+      is_read: false,
     };
 
-    ws.send(JSON.stringify(msg));
+    setMessages((prev) => [...prev, { ...msg, sender: userId }]);
+    wsRef.current.send(JSON.stringify(msg));
     setText("");
-  }, [ws, text, userId, senderName, conversationId]);
+  }, [text, userId, senderName, conversationId]);
 
-  // Open/Close chat widget
+  // Toggle chat visibility
   const toggleChat = () => {
     if (!token || !userId || !senderName) {
       alert("You need to log in first.");
@@ -110,18 +164,16 @@ const ChatWidget = () => {
     setShowChat((prev) => !prev);
   };
 
-  // Polling messages when chat is open
+  // Polling when chat is shown
   useEffect(() => {
     if (!showChat) return;
-
     const interval = setInterval(() => {
       fetchMessages();
-    }, 1000);
-
+    }, 5000); // fetch every 5 seconds
     return () => clearInterval(interval);
   }, [showChat, fetchMessages]);
 
-  // Close chat on outside click
+  // Hide chat on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -132,48 +184,54 @@ const ChatWidget = () => {
         setShowChat(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showChat]);
 
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
       <Button variant="primary" onClick={toggleChat}>
         <BsChatDots size={24} />
+        {unreadCount > 0 && (
+          <Badge pill bg="danger" style={{ marginLeft: "5px" }}>
+            {unreadCount}
+          </Badge>
+        )}
       </Button>
 
       {showChat && (
         <div style={{ marginTop: 10 }} ref={chatBoxRef}>
           <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
             <h5 className="mb-3">Chat with Support</h5>
-
-            <div
-              className="border rounded mb-3 p-2 bg-white"
-              style={{ height: 300, overflowY: "auto" }}
-            >
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`text-${msg.sender === userId ? "end" : "start"}`}
-                >
-                  <div
-                    className={`d-inline-block p-2 rounded mb-1 ${
-                      msg.sender === userId
-                        ? "bg-primary text-white"
-                        : "bg-light"
-                    }`}
-                    style={{ maxWidth: "80%" }}
-                  >
-                    {msg.receiver === ("admin" || "Admin") && (
-                      <strong>{msg.receiver}</strong>
-                    )}
-                    <div>{msg.message}</div>
-                  </div>
-                </div>
-              ))}
+            <div className="border rounded mb-3 p-2 bg-white" style={{ height: 300, overflowY: "auto" }}>
+              {messages.length === 0 ? (
+                <Spinner animation="border" variant="primary" />
+              ) : (
+                messages.map((msg, idx) => {
+                  const isUser = msg.sender === userId;
+                  return (
+                    <div
+                      key={idx}
+                      className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"}`}
+                    >
+                      <div
+                        className={`p-2 rounded ${isUser ? "bg-primary text-white" : "bg-light"}`}
+                        style={{ maxWidth: "80%" }}
+                      >
+                        <div className="fw-bold mb-1" style={{ fontSize: "0.85rem" }}>
+                          {isUser ? senderName : "Admin"}
+                        </div>
+                        <div>{msg.message}</div>
+                        {msg.read_at && (
+                          <small className="text-muted d-block mt-1" style={{ fontSize: "0.75rem" }}>
+                            Read at: {new Date(msg.read_at).toLocaleString()}
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
               <div ref={bottomRef} />
             </div>
 

@@ -31,12 +31,12 @@ const AdminInbox = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    audioRef.current = new Audio("/mixkit-software-interface-start-2574.mp3");
+    audioRef.current = new Audio("/mixkit-software-interface-start-2574.wav");
 
     const fetchConversations = async () => {
       try {
         const res = await fetch(
-          "http://192.168.1.10:8081/api/admin/messages/all",
+          "http://192.168.1.16:8081/api/admin/messages/all",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const convs = await res.json();
@@ -44,7 +44,7 @@ const AdminInbox = () => {
           convs.map(async (conv) => {
             const convId = `user-${conv.sender}-admin`;
             const r2 = await fetch(
-              `http://192.168.1.10:8081/api/user/messages/${convId}`,
+              `http://192.168.1.16:8081/api/user/messages/${convId}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             let msgs = await r2.json();
@@ -60,7 +60,7 @@ const AdminInbox = () => {
 
     fetchConversations();
 
-    ws.current = new WebSocket("ws://192.168.1.10:8081");
+    ws.current = new WebSocket("ws://192.168.1.16:8081");
     ws.current.onopen = () =>
       ws.current.send(JSON.stringify({ type: "init", userId: adminId }));
 
@@ -115,7 +115,7 @@ const AdminInbox = () => {
       (async () => {
         try {
           const res = await fetch(
-            "http://192.168.1.10:8081/api/admin/messages/all",
+            "http://192.168.1.8:8081/api/admin/messages/all",
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const convs = await res.json();
@@ -123,7 +123,7 @@ const AdminInbox = () => {
             convs.map(async (conv) => {
               const convId = `user-${conv.sender}-admin`;
               const r2 = await fetch(
-                `http://192.168.1.10:8081/api/user/messages/${convId}`,
+                `http://192.168.1.8:8081/api/user/messages/${convId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
               let msgs = await r2.json();
@@ -164,6 +164,7 @@ const AdminInbox = () => {
     const newMsg = {
       sender_id: adminId,
       sender_name: adminName,
+      receiver:selectedUser.name,
       receiver_id: selectedUser.id,
       message: msgInput.trim(),
       conversation_id: `user-${selectedUser.id}-admin`,
