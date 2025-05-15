@@ -1,21 +1,28 @@
 import React, { useEffect, useState } from "react";
-import Table from "react-bootstrap/Table";
+import {
+  Box,
+  Card,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  IconButton,
+  Toolbar,
+  TextField,
+  Select,
+  MenuItem,
+  Button,
+  Fab,
+  Pagination,
+} from "@mui/material";
+import { Edit, Delete, Add } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchusersrequest } from "../../features/user/userActions";
-import {
-  Button,
-  Form,
-  InputGroup,
-  Dropdown,
-  DropdownButton,
-  Row,
-  Col,
-  Card,
-} from "react-bootstrap";
-import PaginationComponent from "./Pagination";
-import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
-import { GoPlus } from "react-icons/go";
 
 const UserTable = () => {
   const dispatch = useDispatch();
@@ -60,13 +67,12 @@ const UserTable = () => {
       await Promise.all(
         selectedUsers.map(async (userId) => {
           const response = await fetch(
-            `http://192.168.1.10:8081/api/users/delete/${userId}`,
+            `http://192.168.1.10:8081/api/users/admindelete/${userId}`,
             {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
             }
           );
-
           const data = await response.json();
           if (!response.ok) {
             throw new Error(data.error || "Failed to delete user");
@@ -78,17 +84,14 @@ const UserTable = () => {
       dispatch(fetchusersrequest());
       setSelectedUsers([]);
     } catch (error) {
-
       console.error("Error deleting users:", error);
       alert("Error: Could not delete users");
     }
   };
 
   const handleCheckboxChange = (userId) => {
-    setSelectedUsers((prevSelected) =>
-      prevSelected.includes(userId)
-        ? prevSelected.filter((id) => id !== userId)
-        : [...prevSelected, userId]
+    setSelectedUsers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
   };
 
@@ -97,157 +100,154 @@ const UserTable = () => {
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
 
   const filteredUsers = users.filter((user) => {
-    const matchesSearchQuery =
+    const matchSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.phone_number.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return filterOption === "All"
-      ? matchesSearchQuery
-      : matchesSearchQuery && user.role === filterOption;
+    return filterOption === "All" ? matchSearch : matchSearch && user.role === filterOption;
   });
 
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
   return (
-    <div className="container-fluid">
-      {/* Header Section */}
-      <Row className="align-items-center mb-3">
-        <Col xs={12} md={6} className="text-md-start text-center">
-          <h2
-            className="fw-bold"
-            style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" fontWeight="bold" mb={2}>
+        Users
+      </Typography>
+
+      <Card variant="outlined" sx={{ p: 2, mb: 3 }}>
+        <Toolbar sx={{ flexDirection: "column", gap: 2 }}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            flexWrap="wrap"
+            width="100%"
+            gap={2}
           >
-            Users
-          </h2>
-        </Col>
-        <Col xs={12} md={6} className="d-flex justify-content-end">
-          <Button
-            onClick={() => navigate("/admin/addusers")}
-            className="d-flex align-items-center"
-            style={{
-              fontSize: "1rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "#1E5EFF",
-              border: "none",
-            }}
-          >
-            <GoPlus className="me-2" size={20} />
-            Add User
-          </Button>
-        </Col>
-      </Row>
+            <TextField
+              label="Search users"
+              variant="outlined"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="small"
+              sx={{
+                minWidth: 200,
+                height: "40px",
+                "@media (max-width:600px)": { minWidth: "100%" },
+              }}
+            />
 
-      {/* Filters, Search, and Bulk Actions */}
-      <Card className="p-4 shadow-lg border-0 rounded-3">
-        <Row className="align-items-center">
-          <Col xs={12} md={6} className="d-flex mb-2 mb-md-0">
-            <DropdownButton
-              variant="outline-primary"
-              title={`Filter: ${filterOption}`}
-              onSelect={(selectedFilter) => setFilterOption(selectedFilter)}
+            <Select
+              value={filterOption}
+              onChange={(e) => setFilterOption(e.target.value)}
+              displayEmpty
+              size="small"
+              sx={{
+                minWidth: 120,
+                height: "40px",
+                "@media (max-width:600px)": { minWidth: "100%" },
+              }}
             >
-              <Dropdown.Item eventKey="All">All</Dropdown.Item>
-              <Dropdown.Item eventKey="Admin">Admin</Dropdown.Item>
-              <Dropdown.Item eventKey="User">User</Dropdown.Item>
-            </DropdownButton>
+              <MenuItem value="All">All</MenuItem>
+              <MenuItem value="Admin">Admin</MenuItem>
+              <MenuItem value="User">User</MenuItem>
+            </Select>
 
-            <InputGroup className="ms-3">
-              <Form.Control
-                type="text"
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </InputGroup>
-          </Col>
+            <Box>
+              <IconButton
+                color="primary"
+                disabled={selectedUsers.length !== 1}
+                onClick={handleEditSelectedUsers}
+              >
+                <Edit />
+              </IconButton>
+              <IconButton
+                color="error"
+                disabled={selectedUsers.length === 0}
+                onClick={handleDeleteSelectedUsers}
+              >
+                <Delete />
+              </IconButton>
+            </Box>
+          </Box>
+        </Toolbar>
 
-          {/* Bulk Actions */}
-          <Col xs={12} md={6} className="d-flex justify-content-end">
-            <Button
-              variant="outline-primary"
-              className="me-2"
-              disabled={selectedUsers.length !== 1}
-              onClick={handleEditSelectedUsers}
-            >
-              <MdModeEditOutline size={20} />
-            </Button>
-            <Button
-              variant="outline-danger"
-              disabled={selectedUsers.length === 0}
-              onClick={handleDeleteSelectedUsers}
-            >
-              <MdOutlineDeleteOutline size={20} />
-            </Button>
-          </Col>
-        </Row>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={
+                      selectedUsers.length > 0 &&
+                      selectedUsers.length < currentUsers.length
+                    }
+                    checked={
+                      currentUsers.length > 0 &&
+                      selectedUsers.length === currentUsers.length
+                    }
+                    onChange={(e) =>
+                      setSelectedUsers(
+                        e.target.checked ? currentUsers.map((u) => u.id) : []
+                      )
+                    }
+                  />
+                </TableCell>
+                <TableCell>S.NO</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Password</TableCell>
+                <TableCell>Phone Number</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentUsers.length > 0 ? (
+                currentUsers.map((user, index) => (
+                  <TableRow key={user.id} hover>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => handleCheckboxChange(user.id)}
+                      />
+                    </TableCell>
+                    <TableCell>{indexOfFirstUser + index + 1}</TableCell>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.password}</TableCell>
+                    <TableCell>{user.phone_number}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    No users available.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-        {/* Table */}
-        <Table striped bordered hover responsive className="mt-3 shadow-sm">
-          <thead className="bg-primary text-white">
-            <tr>
-              <th>
-                <Form.Check
-                  type="checkbox"
-                  onChange={(e) =>
-                    setSelectedUsers(
-                      e.target.checked
-                        ? currentUsers.map((user) => user.id)
-                        : []
-                    )
-                  }
-                  checked={
-                    selectedUsers.length === currentUsers.length &&
-                    currentUsers.length > 0
-                  }
-                />
-              </th>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Password</th>
-              <th>Phone Number</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentUsers.length > 0 ? (
-              currentUsers.map((user, index) => (
-                <tr key={user.id}>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={selectedUsers.includes(user.id)}
-                      onChange={() => handleCheckboxChange(user.id)}
-                    />
-                  </td>
-                  <td>{indexOfFirstUser + index + 1}</td>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.password}</td>
-                  <td>{user.phone_number}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center">
-                  No users available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-
-        <PaginationComponent
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(e, page) => setCurrentPage(page)}
+            color="primary"
+          />
+        </Box>
       </Card>
-    </div>
+
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{ position: "fixed", bottom: 32, right: 32 }}
+        onClick={() => navigate("/admin/addusers")}
+      >
+        <Add />
+      </Fab>
+    </Box>
   );
 };
 
