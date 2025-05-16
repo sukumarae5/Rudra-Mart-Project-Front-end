@@ -4,7 +4,6 @@ import {
   Button,
   InputGroup,
   FormControl,
-  Badge,
   Spinner,
 } from "react-bootstrap";
 import { BsChatDots } from "react-icons/bs";
@@ -13,21 +12,22 @@ const ChatWidget = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const [unreadCount, setUnreadCount] = useState(0);
   const [showChat, setShowChat] = useState(false);
   const bottomRef = useRef();
   const chatBoxRef = useRef();
+  const audioRef = useRef(null);
+  const sendAudioRef = useRef(null);
   const wsRef = useRef(null);
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
   const senderName = user?.name;
+  const [conversationId, setConversationId] = useState(
+    localStorage.getItem("conversationId")
+  );
 
-  const storedConversationId = localStorage.getItem("conversationId");
-  const [conversationId, setConversationId] = useState(storedConversationId);
-
-  // Setup conversation ID
+  // Create conversation ID if not present
   useEffect(() => {
     if (!conversationId && userId) {
       const newId = `user-${userId}-admin`;
@@ -36,13 +36,13 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
-  // Fetch and mark messages as read
+  // Fetch messages from backend
   const fetchMessages = useCallback(async () => {
     if (!conversationId || !token) return;
 
     try {
       const response = await fetch(
-        `http://192.168.1.16:8081/api/user/messages/${conversationId}`,
+        `http://192.168.1.8:8081/api/user/messages/${conversationId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -60,11 +60,10 @@ const ChatWidget = () => {
       setMessages(filtered);
 
       const unread = filtered.filter((msg) => !msg.is_read && msg.sender !== userId);
-      setUnreadCount(unread.length);
 
-      // 🔁 Mark unread messages as read
+      // Mark messages as read
       if (unread.length > 0) {
-        await fetch(`http://192.168.1.16:8081/api/user/messages/mark-read`, {
+        await fetch(`http://192.168.1.8:8081/api/user/messages/mark-read`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -81,39 +80,27 @@ const ChatWidget = () => {
     }
   }, [conversationId, token, userId]);
 
-  // WebSocket initialization
+  // Initialize WebSocket
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId || wsRef.current) return;
 
     fetchMessages();
 
-    const socket = new WebSocket("ws://192.168.1.16:8081");
+    const socket = new WebSocket("ws://192.168.1.8:8081");
     wsRef.current = socket;
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: "init", userId }));
     };
 
-    socket.onmessage = async (event) => {
+    socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
 
-        if (!data.is_read && data.sender !== userId) {
-          setUnreadCount((prev) => prev + 1);
-
-          // 🔁 Auto mark new incoming messages as read
-          await fetch(`http://192.168.1.16:8081/api/user/messages/mark-read`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              conversation_id: conversationId,
-              user_id: userId,
-            }),
+        if (data.sender_id !== userId && audioRef.current) {
+          audioRef.current.play().catch((e) => {
+            console.warn("Audio autoplay blocked:", e);
           });
         }
       }
@@ -129,7 +116,7 @@ const ChatWidget = () => {
     };
   }, [token, userId, senderName, conversationId, fetchMessages]);
 
-  // Auto scroll to bottom
+  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -149,31 +136,26 @@ const ChatWidget = () => {
       is_read: false,
     };
 
-    setMessages((prev) => [...prev, { ...msg, sender: userId }]);
     wsRef.current.send(JSON.stringify(msg));
     setText("");
+
+    if (sendAudioRef.current) {
+      sendAudioRef.current.play().catch((e) => {
+        console.warn("Send sound blocked:", e);
+      });
+    }
   }, [text, userId, senderName, conversationId]);
 
-  // Toggle chat visibility
-  const toggleChat = () => {
-    if (!token || !userId || !senderName) {
-      alert("You need to log in first.");
-      navigate("/login");
-      return;
-    }
-    setShowChat((prev) => !prev);
-  };
-
-  // Polling when chat is shown
+  // Poll messages when chat is open
   useEffect(() => {
     if (!showChat) return;
     const interval = setInterval(() => {
       fetchMessages();
-    }, 5000); // fetch every 5 seconds
+    }, 2000);
     return () => clearInterval(interval);
   }, [showChat, fetchMessages]);
 
-  // Hide chat on outside click
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -188,22 +170,41 @@ const ChatWidget = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showChat]);
 
+  // Toggle chat
+  const toggleChat = () => {
+    if (!token || !userId || !senderName) {
+      alert("You need to log in first.");
+      navigate("/login");
+      return;
+    }
+
+    if (audioRef.current) {
+      audioRef.current.play().catch((e) => {
+        console.warn("Audio play blocked:", e);
+      });
+    }
+
+    setShowChat((prev) => !prev);
+  };
+
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
       <Button variant="primary" onClick={toggleChat}>
         <BsChatDots size={24} />
-        {unreadCount > 0 && (
-          <Badge pill bg="danger" style={{ marginLeft: "5px" }}>
-            {unreadCount}
-          </Badge>
-        )}
       </Button>
+
+      <audio ref={audioRef} src="/notification.mp3" preload="auto" />
+      <audio ref={sendAudioRef} src="/sendingnotification.mp3" preload="auto" />
 
       {showChat && (
         <div style={{ marginTop: 10 }} ref={chatBoxRef}>
           <div className="card shadow p-3" style={{ width: 400, maxHeight: 500 }}>
             <h5 className="mb-3">Chat with Support</h5>
-            <div className="border rounded mb-3 p-2 bg-white" style={{ height: 300, overflowY: "auto" }}>
+
+            <div
+              className="border rounded mb-3 p-2 bg-white"
+              style={{ height: 300, overflowY: "auto" }}
+            >
               {messages.length === 0 ? (
                 <Spinner animation="border" variant="primary" />
               ) : (
@@ -212,21 +213,20 @@ const ChatWidget = () => {
                   return (
                     <div
                       key={idx}
-                      className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"}`}
+                      className={`d-flex mb-2 ${
+                        isUser ? "justify-content-end" : "justify-content-start"
+                      }`}
                     >
                       <div
-                        className={`p-2 rounded ${isUser ? "bg-primary text-white" : "bg-light"}`}
+                        className={`p-2 rounded ${
+                          isUser ? "bg-primary text-white" : "bg-light"
+                        }`}
                         style={{ maxWidth: "80%" }}
                       >
                         <div className="fw-bold mb-1" style={{ fontSize: "0.85rem" }}>
                           {isUser ? senderName : "Admin"}
                         </div>
                         <div>{msg.message}</div>
-                        {msg.read_at && (
-                          <small className="text-muted d-block mt-1" style={{ fontSize: "0.75rem" }}>
-                            Read at: {new Date(msg.read_at).toLocaleString()}
-                          </small>
-                        )}
                       </div>
                     </div>
                   );

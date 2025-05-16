@@ -53,10 +53,11 @@ const Login = () => {
       return;
     }
 
-    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
-    const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
-
-    if (email === adminEmail && password === adminPassword) {
+    // const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
+    // const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
+const matchtheadmindata=(users.find((user)=>user.email===email && user.password===password && user.role==="admin"))
+    console.log(matchtheadmindata)
+if (matchtheadmindata){
       setSnackbar({
         open: true,
         message: "Admin Login Successful!",
@@ -70,8 +71,9 @@ const Login = () => {
 
     try {
       const matchingUser = users.find(
-        (user) => user.email === email && user.password === password
+        (user) => user.email === email && user.password === password && user.role==="customer"
       );
+      console.log(matchingUser)
 
       if (!matchingUser) {
         setLogin({ ...login, password: "" });

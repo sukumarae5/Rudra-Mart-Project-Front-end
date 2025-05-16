@@ -337,7 +337,6 @@ export default function AdminProfileSettingPage() {
 {activeTab === "security" && (
   <div style={styles.card}>
     <h3>Notification Settings</h3>
-
     {[
       { key: "personalizedOffers", title: "Personalized Offers", description: "Receive offers made special for you" },
       { key: "onlineWebinars", title: "Online Webinars", description: "Get notified about upcoming webinars" },
@@ -358,7 +357,6 @@ export default function AdminProfileSettingPage() {
         </div>
       </div>
     ))}
-
     {/* Add Cancel and Save buttons here */}
     <div style={styles.buttonGroup}>
       <button style={styles.button(false)}>Cancel</button>
