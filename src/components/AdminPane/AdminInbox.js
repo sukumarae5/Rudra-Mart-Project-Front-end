@@ -26,17 +26,16 @@ const AdminInbox = () => {
   const intervalRef = useRef(null);
   const audioRef = useRef(null); // Notification audio reference
 
-  const adminId = 2;
+  const adminId = process.env.REACT_APP_ADMIN_ID;
   const adminName = "admin";
   const token = localStorage.getItem("token");
-
   useEffect(() => {
-    audioRef.current = new Audio("/mixkit-software-interface-start-2574.mp3");
+    audioRef.current = new Audio("/mixkit-software-interface-start-2574.wav");
 
     const fetchConversations = async () => {
       try {
         const res = await fetch(
-          "http://192.168.1.10:8081/api/admin/messages/all",
+          "http://192.168.1.8:8081/api/admin/messages/all",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const convs = await res.json();
@@ -44,7 +43,7 @@ const AdminInbox = () => {
           convs.map(async (conv) => {
             const convId = `user-${conv.sender}-admin`;
             const r2 = await fetch(
-              `http://192.168.1.10:8081/api/user/messages/${convId}`,
+              `http://192.168.1.8:8081/api/user/messages/${convId}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             let msgs = await r2.json();
@@ -60,7 +59,7 @@ const AdminInbox = () => {
 
     fetchConversations();
 
-    ws.current = new WebSocket("ws://192.168.1.10:8081");
+    ws.current = new WebSocket("ws://192.168.1.8:8081");
     ws.current.onopen = () =>
       ws.current.send(JSON.stringify({ type: "init", userId: adminId }));
 
@@ -115,7 +114,7 @@ const AdminInbox = () => {
       (async () => {
         try {
           const res = await fetch(
-            "http://192.168.1.10:8081/api/admin/messages/all",
+            "http://192.168.1.8:8081/api/admin/messages/all",
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const convs = await res.json();
@@ -123,7 +122,7 @@ const AdminInbox = () => {
             convs.map(async (conv) => {
               const convId = `user-${conv.sender}-admin`;
               const r2 = await fetch(
-                `http://192.168.1.10:8081/api/user/messages/${convId}`,
+                `http://192.168.1.8:8081/api/user/messages/${convId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
               let msgs = await r2.json();
@@ -164,9 +163,10 @@ const AdminInbox = () => {
     const newMsg = {
       sender_id: adminId,
       sender_name: adminName,
+      receiver:selectedUser.name,
       receiver_id: selectedUser.id,
       message: msgInput.trim(),
-      conversation_id: `user-${selectedUser.id}-admin`,
+      conversation_id: `user-${adminId}-admin`,
       is_read: false,
     };
     ws.current.send(JSON.stringify(newMsg));
@@ -193,12 +193,14 @@ const AdminInbox = () => {
     const bDate = new Date(b.messages.at(-1)?.created_at || 0);
     return bDate - aDate;
   });
-
+  console.log(selectedUser)
+  console.log(deduped)
   const displayedMessages = selectedUser
     ? allMessages
-        .filter((m) => m.conversation_id === `user-${selectedUser.id}-admin`)
+      .filter((m) => m.conversation_id === `user-${selectedUser.id}-admin`)
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
     : [];
+    console.log(displayedMessages)
 
   const groupedMessages = displayedMessages.reduce((acc, msg) => {
     const dateLabel = moment(msg.created_at).calendar(null, {
@@ -274,44 +276,36 @@ const AdminInbox = () => {
               >
                 {date}
               </Typography>
-              {msgs.map((msg, idx) => (
-                <Box
-                  key={idx}
-                  display="flex"
-                  justifyContent={
-                    msg.sender === adminId || msg.sender_id === adminId
-                      ? "flex-end"
-                      : "flex-start"
-                  }
-                  mb={1}
-                >
-                  <Box
-                    bgcolor={
-                      msg.sender === adminId || msg.sender_id === adminId
-                        ? "#1976d2"
-                        : "#e0e0e0"
-                    }
-                    color={
-                      msg.sender === adminId || msg.sender_id === adminId
-                        ? "white"
-                        : "black"
-                    }
-                    px={2}
-                    py={1}
-                    borderRadius={2}
-                    maxWidth="60%"
-                  >
-                    <Typography variant="body2">{msg.message}</Typography>
-                    <Typography
-                      variant="caption"
-                      display="block"
-                      textAlign="right"
-                    >
-                      {moment(msg.created_at).format("h:mm A")}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+              {msgs.map((msg, idx) => {
+  const isAdminSender = msg.sender_name === "admin";
+
+  return (
+    <Box
+      key={idx}
+      display="flex"
+      justifyContent={isAdminSender ? "flex-end" : "flex-start"}
+      mb={1}
+    >
+      <Box
+        bgcolor={isAdminSender ? "#1976d2" : "#e0e0e0"}
+        color={isAdminSender ? "white" : "black"}
+        px={2}
+        py={1}
+        borderRadius={2}
+        maxWidth="60%"
+      >
+        <Typography variant="body2">{msg.message}</Typography>
+        <Typography
+          variant="caption"
+          display="block"
+          textAlign="right"
+        >
+          {moment(msg.created_at).format("h:mm A")}
+        </Typography>
+      </Box>
+    </Box>
+  );
+})}
             </Box>
           ))}
           <div ref={messageBoxRef} />

@@ -1,27 +1,33 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, InputGroup, FormControl } from "react-bootstrap";
+import {
+  Button,
+  InputGroup,
+  FormControl,
+  Spinner,
+} from "react-bootstrap";
 import { BsChatDots } from "react-icons/bs";
 
 const ChatWidget = () => {
   const navigate = useNavigate();
-  const [ws, setWs] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [showChat, setShowChat] = useState(false);
   const bottomRef = useRef();
   const chatBoxRef = useRef();
   const audioRef = useRef(null);
-  const sendaudioRef=useRef(null)
-  const [showChat, setShowChat] = useState(false);
+  const sendAudioRef = useRef(null);
+  const wsRef = useRef(null);
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
   const senderName = user?.name;
+  const [conversationId, setConversationId] = useState(
+    localStorage.getItem("conversationId")
+  );
 
-  const storedConversationId = localStorage.getItem("conversationId");
-  const [conversationId, setConversationId] = useState(storedConversationId);
-
+  // Create conversation ID if not present
   useEffect(() => {
     if (!conversationId && userId) {
       const newId = `user-${userId}-admin`;
@@ -30,6 +36,7 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
+  // Fetch messages from backend
   const fetchMessages = useCallback(async () => {
     if (!conversationId || !token) return;
 
@@ -41,22 +48,46 @@ const ChatWidget = () => {
         }
       );
       const data = await response.json();
+
       const filtered = Array.isArray(data)
-        ? data.filter((msg) => msg.conversation_id === conversationId)
+        ? data.filter(
+            (msg) =>
+              (msg.sender === userId || msg.receiver_id === userId) &&
+              msg.conversation_id === conversationId
+          )
         : [];
+
       setMessages(filtered);
+
+      const unread = filtered.filter((msg) => !msg.is_read && msg.sender !== userId);
+
+      // Mark messages as read
+      if (unread.length > 0) {
+        await fetch(`http://192.168.1.8:8081/api/user/messages/mark-read`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            user_id: userId,
+          }),
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch messages:", error);
     }
-  }, [conversationId, token]);
+  }, [conversationId, token, userId]);
 
+  // Initialize WebSocket
   useEffect(() => {
-    if (!token || !userId || !senderName || !conversationId) return;
+    if (!token || !userId || !senderName || !conversationId || wsRef.current) return;
 
     fetchMessages();
 
     const socket = new WebSocket("ws://192.168.1.8:8081");
-    setWs(socket);
+    wsRef.current = socket;
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: "init", userId }));
@@ -67,82 +98,64 @@ const ChatWidget = () => {
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
 
-        // ✅ Play sound if message is from admin (not current user)
         if (data.sender_id !== userId && audioRef.current) {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch((e) => {
-              console.warn("Audio autoplay blocked:", e);
-            });
-          }
+          audioRef.current.play().catch((e) => {
+            console.warn("Audio autoplay blocked:", e);
+          });
         }
       }
     };
+
     socket.onerror = (err) => {
       console.error("WebSocket error:", err);
     };
 
     return () => {
       socket.close();
+      wsRef.current = null;
     };
   }, [token, userId, senderName, conversationId, fetchMessages]);
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Send message
   const handleSend = useCallback(() => {
-    if (!text.trim() || !ws || !conversationId) return;
-  
+    if (!text.trim() || !wsRef.current || !conversationId) return;
+
     const msg = {
       sender_id: userId,
       sender_name: senderName,
-      receiver_id: "admin",
+      receiver: "admin",
+      receiver_id: 660026,
       message: text.trim(),
       conversation_id: conversationId,
+      created_at: new Date().toISOString(),
+      is_read: false,
     };
-  
-    ws.send(JSON.stringify(msg));
-    setText("");
-  
-    // ✅ Play send sound
-    if (sendaudioRef.current) {
-      const playPromise = sendaudioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((e) => {
-          console.warn("Send sound blocked:", e);
-        });
-      }
-    }
-  }, [ws, text, userId, senderName, conversationId]);
-  
-  const toggleChat = () => {
-    if (!token || !userId || !senderName) {
-      alert("You need to log in first.");
-      navigate("/login");
-      return;
-    }
 
-    // ✅ Try to unlock audio
-    if (audioRef.current) {
-      audioRef.current.play().catch((e) => {
-        console.warn("Audio play blocked:", e);
+    wsRef.current.send(JSON.stringify(msg));
+    setText("");
+
+    if (sendAudioRef.current) {
+      sendAudioRef.current.play().catch((e) => {
+        console.warn("Send sound blocked:", e);
       });
     }
+  }, [text, userId, senderName, conversationId]);
 
-    setShowChat((prev) => !prev);
-  };
-
+  // Poll messages when chat is open
   useEffect(() => {
     if (!showChat) return;
-
     const interval = setInterval(() => {
       fetchMessages();
-    }, 1000);
-
+    }, 2000);
     return () => clearInterval(interval);
   }, [showChat, fetchMessages]);
 
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -153,12 +166,26 @@ const ChatWidget = () => {
         setShowChat(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showChat]);
+
+  // Toggle chat
+  const toggleChat = () => {
+    if (!token || !userId || !senderName) {
+      alert("You need to log in first.");
+      navigate("/login");
+      return;
+    }
+
+    if (audioRef.current) {
+      audioRef.current.play().catch((e) => {
+        console.warn("Audio play blocked:", e);
+      });
+    }
+
+    setShowChat((prev) => !prev);
+  };
 
   return (
     <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
@@ -166,12 +193,8 @@ const ChatWidget = () => {
         <BsChatDots size={24} />
       </Button>
 
-      <Button onClick={() => audioRef.current?.play()} style={{ display: "none" }}>
-        Init Sound
-      </Button>
-
       <audio ref={audioRef} src="/notification.mp3" preload="auto" />
-      <audio ref ={sendaudioRef} src="/sendingnotification.mp3" preload="auto" />
+      <audio ref={sendAudioRef} src="/sendingnotification.mp3" preload="auto" />
 
       {showChat && (
         <div style={{ marginTop: 10 }} ref={chatBoxRef}>
@@ -182,23 +205,33 @@ const ChatWidget = () => {
               className="border rounded mb-3 p-2 bg-white"
               style={{ height: 300, overflowY: "auto" }}
             >
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`text-${msg.sender === userId ? "end" : "start"}`}
-                >
-                  <div
-                    className={`d-inline-block p-2 rounded mb-1 ${
-                      msg.sender === userId
-                        ? "bg-primary text-white"
-                        : "bg-light"
-                    }`}
-                    style={{ maxWidth: "80%" }}
-                  >
-                    <div>{msg.message}</div>
-                  </div>
-                </div>
-              ))}
+              {messages.length === 0 ? (
+                <Spinner animation="border" variant="primary" />
+              ) : (
+                messages.map((msg, idx) => {
+                  const isUser = msg.sender === userId;
+                  return (
+                    <div
+                      key={idx}
+                      className={`d-flex mb-2 ${
+                        isUser ? "justify-content-end" : "justify-content-start"
+                      }`}
+                    >
+                      <div
+                        className={`p-2 rounded ${
+                          isUser ? "bg-primary text-white" : "bg-light"
+                        }`}
+                        style={{ maxWidth: "80%" }}
+                      >
+                        <div className="fw-bold mb-1" style={{ fontSize: "0.85rem" }}>
+                          {isUser ? senderName : "Admin"}
+                        </div>
+                        <div>{msg.message}</div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
               <div ref={bottomRef} />
             </div>
 
