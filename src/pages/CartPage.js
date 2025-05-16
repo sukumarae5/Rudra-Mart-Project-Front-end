@@ -62,7 +62,9 @@ const CartPage = () => {
       },
     ];
     dispatch(fetcheckeoutpagedata(checkoutData));
-    navigate("/CheckoutPage");
+    navigate("/CheckoutPage");     
+
+    
   };
 
   const finalCost = (totalCost - discount).toFixed(2);

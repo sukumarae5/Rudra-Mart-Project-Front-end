@@ -52,11 +52,7 @@ const Login = () => {
       });
       return;
     }
-
-    // const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
-    // const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
 const matchtheadmindata=(users.find((user)=>user.email===email && user.password===password && user.role==="admin"))
-    console.log(matchtheadmindata)
 if (matchtheadmindata){
       setSnackbar({
         open: true,

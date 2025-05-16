@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { FaHeart, FaTruck, FaUndo } from "react-icons/fa";
 import ReactImageMagnify from "react-image-magnify";
 import { useNavigate } from "react-router-dom";
@@ -16,18 +16,27 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
+import { fetcheckeoutpagedata } from "../features/cart/cartActions";
 
 const getProductId = (product) => product.id || product._id;
 
 const ProductPage = () => {
+  const dispatch=useDispatch();
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [activeButton, setActiveButton] = useState("");
   const [quantity, setQuantity] = useState(1);
 
-  const { products = [], selectedProduct = {} } = useSelector(
-    (state) => state.products || {}
+  const products = useSelector((state) => state.products?.products || []);
+  const selectedProductFromRedux = useSelector(
+    (state) => state.products?.selectedProduct || {}
   );
+
+  const [product, setProduct] = useState(selectedProductFromRedux);
+
+  useEffect(() => {
+    setProduct(selectedProductFromRedux);
+  }, [selectedProductFromRedux]);
 
   const {
     name: title = "No Title",
@@ -38,22 +47,23 @@ const ProductPage = () => {
     category_id,
     id,
     user_id,
-  } = selectedProduct;
+  } = product || {};
 
   const [mainImage, setMainImage] = useState(image_url);
 
   useEffect(() => {
-    setMainImage(image_url);
-  }, [image_url]);
+    setMainImage(product?.image_url || "");
+  }, [product]);
 
   const relatedProducts = products.filter(
-    (product) =>
-      product.category_id === category_id &&
-      getProductId(product) !== getProductId(selectedProduct)
+    (p) =>
+      p.category_id === category_id && getProductId(p) !== getProductId(product)
   );
 
-  const handleCardClick = (product) => {
-    navigate(`/productpage/${getProductId(product)}`);
+  const handleCardClick = (clickedProduct) => {
+    setProduct(clickedProduct);
+    setQuantity(1);
+    setIsLiked(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -65,7 +75,7 @@ const ProductPage = () => {
   };
 
   const handleBuy = () => {
-    if (!selectedProduct) return;
+    if (!product) return;
 
     const checkoutItem = [
       {
@@ -78,8 +88,11 @@ const ProductPage = () => {
         totalPrice: parseFloat(price) * quantity,
       },
     ];
+  
 
     navigate("/CheckoutPage");
+      dispatch(fetcheckeoutpagedata(checkoutItem));
+
   };
 
   const responsive = {
@@ -89,7 +102,7 @@ const ProductPage = () => {
     mobile: { breakpoint: { max: 768, min: 0 }, items: 1 },
   };
 
-  if (!selectedProduct || Object.keys(selectedProduct).length === 0) {
+  if (!product || Object.keys(product).length === 0) {
     return (
       <Box textAlign="center" mt={10}>
         <Typography color="error" fontSize={20}>
@@ -252,7 +265,6 @@ const ProductPage = () => {
         </Grid>
       </Card>
 
-      {/* Related Products Carousel */}
       {relatedProducts.length > 0 && (
         <Container sx={{ mt: 6 }}>
           <Typography variant="h5" textAlign="center" mb={3}>
@@ -270,10 +282,10 @@ const ProductPage = () => {
               <button className="custom-arrow custom-right">›</button>
             }
           >
-            {relatedProducts.map((product) => (
-              <Box key={getProductId(product)} px={1}>
+            {relatedProducts.map((related) => (
+              <Box key={getProductId(related)} px={1}>
                 <Card
-                  onClick={() => handleCardClick(product)}
+                  onClick={() => handleCardClick(related)}
                   sx={{
                     width: 220,
                     height: 340,
@@ -290,8 +302,8 @@ const ProductPage = () => {
                 >
                   <CardMedia
                     component="img"
-                    image={product.image_url}
-                    alt={product.name}
+                    image={related.image_url}
+                    alt={related.name}
                     sx={{
                       height: 180,
                       width: "100%",
@@ -308,7 +320,7 @@ const ProductPage = () => {
                     }}
                   >
                     <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                      {product.name}
+                      {related.name}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -320,10 +332,10 @@ const ProductPage = () => {
                         WebkitBoxOrient: "vertical",
                       }}
                     >
-                      {product.description}
+                      {related.description}
                     </Typography>
                     <Typography fontSize={14} color="green" fontWeight="bold">
-                      ₹{parseFloat(product.price).toLocaleString("en-IN")}
+                      ₹{parseFloat(related.price).toLocaleString("en-IN")}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -333,7 +345,6 @@ const ProductPage = () => {
         </Container>
       )}
 
-      {/* Carousel Arrows */}
       <style>{`
         .custom-arrow {
           position: absolute;

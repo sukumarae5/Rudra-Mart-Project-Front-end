@@ -68,6 +68,7 @@ const ChatWidget = () => {
         setMessages((prev) => [...prev, data]);
 
         // ✅ Play sound if message is from admin (not current user)
+        
         if (data.sender_id !== userId && audioRef.current) {
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
