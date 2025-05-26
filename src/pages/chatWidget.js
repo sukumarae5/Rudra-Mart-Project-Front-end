@@ -1,12 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  InputGroup,
-  FormControl,
-  Spinner,
-} from "react-bootstrap";
-import { BsChatDots } from "react-icons/bs";
+import { Button, InputGroup, FormControl, Spinner } from "react-bootstrap";
+import { BsChatDots, BsCheck, BsCheckAll } from "react-icons/bs";
 
 const ChatWidget = () => {
   const navigate = useNavigate();
@@ -18,16 +13,14 @@ const ChatWidget = () => {
   const audioRef = useRef(null);
   const sendAudioRef = useRef(null);
   const wsRef = useRef(null);
+  const messageQueue = useRef([]);
 
   const token = localStorage.getItem("authToken");
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
   const senderName = user?.name;
-  const [conversationId, setConversationId] = useState(
-    localStorage.getItem("conversationId")
-  );
+  const [conversationId, setConversationId] = useState(localStorage.getItem("conversationId"));
 
-  // Create conversation ID if not present
   useEffect(() => {
     if (!conversationId && userId) {
       const newId = `user-${userId}-admin`;
@@ -36,19 +29,16 @@ const ChatWidget = () => {
     }
   }, [conversationId, userId]);
 
-  // Fetch messages from backend
   const fetchMessages = useCallback(async () => {
     if (!conversationId || !token) return;
-
     try {
       const response = await fetch(
-        `http://192.168.1.8:8081/api/user/messages/${conversationId}`,
+        `http://192.168.1.23:8081/api/user/messages/${conversationId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       const data = await response.json();
-
       const filtered = Array.isArray(data)
         ? data.filter(
             (msg) =>
@@ -56,45 +46,31 @@ const ChatWidget = () => {
               msg.conversation_id === conversationId
           )
         : [];
-
       setMessages(filtered);
-
-      const unread = filtered.filter((msg) => !msg.is_read && msg.sender !== userId);
-
-      // Mark messages as read
-      if (unread.length > 0) {
-        await fetch(`http://192.168.1.8:8081/api/user/messages/mark-read`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            conversation_id: conversationId,
-            user_id: userId,
-          }),
-        });
-      }
     } catch (error) {
       console.error("Failed to fetch messages:", error);
     }
   }, [conversationId, token, userId]);
 
-  // Initialize WebSocket
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId || wsRef.current) return;
 
     fetchMessages();
 
-    const socket = new WebSocket("ws://192.168.1.8:8081");
+    const socket = new WebSocket("ws://192.168.1.23:8081");
     wsRef.current = socket;
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: "init", userId }));
+      messageQueue.current.forEach((queuedMsg) => {
+        socket.send(JSON.stringify(queuedMsg));
+      });
+      messageQueue.current = [];
     };
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
 
@@ -102,6 +78,11 @@ const ChatWidget = () => {
           audioRef.current.play().catch((e) => {
             console.warn("Audio autoplay blocked:", e);
           });
+        }
+
+        // Mark as read if from admin
+        if (data.sender_id !== userId && wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: "read", messageId: data.id }));
         }
       }
     };
@@ -116,12 +97,10 @@ const ChatWidget = () => {
     };
   }, [token, userId, senderName, conversationId, fetchMessages]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send message
   const handleSend = useCallback(() => {
     if (!text.trim() || !wsRef.current || !conversationId) return;
 
@@ -136,7 +115,12 @@ const ChatWidget = () => {
       is_read: false,
     };
 
-    wsRef.current.send(JSON.stringify(msg));
+    if (wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(msg));
+    } else {
+      messageQueue.current.push(msg);
+    }
+
     setText("");
 
     if (sendAudioRef.current) {
@@ -146,7 +130,6 @@ const ChatWidget = () => {
     }
   }, [text, userId, senderName, conversationId]);
 
-  // Poll messages when chat is open
   useEffect(() => {
     if (!showChat) return;
     const interval = setInterval(() => {
@@ -155,14 +138,9 @@ const ChatWidget = () => {
     return () => clearInterval(interval);
   }, [showChat, fetchMessages]);
 
-  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        showChat &&
-        chatBoxRef.current &&
-        !chatBoxRef.current.contains(event.target)
-      ) {
+      if (showChat && chatBoxRef.current && !chatBoxRef.current.contains(event.target)) {
         setShowChat(false);
       }
     };
@@ -170,7 +148,6 @@ const ChatWidget = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showChat]);
 
-  // Toggle chat
   const toggleChat = () => {
     if (!token || !userId || !senderName) {
       alert("You need to log in first.");
@@ -213,20 +190,21 @@ const ChatWidget = () => {
                   return (
                     <div
                       key={idx}
-                      className={`d-flex mb-2 ${
-                        isUser ? "justify-content-end" : "justify-content-start"
-                      }`}
+                      className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"}`}
                     >
                       <div
-                        className={`p-2 rounded ${
-                          isUser ? "bg-primary text-white" : "bg-light"
-                        }`}
+                        className={`p-2 rounded ${isUser ? "bg-primary text-white" : "bg-light"}`}
                         style={{ maxWidth: "80%" }}
                       >
                         <div className="fw-bold mb-1" style={{ fontSize: "0.85rem" }}>
                           {isUser ? senderName : "Admin"}
                         </div>
                         <div>{msg.message}</div>
+                        {isUser && (
+                          <div className="text-end mt-1" style={{ fontSize: "0.75rem" }}>
+                            {msg.is_read ? <BsCheckAll color="white" /> : <BsCheck color="white" />}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
