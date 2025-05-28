@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, InputGroup, FormControl, Spinner } from "react-bootstrap";
-import { BsChatDots } from "react-icons/bs";
+import { BsChatDots, BsCheck, BsCheckAll } from "react-icons/bs";
 
 const ChatWidget = () => {
   const navigate = useNavigate();
@@ -31,16 +31,14 @@ const ChatWidget = () => {
 
   const fetchMessages = useCallback(async () => {
     if (!conversationId || !token) return;
-
     try {
       const response = await fetch(
-        `http://192.168.97.55:8081/api/user/messages/${conversationId}`,
+        `http://192.168.1.23:8081/api/user/messages/${conversationId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       const data = await response.json();
-
       const filtered = Array.isArray(data)
         ? data.filter(
             (msg) =>
@@ -48,7 +46,6 @@ const ChatWidget = () => {
               msg.conversation_id === conversationId
           )
         : [];
-
       setMessages(filtered);
     } catch (error) {
       console.error("Failed to fetch messages:", error);
@@ -61,13 +58,11 @@ const ChatWidget = () => {
 
     fetchMessages();
 
-    const socket = new WebSocket("ws://192.168.97.55:8081");
+    const socket = new WebSocket("ws://192.168.1.23:8081");
     wsRef.current = socket;
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ type: "init", userId }));
-
-      // Send queued messages
       messageQueue.current.forEach((queuedMsg) => {
         socket.send(JSON.stringify(queuedMsg));
       });
@@ -76,6 +71,7 @@ const ChatWidget = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
       if (data.conversation_id === conversationId) {
         setMessages((prev) => [...prev, data]);
 
@@ -83,6 +79,11 @@ const ChatWidget = () => {
           audioRef.current.play().catch((e) => {
             console.warn("Audio autoplay blocked:", e);
           });
+        }
+
+        // Mark as read if from admin
+        if (data.sender_id !== userId && wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: "read", messageId: data.id }));
         }
       }
     };
@@ -115,13 +116,10 @@ const ChatWidget = () => {
       is_read: false,
     };
 
-    const ws = wsRef.current;
-
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(msg));
+    if (wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(msg));
     } else {
       messageQueue.current.push(msg);
-      console.warn("WebSocket not open yet. Message queued.");
     }
 
     setText("");
@@ -144,11 +142,7 @@ const ChatWidget = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        showChat &&
-        chatBoxRef.current &&
-        !chatBoxRef.current.contains(event.target)
-      ) {
+      if (showChat && chatBoxRef.current && !chatBoxRef.current.contains(event.target)) {
         setShowChat(false);
       }
     };
@@ -208,6 +202,11 @@ const ChatWidget = () => {
                           {isUser ? senderName : "Admin"}
                         </div>
                         <div>{msg.message}</div>
+                        {isUser && (
+                          <div className="text-end mt-1" style={{ fontSize: "0.75rem" }}>
+                            {msg.is_read ? <BsCheckAll color="white" /> : <BsCheck color="white" />}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
