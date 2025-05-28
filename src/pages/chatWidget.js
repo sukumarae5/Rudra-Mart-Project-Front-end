@@ -53,7 +53,8 @@ const ChatWidget = () => {
   }, [conversationId, token, userId]);
 
   useEffect(() => {
-    if (!token || !userId || !senderName || !conversationId || wsRef.current) return;
+    if (!token || !userId || !senderName || !conversationId || wsRef.current)
+      return;
 
     fetchMessages();
 
@@ -132,6 +133,7 @@ const ChatWidget = () => {
 
   useEffect(() => {
     if (!showChat) return;
+
     const interval = setInterval(() => {
       fetchMessages();
     }, 2000);
@@ -226,7 +228,7 @@ const ChatWidget = () => {
             </InputGroup>
           </div>
         </div>
-      )}
+      )}   
     </div>
   );
 };
