@@ -529,15 +529,12 @@ const HomePage = () => {
   {viewAll && (
     <Row className="mt-4">
       {products.map((product) => (
-        <Grid
-          item
-          xs={12} sm={6} md={4} lg={3} // Adjusting to make it responsive
-          key={product.id}
-        >
+         <Col xs={12} sm={6} md={4} lg={3} key={product.id}>
           <div
+          
             className="card"
             style={{
-              borderRadius: "10px",
+              borderRadius: "10px",             
               boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
               padding: "10px",
               position: "relative",
@@ -559,7 +556,7 @@ const HomePage = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-              }}
+                            }}
             >
               {wishlistItems.some((item) => item.product_id === product.id) ? (
                 <FaHeart
@@ -638,7 +635,7 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-        </Grid>
+         </Col>
       ))}
     </Row>
   )}

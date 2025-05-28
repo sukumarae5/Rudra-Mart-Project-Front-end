@@ -55,6 +55,8 @@ const ChatWidget = () => {
   useEffect(() => {
     if (!token || !userId || !senderName || !conversationId || wsRef.current)
       return;
+    if (!token || !userId || !senderName || !conversationId || wsRef.current)
+      return;
 
     fetchMessages();
 

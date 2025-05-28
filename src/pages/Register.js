@@ -49,7 +49,6 @@ const Register = () => {
         password: formData.password,
         role: formData.role,
       };
-
       const response = await fetch(
         `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register`,
         {
@@ -74,8 +73,6 @@ const Register = () => {
       setError(error.message || "Registration failed, please try again later");
     }
   };
-
-
   const handleGoogleSuccess = async (response) => {    
       const { credential } = response;  
       if (!credential) {
@@ -94,7 +91,6 @@ const Register = () => {
     
   const handleGoogleFailure = (error) => {
     console.error("Google login failed:", error);
-
   };
     return (
     <div className="container py-5">
@@ -111,10 +107,8 @@ const Register = () => {
           <div style={{ maxWidth: "400px" }}>
             <h2 className="fw-bold mb-4">Create an Account</h2>
             <p className="text-muted mb-4">Enter your details below</p>
-
             {error && <p className="text-danger">{error}</p>} {/* Show error */}
             {message && <p className="text-success">{message}</p>} {/* Show success */}
-
             <form onSubmit={handleSubmit}>
               {[
                 { type: "text", name: "name", placeholder: "Name" },
@@ -142,18 +136,8 @@ const Register = () => {
               >
                 {loading ? <span className="spinner-border spinner-border-sm"></span> : "Create Account"}
               </button>
-            </form>
-
-            {/* <button
-              onClick={handleGoogleSignUp}
-              className="w-full d-flex align-items-center justify-content-center mt-3 py-2 px-4 border border-gray-300 rounded-lg"
-            >
-              <FcGoogle className="me-2" size={20}
-               />
-              Sign Up with Google
-            </button> */}
+            </form>            
             <div className="text-center mt-3">
-
 <GoogleLogin className="me-2" 
 onSuccess={handleGoogleSuccess}
 onError={handleGoogleFailure}
