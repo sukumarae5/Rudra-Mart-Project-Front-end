@@ -529,11 +529,7 @@ const HomePage = () => {
   {viewAll && (
     <Row className="mt-4">
       {products.map((product) => (
-        <div
-          item
-           xs={3} sm={6} md={4} lg={3}// Adjusting to make it responsive
-          key={product.id}
-        >
+         <Col xs={12} sm={6} md={4} lg={3} key={product.id}>
           <div
           
             className="card"
@@ -639,7 +635,7 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-        </div>
+         </Col>
       ))}
     </Row>
   )}
