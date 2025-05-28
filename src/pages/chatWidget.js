@@ -136,7 +136,6 @@ const ChatWidget = () => {
   useEffect(() => {
     if (!showChat) return;
 
-
     const interval = setInterval(() => {
       fetchMessages();
     }, 2000);
@@ -232,10 +231,8 @@ const ChatWidget = () => {
           </div>
         </div>
       )}   
-      )}   
     </div>
   );
 };
 
 export default ChatWidget;
-
