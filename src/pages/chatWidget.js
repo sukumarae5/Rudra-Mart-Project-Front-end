@@ -33,7 +33,7 @@ const ChatWidget = () => {
     if (!conversationId || !token) return;
     try {
       const response = await fetch(
-        `http://192.168.1.23:8081/api/user/messages/${conversationId}`,
+        `http://192.168.1.25:8081/api/user/messages/${conversationId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -60,7 +60,7 @@ const ChatWidget = () => {
 
     fetchMessages();
 
-    const socket = new WebSocket("ws://192.168.1.23:8081");
+    const socket = new WebSocket("ws://192.168.1.25:8081");
     wsRef.current = socket;
 
     socket.onopen = () => {

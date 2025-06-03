@@ -41,7 +41,7 @@ const AdminInbox = () => {
   }, []);
 
   const connectWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.1.23:8081");
+    ws.current = new WebSocket("ws://192.168.1.25:8081");
 
     ws.current.onopen = () => {
       ws.current.send(JSON.stringify({ type: "init", userId: adminId }));
@@ -71,7 +71,7 @@ const AdminInbox = () => {
   const fetchConversations = async (playSound = false) => {
     try {
       const res = await fetch(
-        "http://192.168.1.23:8081/api/admin/messages/all"
+        "http://192.168.1.25:8081/api/admin/messages/all"
       );
       const convs = await res.json();
       console.log(convs);
@@ -81,7 +81,7 @@ const AdminInbox = () => {
           console.log(conv);
           console.log(convId);
           const r2 = await fetch(
-            `http://192.168.1.23:8081/api/user/messages/${convId}`
+            `http://192.168.1.25:8081/api/user/messages/${convId}`
           );
           const msgs = await r2.json();
           console.log(msgs);
