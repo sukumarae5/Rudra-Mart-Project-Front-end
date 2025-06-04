@@ -1,8 +1,10 @@
 import React from "react";
-import { RiCustomerServiceLine } from "react-icons/ri";
-import { AiTwotoneSafetyCertificate } from "react-icons/ai";
+import { Row, Col, Badge } from "react-bootstrap";
 import { TbTruckDelivery } from "react-icons/tb";
-import { Badge, Col, Row } from "react-bootstrap";
+import { MdLocalOffer } from "react-icons/md";
+import { AiTwotoneSafetyCertificate } from "react-icons/ai";
+import { RiCustomerServiceLine } from "react-icons/ri";
+
 import newarivelpageimage from "../assets/images/newarivelpageimage.png";
 import newarivelpageimage1 from "../assets/images/newarivelpageimage1.png";
 import newarivelpageimage2 from "../assets/images/newarivelpageimage2.png";
@@ -11,24 +13,30 @@ import newarivelpageimage3 from "../assets/images/newarivelpageimage3.png";
 const NewArrivalpage = () => {
   const iconData1 = [
     {
-      icons: <TbTruckDelivery />,
-      title: "FREE AND FAST DELIVERY",
-      heading: "Free delivery for all orders over $140",
+      icon: <TbTruckDelivery />,
+      title: "10-Minute Delivery",
+      heading: "Lightning fast doorstep delivery",
     },
     {
-      icons: <RiCustomerServiceLine />,
-      title: "24/7 CUSTOMER SERVICE",
-      heading: "Friendly 24/7 customer support",
+      icon: <MdLocalOffer />,
+      title: "Best Prices & Offers",
+      heading: "Stay on budget, every time",
     },
     {
-      icons: <AiTwotoneSafetyCertificate />,
-      title: "MONEY BACK GUARANTEE",
-      heading: "We return money within 30 days",
+      icon: <AiTwotoneSafetyCertificate />,
+      title: "Quality Assurance",
+      heading: "Only the highest quality products",
+    },
+    {
+      icon: <RiCustomerServiceLine />,
+      title: "24/7 Customer Support",
+      heading: "Always here to help you",
     },
   ];
 
   return (
     <div className="container py-4">
+      {/* New Arrival Title */}
       <div className="d-flex align-items-center">
         <Badge
           bg="danger"
@@ -38,17 +46,16 @@ const NewArrivalpage = () => {
             marginLeft: "30px",
             marginRight: "10px",
           }}
-        >
-          {" "}
-        </Badge>
+        ></Badge>
         <p className="text-danger fw-bold fs-5 mb-0">Featured</p>
       </div>
       <h1 className="fw-bold fs-3 ms-3">New Arrival</h1>
 
+      {/* New Arrival Cards */}
       <Row className="mt-4 g-4">
         <Col lg={6}>
           <div
-            className="position-relative overflow-hidden rounded shadow "
+            className="position-relative overflow-hidden rounded shadow"
             style={{ background: "black" }}
           >
             <img
@@ -66,16 +73,21 @@ const NewArrivalpage = () => {
             </div>
           </div>
         </Col>
+
         <Col lg={6}>
           <Row className="g-4">
             <Col lg={12}>
               <div
-                className="position-relative overflow-hidden rounded shadow "
-                style={{ background: "black", width: "100%" }}
+                className="position-relative overflow-hidden rounded shadow"
+                style={{ background: "black" }}
               >
-                <img src={newarivelpageimage3} alt="Women's Collections" />
+                <img
+                  src={newarivelpageimage3}
+                  alt="Women's Collections"
+                  className="img-fluid"
+                />
                 <div
-                  className="position-absolute bottom-0 text-white p-3 "
+                  className="position-absolute bottom-0 text-white p-3"
                   style={{ width: "100%" }}
                 >
                   <h2>Women’s Collections</h2>
@@ -87,13 +99,13 @@ const NewArrivalpage = () => {
 
             <Col lg={6}>
               <div
-                className="position-relative overflow-hidden rounded shadow "
+                className="position-relative overflow-hidden rounded shadow"
                 style={{ background: "black" }}
               >
                 <img
                   src={newarivelpageimage}
                   alt="Speakers"
-                  className="img-fluid pl-6"
+                  className="img-fluid"
                 />
                 <div
                   className="position-absolute bottom-0 text-white p-3"
@@ -108,16 +120,18 @@ const NewArrivalpage = () => {
 
             <Col lg={6}>
               <div
-                className="position-relative overflow-hidden rounded shadow "
+                className="position-relative overflow-hidden rounded shadow"
                 style={{ background: "black" }}
               >
                 <img
                   src={newarivelpageimage2}
                   alt="Perfume"
-                  className="img-fluid"                />
+                  className="img-fluid"
+                />
                 <div
                   className="position-absolute bottom-0 text-white p-3"
-                  style={{ width: "100%" }}                >
+                  style={{ width: "100%" }}
+                >
                   <h2>Perfume</h2>
                   <p>GUCCI INTENSE OUD EDP</p>
                   <h4 className="text-decoration-underline">Shop Now</h4>
@@ -127,14 +141,35 @@ const NewArrivalpage = () => {
           </Row>
         </Col>
       </Row>
-      <Row className="justify-content-center mt-5">
+
+      {/* Why Choose Us - Heading */}
+     <Row className="mt-5">
+  <Col className="text-center">
+    <h1 className="fw-bold text-dark mb-4" style={{ fontSize: "25px" }}>
+      Why Choose Flash Cart?
+    </h1>
+  </Col>
+</Row>
+
+
+      {/* Icons Row */}
+      <Row className="justify-content-between text-center">
         {iconData1.map((item, index) => (
-          <Col key={index} md={3} sm={6} xs={12} className="text-center mb-4">
-            <div className="p-4 bg-white ">
-              <div className="d-flex justify-content-center align-items-center rounded-circle mx-auto bg-dark" style={{ width: '80px', height: '80px' }}>
-                <span className="fs-2 text-white">{item.icons}</span>
+          <Col key={index} lg={3} md={6} sm={12} className="mb-4">
+            <div>
+              <div
+                className="d-flex justify-content-center align-items-center mx-auto rounded-circle"
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  backgroundColor: "#4169E1", // Royal Blue
+                }}
+              >
+                <span className="fs-2 text-white">{item.icon}</span>
               </div>
-              <h5 className="fw-bold mt-3">{item.title}</h5>
+              <h5 className="fw-bold mt-3" style={{ color: "rgb(0, 3, 11)" }}>
+                {item.title}
+              </h5>
               <p className="small text-muted">{item.heading}</p>
             </div>
           </Col>
