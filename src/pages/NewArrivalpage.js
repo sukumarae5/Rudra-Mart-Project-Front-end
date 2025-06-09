@@ -1,5 +1,5 @@
 import React from "react";
-import { Row, Col, Badge } from "react-bootstrap";
+import { Row, Col, Badge, Container } from "react-bootstrap";
 import { TbTruckDelivery } from "react-icons/tb";
 import { MdLocalOffer } from "react-icons/md";
 import { AiTwotoneSafetyCertificate } from "react-icons/ai";
@@ -9,6 +9,7 @@ import newarivelpageimage from "../assets/images/newarivelpageimage.png";
 import newarivelpageimage1 from "../assets/images/newarivelpageimage1.png";
 import newarivelpageimage2 from "../assets/images/newarivelpageimage2.png";
 import newarivelpageimage3 from "../assets/images/newarivelpageimage3.png";
+import { Link } from "react-router-dom";
 
 const NewArrivalpage = () => {
   const iconData1 = [
@@ -37,22 +38,10 @@ const NewArrivalpage = () => {
   return (
     <div className="container py-4">
       {/* New Arrival Title */}
-      <div className="d-flex align-items-center">
-        <Badge
-          bg="danger"
-          style={{
-            width: "20px",
-            height: "50px",
-            marginLeft: "30px",
-            marginRight: "10px",
-          }}
-        ></Badge>
-        <p className="text-danger fw-bold fs-5 mb-0">Featured</p>
-      </div>
-      <h1 className="fw-bold fs-3 ms-3">New Arrival</h1>
+    
 
       {/* New Arrival Cards */}
-      <Row className="mt-4 g-4">
+      {/* <Row className="mt-4 g-4">
         <Col lg={6}>
           <div
             className="position-relative overflow-hidden rounded shadow"
@@ -140,7 +129,7 @@ const NewArrivalpage = () => {
             </Col>
           </Row>
         </Col>
-      </Row>
+      </Row> */}
 
       {/* Why Choose Us - Heading */}
      <Row className="mt-5">
@@ -175,6 +164,15 @@ const NewArrivalpage = () => {
           </Col>
         ))}
       </Row>
+    <Container>
+      <Row className="justify-content-center">
+        <Col xs="auto">
+          <Link to="/admin" className="btn">
+            Admin panel
+          </Link>
+        </Col>
+      </Row>
+    </Container>
     </div>
   );
 };

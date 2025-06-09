@@ -1,242 +1,269 @@
-import React, { useEffect, useState, useMemo } from "react";
-import {
-    Grid,
-    Card,
-    CardMedia,
-    CardContent,
-    CardActions,
-    Typography,
-    IconButton,
-    Button,
-    Snackbar,
-    Box,
-    Badge as MuiBadge,
-} from "@mui/material";
-import MuiAlert from "@mui/material/Alert";
-import { FaEye, FaRegHeart, FaHeart } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { Card, Row, Col, Container, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    fetchproductsrequest,
-    setSelectedProduct,
+  fetchproductsrequest,
+  setSelectedProduct,
 } from "../features/product/productActions";
 import { fetchApiCartDataRequest } from "../features/cart/cartActions";
-import {
-    addToWishlistRequest,
-    removeWishlistProductRequest,
-} from "../features/wishlist/wishlistAction";
 import { useNavigate } from "react-router-dom";
 
 const SellingProductspage = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { products = [], loading, error } = useSelector(
+    (state) => state.products || {}
+  );
 
-    const { products = [], loading, error } = useSelector((state) => state.products || {});
-    const { cartItems = [] } = useSelector((state) => state.cart || {});
-    const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
-    const wishlistItems = Array.isArray(wishlistData[0]) ? wishlistData[0] : wishlistData;
+  const [showAll, setShowAll] = useState(false);
 
-    const [viewAll, setViewAll] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  useEffect(() => {
+    dispatch(fetchproductsrequest());
+  }, [dispatch]);
 
-    const showSnackbar = (message, severity = "success") => {
-        setSnackbarMessage(message);
-        setSnackbarSeverity(severity);
-        setSnackbarOpen(true);
-    };
+  const handleCardClick = (product) => {
+    dispatch(setSelectedProduct(product));
+    navigate("/productpage");
+  };
 
-    useEffect(() => {
-        dispatch(fetchproductsrequest());
-    }, [dispatch]);
+  const handleAddToCart = async (e, product) => {
+    e.stopPropagation();
+    const userToken = localStorage.getItem("authToken");
+    if (!userToken) {
+      alert("Please log in");
+      navigate("/login");
+      return;
+    }
 
-    const memoizedProducts = useMemo(() => {
-        return viewAll ? products : products.slice(0, 4);
-    }, [products, viewAll]);
-
-    const handleAddToCart = async (event, product) => {
-        event.stopPropagation();
-        const userToken = localStorage.getItem("authToken");
-        const user = JSON.parse(localStorage.getItem("user"));
-
-        if (!userToken || !user?.id) {
-            showSnackbar("Please log in to add to cart.", "error");
-            navigate("/login");
-            return;
-        }
-
-        if (cartItems.some((item) => item.user_id === user.id && item.product_id === product.id)) {
-            showSnackbar("Product already in cart.", "warning");
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${userToken}`,
-                },
-                body: JSON.stringify({ user_id: user.id, product_id: product.id, quantity: 1 }),
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || response.statusText);
-
-            showSnackbar("Product added to cart!");
-            dispatch(fetchApiCartDataRequest());
-        } catch (error) {
-            console.error("Add to cart error:", error);
-            showSnackbar(error.message, "error");
-        }
-    };
-
-    const handleCardClick = (product) => {
-        dispatch(setSelectedProduct(product));
-        navigate("/productpage");
-    };
-
-    const handleWishlistClick = (e, product) => {
-        e.stopPropagation();
-        dispatch(addToWishlistRequest(product.id));
-        showSnackbar("Added to wishlist!");
-    };
-
-    const removeItem = (event, productId) => {
-        event.stopPropagation();
-        console.log(productId)
-        const wishlistItem = wishlistItems.find((item) => Number(item.product_id) === Number(productId));
-        if (wishlistItem) {
-            dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));
-            showSnackbar("Removed from wishlist.", "info");
-        }
-    };
-
-    return (
-        <Box sx={{ px: 3, py: 4 }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <MuiBadge
-                    sx={{
-                        width: "10px",
-                        height: "40px",
-                        backgroundColor: "red",
-                        borderRadius: "2px",
-                        mr: 2,
-                    }}
-                />
-                <Typography variant="h6" color="error" fontWeight="bold">
-                    This Month
-                </Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
-                <Typography variant="h4" fontWeight="bold">
-                    Best Selling Products
-                </Typography>
-                <Button variant="contained" color="error" onClick={() => setViewAll((prev) => !prev)}>
-                    {viewAll ? "Show Less" : "View All Products"}
-                </Button>
-            </Box>
-
-            <Grid container spacing={3}>
-                {loading ? (
-                    <Typography variant="h6">Loading products...</Typography>
-                ) : error ? (
-                    <Typography variant="h6" color="error">Error: {error}</Typography>
-                ) : (
-                    memoizedProducts.map((product) => (
-                        <Grid item xs={12} sm={6} md={3} key={product.id}>
-                            <ProductCard
-                                product={product}
-                                handleWishlistClick={handleWishlistClick}
-                                removeItem={removeItem}
-                                handleAddToCart={handleAddToCart}
-                                handleCardClick={handleCardClick}
-                                wishlistItems={wishlistItems}
-                            />
-                        </Grid>
-                    ))
-                )}
-            </Grid>
-
-            {/* Snackbar */}
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={3000}
-                onClose={() => setSnackbarOpen(false)}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-                <MuiAlert
-                    onClose={() => setSnackbarOpen(false)}
-                    severity={snackbarSeverity}
-                    elevation={6}
-                    variant="filled"
-                    sx={{ width: "100%", textAlign: "center" }}
-                >
-                    {snackbarMessage}
-                </MuiAlert>
-            </Snackbar>
-        </Box>
+    const user = JSON.parse(localStorage.getItem("user"));
+    const res = await fetch(
+      `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          product_id: product.id,
+          quantity: 1,
+        }),
+      }
     );
-};
 
-const ProductCard = ({ product, handleWishlistClick, removeItem, handleAddToCart, handleCardClick, wishlistItems }) => {
-    const isInWishlist = useMemo(() => wishlistItems.some((item) => item.product_id === product.id), [wishlistItems, product.id]);
+    if (res.ok) {
+      dispatch(fetchApiCartDataRequest());
+      alert("Added to cart");
+    }
+  };
 
-    return (
-        <Card
-            sx={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                boxShadow: 3,
-                position: "relative",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": { transform: "scale(1.02)" },
+  return (
+    <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>
+      {/* Header and Toggle Button */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              fontWeight: "bold",
+              color: "rgb(6, 6, 6)",
+              fontSize: "30px",
+              margin: 0,
             }}
-            onClick={() => handleCardClick(product)}
-        >
-            <Box sx={{ position: "absolute", top: 10, right: 10, zIndex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                <IconButton onClick={(e) => isInWishlist ? removeItem(e, product.id) : handleWishlistClick(e, product)}>
-                    {isInWishlist ? <FaHeart color="red" /> : <FaRegHeart />}
-                </IconButton>
-                <IconButton onClick={(e) => { e.stopPropagation(); handleCardClick(product); }}>
-                    <FaEye />
-                </IconButton>
-            </Box>
+          >
+            Featured Products
+          </h2>
+        </div>
+        {products.length > 4 && (
+          <Button
+            onClick={() => setShowAll((prev) => !prev)}
+            variant="outline-primary"
+            style={{ fontWeight: "bold", padding: "10px 20px", whiteSpace: "nowrap" }}
+          >
+            {showAll ? "Show Less" : "View All"}
+          </Button>
+        )}
+      </div>
 
-            <CardMedia
-                component="img"
-                image={product.image_url}
-                alt={product.name}
-                sx={{ height: 200, objectFit: "cover" }}
-            />
-
-            <CardContent>
-                <Typography variant="h6" fontWeight="bold" noWrap>
-                    {product.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    {product.description}
-                </Typography>
-                <Typography variant="subtitle1" fontWeight="bold">
-                    ₹{product.price}
-                </Typography>
-            </CardContent>
-
-            <CardActions>
-                <Button
-                    fullWidth
-                    variant="contained"
-                    color="error"
-                    onClick={(e) => handleAddToCart(e, product)}
+      {/* Product Grid */}
+      <Row>
+        {loading ? (
+          <h3>Loading...</h3>
+        ) : error ? (
+          <h3>Error: {error}</h3>
+        ) : (
+          (showAll ? products : products.slice(0, 6)).map((product) => (
+            <Col
+              key={product.id}
+              xs={12}
+              sm={6}
+              md={4}
+              lg={2}
+              style={{ marginBottom: "20px" }}
+            >
+              <Card
+                onClick={() => handleCardClick(product)}
+                className="h-100 shadow-sm"
+                style={{
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    paddingBottom: "100%", // square aspect ratio
+                    overflow: "hidden",
+                    borderTopLeftRadius: "10px",
+                    borderTopRightRadius: "10px",
+                    backgroundColor: "#fff",
+                  }}
                 >
-                    Add to Cart
-                </Button>
-            </CardActions>
-        </Card>
-    );
+                  {product.discount ? (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        left: "10px",
+                        backgroundColor: "#ffc107",
+                        color: "#000",
+                        fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        padding: "5px 8px",
+                        borderRadius: "4px",
+                        zIndex: 2,
+                      }}
+                    >
+                      {product.discount}% OFF
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        left: "10px",
+                        width: "25px",
+                        height: "25px",
+                        borderRadius: "20%",
+                        backgroundColor: "#f6c90e",
+                        color: "#000",
+                        fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        textAlign: "center",
+                        lineHeight: "25px",
+                        zIndex: 2,
+                      }}
+                    >
+                      0
+                    </div>
+                  )}
+
+                  {product.delivery_time && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "110px",
+                        left: "10px",
+                        backgroundColor: "#007bff",
+                        color: "#fff",
+                        fontSize: "12px",
+                        padding: "5px 10px",
+                        borderRadius: "20px",
+                        zIndex: 2,
+                      }}
+                    >
+                      ⏱ {product.delivery_time}
+                    </div>
+                  )}
+
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    style={{
+                      position: "absolute",
+                      top: "8%",
+                      left: "8%",
+                      width: "84%",
+                      height: "84%",
+                      objectFit: "contain",
+                      borderRadius: "10px",
+                    }}
+                  />
+                </div>
+
+                {/* Card Body */}
+                <Card.Body
+                  className="d-flex flex-column justify-content-between text-center"
+                  style={{
+                    paddingTop: "10px",
+                    paddingBottom: "15px",
+                  }}
+                >
+                  <Card.Title
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      minHeight: "40px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={product.name} // tooltip on hover
+                  >
+                    {product.name}
+                  </Card.Title>
+
+                  <Card.Text
+                    className="text-muted"
+                    style={{ fontSize: "14px", marginBottom: "5px" }}
+                  >
+                    {product.weight || product.quantity}
+                  </Card.Text>
+
+                  <div
+                    className="d-flex justify-content-center align-items-center gap-2"
+                    style={{ fontSize: "16px", fontWeight: "700" }}
+                  >
+                    <span>₹{product.price}</span>
+                    {product.mrp && (
+                      <span
+                        style={{
+                          textDecoration: "line-through",
+                          color: "#6c757d",
+                          fontSize: "14px",
+                        }}
+                      >
+                        ₹{product.mrp}
+                      </span>
+                    )}
+                  </div>
+
+                  <Button
+                    onClick={(e) => handleAddToCart(e, product)}
+                    variant="primary"
+                    className="mt-3 fw-bold"
+                    style={{
+                      borderRadius: "6px",
+                    }}
+                  >
+                    Add
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))
+        )}
+      </Row>
+    </Container>
+  );
 };
 
 export default SellingProductspage;
