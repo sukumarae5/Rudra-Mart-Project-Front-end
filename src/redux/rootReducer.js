@@ -1,11 +1,13 @@
 import { combineReducers } from 'redux';
+
 import productReducer from '../features/product/productSlice';
 import cartReducer from '../features/cart/cartSlice';
 import userReducer from '../features/user/userSlice';
-import {addressReducer}  from '../features/address/addressSlice';
+import { addressReducer } from '../features/address/addressSlice';
 import orderReducer from '../features/order/orderSlice';
-import wishlistReducer from '../features/wishlist/wishlistSlice'
+import wishlistReducer from '../features/wishlist/wishlistSlice';
 import dashboardReducer from '../features/admin/adminSlice';
+import categoryProductReducer from '../features/categories/categorieSlice'; // renamed for camelCase
 
 const rootReducer = combineReducers({
   products: productReducer,
@@ -13,9 +15,9 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   orders: orderReducer,
   address: addressReducer,
-  wishlist:wishlistReducer,
+  wishlist: wishlistReducer,
   admindashboard: dashboardReducer,
-  
-   // Add orders reducer
+  categoryproducts: categoryProductReducer, // if name in store slice is intended
 });
+
 export default rootReducer;

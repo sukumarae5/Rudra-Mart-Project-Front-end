@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Nav, Offcanvas, Container } from "react-bootstrap";
 import { FaHome, FaProductHunt, FaUser } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom";
-import { IoReorderThree } from "react-icons/io5";
-import { BiSolidCategory } from "react-icons/bi";
-import { HiOutlineDocumentReport } from "react-icons/hi";
-import { IoMdMail } from "react-icons/io";
-import { Outlet } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
+import {
+  HiOutlineArrowRight,
+  HiOutlineDocumentReport,
+  HiOutlineLogout,
+  HiOutlinePhotograph,
+  HiOutlineShoppingBag,
+  HiOutlineTag,
+  HiOutlineTruck,
+  HiOutlineUserGroup,
+  HiOutlineViewGrid,
+} from "react-icons/hi";
 
 const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
   const location = useLocation();
@@ -30,7 +36,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
             position: "fixed",
             top: "60px",
             left: 0,
-            backgroundColor: "rgb(6, 107, 133)", // Corrected color
+            backgroundColor: "rgb(250, 253, 254)",
             boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
             padding: "20px",
             zIndex: 1040,
@@ -43,8 +49,8 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
                 key={path}
                 as={Link}
                 to={path}
-                className={`d-flex align-items-center gap-2 text-white ${
-                  location.pathname === path ? "fw-bold text-primary" : ""
+                className={`d-flex align-items-center gap-2 ${
+                  location.pathname === path ? "fw-bold text-primary" : "text-dark"
                 }`}
               >
                 {icon} <span>{label}</span>
@@ -61,7 +67,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
         placement="start"
         style={{
           width: "250px",
-          backgroundColor: "rgb(6, 107, 133)", // Same as large screen sidebar
+          backgroundColor: "rgb(247, 248, 249)",
           top: "60px",
           height: "calc(100vh - 60px)",
           zIndex: 1040,
@@ -69,7 +75,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
         }}
       >
         <Offcanvas.Header closeButton className="custom-close-btn">
-          <Offcanvas.Title className="text-white">Admin Menu</Offcanvas.Title>
+          <Offcanvas.Title className="text-dark">Admin Menu</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Nav className="flex-column">
@@ -79,8 +85,8 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
                 as={Link}
                 to={path}
                 onClick={handleSidebarClose}
-                className={`d-flex align-items-center gap-2 text-white ${
-                  location.pathname === path ? "fw-bold text-primary" : ""
+                className={`d-flex align-items-center gap-2 ${
+                  location.pathname === path ? "fw-bold text-primary" : "text-dark"
                 }`}
               >
                 {icon} <span>{label}</span>
@@ -93,7 +99,7 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
       {/* Main Content Area */}
       <div
         style={{
-          marginLeft: isLargeScreen ? "150px" : "0", 
+          marginLeft: isLargeScreen ? "150px" : "0",
           marginTop: "40px",
           minHeight: "calc(100vh - 60px)",
           overflowY: "auto",
@@ -118,15 +124,15 @@ const AdminSidebar = ({ showSidebar, handleSidebarClose }) => {
 
 // Sidebar Menu Items
 const menuItems = [
-  { path: "/admin/admindashboard", icon: <FaHome />, label: "Dashboard" },
-  { path: "/admin/adminorders", icon: <IoReorderThree />, label: "Orders" },
-  { path: "/admin/adminproducts", icon: <FaProductHunt />, label: "Products" },
-  { path: "/admin/categories", icon: <BiSolidCategory />, label: "Categories" },
-  { path: "/admin/adminusers", icon: <FaUser />, label: "Customers" },
-  { path: "/admin/adminreports", icon: <HiOutlineDocumentReport />, label: "Reports" },
-  { path: "/admin/admininbox", icon: <IoMdMail />, label: "Inbox" },
-  { path: "/admin/adminprofile", icon: <FaUser />, label: "Personal Settings" },
-  { path: "/login", icon: <FaUser />, label: "Logout" },
+  { path: "/admin/admindashboard", icon: <HiOutlineViewGrid size={18} />, label: "Dashboard" },
+  { path: "/admin/adminproducts", icon: <HiOutlineShoppingBag size={18} />, label: "Products" },
+  { path: "/admin/categories", icon: <HiOutlineTag size={18} />, label: "Categories" },
+  { path: "/admin/adminorders", icon: <HiOutlineShoppingBag size={18} />, label: "Orders" },
+  { path: "/admin/adminreports", icon: <HiOutlineTruck size={18} />, label: "Delivery" },
+  { path: "/admin/adminusers", icon: <HiOutlineUserGroup size={18} />, label: "Users" },
+  { path: "/admin/admininbox", icon: <HiOutlinePhotograph size={18} />, label: "Banners" },
+  { path: "/admin/adminusers", icon: <HiOutlineArrowRight size={18} />, label: "Back to store" },
+  { path: "/admin/admininbox", icon: <HiOutlineLogout size={18} />, label: "Logout" },
 ];
 
 export default AdminSidebar;

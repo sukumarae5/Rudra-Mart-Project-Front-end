@@ -1,33 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Form, Container, Badge } from "react-bootstrap";
-import {  Link, useLocation } from "react-router-dom";
 import {
- 
- 
-  InputGroup,
-  Modal,
-  Button,
+  Navbar, Nav, Form, Container, Badge, InputGroup, Modal, Button,
 } from "react-bootstrap";
-
-import { useDispatch, useSelector } from "react-redux";
-import {fetchproductsrequest,searchquryproduct,} from "../../features/product/productActions";
-
-
-import { userlogoutdata } from "../../features/user/userActions";
-
-import ChatWidget from "../../pages/chatWidget";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Outlet } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { BsCart3 } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
 import { CiUser } from "react-icons/ci";
-import Footer from "./Footer"; // Adjust this path if needed
+import { useDispatch, useSelector } from "react-redux";
+import { fetchApiCartDataRequest } from "../../features/cart/cartActions";
+import Footer from "./Footer";
 
 const Header = () => {
- const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const cartItems = useSelector((state) => state.cart.cartItems || []);
+  console.log("suumar anna",cartItems)
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
+  useEffect(() => {
+    dispatch(fetchApiCartDataRequest());
+  }, [dispatch]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -43,29 +39,19 @@ const Header = () => {
 
   return (
     <div>
- 
-
-      <Navbar expand="lg" bg="white" className="shadow-sm py-2">
+      <Navbar expand="lg" bg="white" fixed="top" className="shadow-sm py-2">
         <Container fluid className="px-3">
-          {/* Logo */}
           <Navbar.Brand href="/" className="d-flex align-items-center me-3">
             <span className="fw-bold text-primary" style={{ fontSize: "1.3rem" }}>
               Rudra<span className="text-warning">E-Mart</span>
             </span>
-            <span
-              className="badge bg-warning text-dark ms-2"
-              style={{
-                fontSize: "0.65rem",
-                fontWeight: "600",
-                padding: "4px 8px",
-                borderRadius: "8px",
-              }}
-            >
+            <span className="badge bg-warning text-dark ms-2" style={{
+              fontSize: "0.65rem", fontWeight: "600", padding: "4px 8px", borderRadius: "8px",
+            }}>
               VIJAYAWADA
             </span>
           </Navbar.Brand>
 
-          {/* Location */}
           <div className="d-none d-lg-flex align-items-center me-3">
             <span
               className="border rounded px-2 py-1 small d-flex align-items-center"
@@ -77,7 +63,6 @@ const Header = () => {
             </span>
           </div>
 
-          {/* Search */}
           <Form className="flex-grow-1 mx-2" onSubmit={handleSearch}>
             <InputGroup>
               <InputGroup.Text className="bg-white border-end-0">
@@ -89,19 +74,17 @@ const Header = () => {
                 className="border-start-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ minWidth: "200px" }}
               />
             </InputGroup>
           </Form>
 
-          {/* Account and Cart */}
           <Nav className="ms-auto d-flex align-items-center">
-            <Nav.Link href="/account" className="d-flex align-items-center me-3">
+            <Nav.Link as={Link} to="/login" className="d-flex align-items-center me-3">
               <CiUser size={20} />
               <span className="d-none d-sm-inline ms-1">Account</span>
             </Nav.Link>
 
-            <Nav.Link href="/cart" className="me-2">
+            <Nav.Link as={Link} to="/cart" className="me-2">
               <div className="d-flex align-items-center position-relative">
                 <BsCart3 size={20} />
                 <Badge
@@ -114,7 +97,7 @@ const Header = () => {
                     right: "-10px",
                   }}
                 >
-                  {/* Cart Count */}
+                  {cartCount}
                 </Badge>
                 <span className="d-none d-sm-inline ms-1">Cart</span>
               </div>
@@ -122,7 +105,8 @@ const Header = () => {
           </Nav>
         </Container>
       </Navbar>
- <Modal show={showModal} onHide={handleModalClose} centered>
+
+      <Modal show={showModal} onHide={handleModalClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Select Your Location</Modal.Title>
         </Modal.Header>
@@ -139,8 +123,10 @@ const Header = () => {
         </Modal.Footer>
       </Modal>
 
-      <Outlet />
-     
+      <div style={{ paddingTop: "80px" }}>
+        <Outlet />
+      </div>
+
       <Footer />
     </div>
   );
