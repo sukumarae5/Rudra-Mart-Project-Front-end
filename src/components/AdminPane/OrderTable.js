@@ -68,10 +68,10 @@ const OrderTable = () => {
   };
 
   return (
-    <div className="container-fluid p-4">
+    <div className="container-fluid ">
       <Row>
         <Col>
-          <Card className="p-4 shadow-lg border-0 rounded-3">
+          <Card className="p-4 shadow border-0 rounded-3">
             <Row className="align-items-center mb-3">
               <Col xs={12} md={6}>
                 <h1 className="fw-bold" style={{ fontSize: "2rem", color: "#131523" }}>
@@ -81,7 +81,18 @@ const OrderTable = () => {
             </Row>
 
             <Row className="align-items-center mb-3">
-              <Col xs={12} md={6} className="d-flex align-items-center gap-3">
+              <Col xs={12} md={6} xl={9} lg={10} className="d-flex align-items-center gap-3">
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search orders..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </InputGroup>
+              </Col>
+
+              <Col xs={11} md={6} xl={1} className="d-flex align-items-center ">
                 <DropdownButton
                   variant="outline-primary"
                   title={`Filter: ${filterOption}`}
@@ -96,17 +107,26 @@ const OrderTable = () => {
                   <Dropdown.Item eventKey="Cancelled">Cancelled</Dropdown.Item>
                   <Dropdown.Item eventKey="Returned">Returned</Dropdown.Item>
                 </DropdownButton>
+              </Col>
 
-                <InputGroup className="w-50">
-                  <Form.Control
-                    type="text"
-                    placeholder="Search orders..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </InputGroup>
+              <Col
+                xs={1}
+                xl={2}
+                // xxl={2}
+                className="d-flex justify-content-end"
+              >
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => window.location.reload()}
+                  className=" d-flex  align-items-center "
+                  style={{ width: "44px", height: "36px", fontSize: "2.0rem", paddingBottom: "7%" }}
+                  aria-label="Reload page"
+                >
+                  ⟳
+                </Button>
               </Col>
             </Row>
+
             {loading ? (
               <p>Loading orders...</p>
             ) : error ? (
@@ -116,11 +136,11 @@ const OrderTable = () => {
                 <thead className="bg-light">
                   <tr>
                     <th>Order ID</th>
-                    <th>Customer ID</th>
+                    <th>Customer </th>
                     <th>Status</th>
-                    <th>Total Amount</th>
-                    <th>Order Date</th>
-                    <th>Actions</th>
+                    <th>Total </th>
+                    <th>Date</th>
+                    <th>Delivere</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -148,7 +168,7 @@ const OrderTable = () => {
                             size="sm"
                             title="Edit Order"
                             onClick={() =>
-                              navigate(`/admin/editorders`, {
+                              navigate("/admin/editorders", {
                                 state: { order },
                               })
                             }
@@ -163,7 +183,6 @@ const OrderTable = () => {
                           >
                             <MdOutlineDeleteOutline size={18} />
                           </Button>
-                          
                         </td>
                       </tr>
                     ))

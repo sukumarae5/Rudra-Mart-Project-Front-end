@@ -1,10 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Button, Modal, Form, Spinner, Row, Col } from "react-bootstrap";
+import {
+  Button,
+  Modal,
+  Form,
+  Spinner,
+  Table,
+  InputGroup,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
 import { BsPlusCircleFill } from "react-icons/bs";
+import { BiSearch } from "react-icons/bi";
+import { fetchProductCategoryRequest } from "../../features/categories/categoriesAction";
+import { useDispatch, useSelector } from "react-redux";
 
-// API URL
 const API_URL = `http://${process.env.REACT_APP_IP_ADDRESS}/api/categories`;
 
 const AdminCategories = () => {
@@ -12,19 +23,30 @@ const AdminCategories = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
   const [categoryData, setCategoryData] = useState({
     id: null,
     name: "",
     image: null,
   });
+   const { categoryproduct = [],  error } = useSelector(
+    (state) => state.categoryproducts || {}
+  );
+  console.log(categoryproduct)
+  const dispatch=useDispatch()
 
   useEffect(() => {
     fetchCategories();
   }, []);
+  useEffect(() => {
+      dispatch(fetchProductCategoryRequest());
+    }, [dispatch]);
+  
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${API_URL}/categories`);
+      const response = await axios.get(API_URL);
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -32,6 +54,12 @@ const AdminCategories = () => {
       setLoading(false);
     }
   };
+
+  const filteredCategories = categoryproduct.filter(
+    (cat) =>
+      cat.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (showInactive || cat.status)
+  );
 
   const openAddModal = () => setShowModal(true);
   const closeAddModal = () => {
@@ -47,28 +75,25 @@ const AdminCategories = () => {
     });
     setShowEditModal(true);
   };
+
   const closeEditModal = () => setShowEditModal(false);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e) =>
     setCategoryData({ ...categoryData, name: e.target.value });
-  };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e) =>
     setCategoryData({ ...categoryData, image: e.target.files[0] });
-  };
 
   const handleAddCategory = async () => {
     if (!categoryData.name || !categoryData.image) {
       alert("Please fill all fields.");
       return;
     }
-
     const formData = new FormData();
     formData.append("name", categoryData.name);
     formData.append("image", categoryData.image);
-
     try {
-      await axios.post(`${API_URL}/categories`, formData, {
+      await axios.post(API_URL, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       fetchCategories();
@@ -83,15 +108,13 @@ const AdminCategories = () => {
       alert("Please fill all fields.");
       return;
     }
-
     const formData = new FormData();
     formData.append("name", categoryData.name);
     if (categoryData.image instanceof File) {
       formData.append("image", categoryData.image);
     }
-
     try {
-      await axios.put(`${API_URL}/categories/${categoryData.id}`, formData, {
+      await axios.put(`${API_URL}/${categoryData.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       fetchCategories();
@@ -103,49 +126,123 @@ const AdminCategories = () => {
 
   return (
     <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold">Product Categories</h2>
-        <Button
-          variant="primary"
-          className="d-flex align-items-center"
-          onClick={openAddModal}
-        >
-          <BsPlusCircleFill className="me-2" size={20} />
-          Add Category
-        </Button>
-      </div>
+      <Row className="align-items-center mb-3 g-1">
+        <Col xs={12} sm={12} md={6} lg={5} xl={7}>
+          <InputGroup style={{ height: "38px" }}>
+            <InputGroup.Text>
+              <BiSearch />
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+
+        <Col xs={5} sm={2} md={3} lg={2} xl={2}>
+          <div className="d-flex align-items-center justify-content-end gap-2" style={{ minHeight: "44px" }}>
+            <Form.Check
+              type="switch"
+              id="show-inactive-switch"
+              checked={showInactive}
+              className="fs-5"
+              onChange={(e) => setShowInactive(e.target.checked)}
+              style={{ transform: "scale(1.2)" }}
+            />
+            <label htmlFor="show-inactive-switch" className="text-center">
+              Show Inactive
+            </label>
+          </div>
+        </Col>
+
+        <Col xl={3} xs={7} lg={5} md={12} className="d-flex justify-content-end gap-3 mt-lg-0 align-items-center">
+          <Button
+            variant="outline-secondary"
+            onClick={fetchCategories}
+            className="d-flex justify-content-center align-items-center"
+            style={{ width: "44px", height: "38px", fontSize: "1.0rem" }}
+            aria-label="Reload page"
+          >
+            ⟳
+          </Button>
+
+          <Button
+            onClick={openAddModal}
+            className="d-flex align-items-center"
+            style={{
+              fontSize: "0.9rem",
+              padding: "7px 10px",
+              backgroundColor: "#1E5EFF",
+              border: "none",
+              height: "40px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <BsPlusCircleFill className="me-2" size={20} />
+            Add Category
+          </Button>
+        </Col>
+      </Row>
 
       {loading ? (
         <div className="text-center py-5">
           <Spinner animation="border" variant="primary" />
         </div>
       ) : (
-        <Row xs={1} md={3} lg={4} className="g-4">
-          {categories.map((category) => (
-            <Col key={category.id}>
-              <Card className="shadow-sm border-0 h-100 category-card">
-                <div className="position-relative">
-                  <Card.Img
-                    variant="top"
-                    src={`http://${process.env.REACT_APP_IP_ADDRESS}/uploads/${category.image}`}
-                    alt={category.name}
-                    className="category-image"
-                  />
-                  <FaEdit
-                    className="edit-icon"
-                    onClick={() => openEditModal(category)}
-                  />
-                </div>
-                <Card.Body className="text-center">
-                  <Card.Title className="fw-bold">{category.name}</Card.Title>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        <div style={{ overflowX: "auto" }}>
+          <Table responsive className="text-center align-middle border" style={{ minWidth: "700px" }}>
+            <thead className="bg-primary text-white">
+              <tr>
+                <th className="text-start">Image</th>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categoryproduct.length > 0 ? (
+                categoryproduct.map((category) => (
+                  <tr key={category.id}>
+                    <td className="text-start">
+                      <img
+                        src={`http://${process.env.REACT_APP_IP_ADDRESS}/uploads/${category.image}`}
+                        alt={category.name}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                    </td>
+                    <td>{category.name}</td>
+                    <td>{category.slug || "N/A"}</td>
+                    <td>{category.description || "N/A"}</td>
+                    <td>{category.status ? "Active" : "Inactive"}</td>
+                    <td>
+                      <Button variant="outline-primary" size="sm" onClick={() => openEditModal(category)}>
+                        <FaEdit />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center py-4">
+                    No categories found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
       )}
 
-      {/* Add Category Modal */}
+      {/* Add Modal */}
       <Modal show={showModal} onHide={closeAddModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Add Category</Modal.Title>
@@ -154,11 +251,7 @@ const AdminCategories = () => {
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Category Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={categoryData.name}
-                onChange={handleInputChange}
-              />
+              <Form.Control type="text" value={categoryData.name} onChange={handleInputChange} />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Upload Image</Form.Label>
@@ -176,7 +269,7 @@ const AdminCategories = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Edit Category Modal */}
+      {/* Edit Modal */}
       <Modal show={showEditModal} onHide={closeEditModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Edit Category</Modal.Title>
@@ -185,11 +278,7 @@ const AdminCategories = () => {
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Category Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={categoryData.name}
-                onChange={handleInputChange}
-              />
+              <Form.Control type="text" value={categoryData.name} onChange={handleInputChange} />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Upload New Image</Form.Label>
@@ -206,37 +295,6 @@ const AdminCategories = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      {/* Custom Styles */}
-      <style>
-        {`
-          .category-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-          }
-          .category-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-          }
-          .category-image {
-            height: 200px;
-            object-fit: cover;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-          }
-          .edit-icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #007bff;
-            font-size: 20px;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-          .edit-icon:hover {
-            transform: scale(1.2);
-          }
-        `}
-      </style>
     </div>
   );
 };
