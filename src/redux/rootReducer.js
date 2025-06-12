@@ -17,7 +17,7 @@ const rootReducer = combineReducers({
   address: addressReducer,
   wishlist: wishlistReducer,
   admindashboard: dashboardReducer,
-  categoryproducts: categoryProductReducer, // if name in store slice is intended
+  categoryproducts: categoryProductReducer,
 });
 
 export default rootReducer;

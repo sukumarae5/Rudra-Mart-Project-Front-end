@@ -178,7 +178,7 @@ const HomePage = () => {
             style={{
             
   backgroundImage: `url(${image3})`,
-  backgroundSize: "fit",            // Ensures the image covers the container
+  backgroundSize: "cover",            // Ensures the image covers the container
   backgroundPosition: "center",       // Centers the image
   backgroundRepeat: "no-repeat",      // Prevents tiling
   borderRadius: "20px",
@@ -187,10 +187,7 @@ const HomePage = () => {
   maxWidth: "100%",                   // Prevents overflow
   overflow: "hidden",
   position: "relative",
-
-
-              
-            }}
+  }}
           >
             <div
               style={{
