@@ -1,3 +1,4 @@
+// --- reducers/categoryproductReducer.js ---
 import {
   FETCH_PRODUCTS_CATEGORY_REQUEST,
   FETCH_PRODUCTS_CATEGORY_SUCCESS,
@@ -8,6 +9,8 @@ const initialState = {
   categoryproduct: [],
   loading: false,
   error: null,
+  products: [],
+  selectedproduct: [],
 };
 
 const categoryproductReducer = (state = initialState, action) => {
@@ -18,6 +21,7 @@ const categoryproductReducer = (state = initialState, action) => {
         loading: true,
         error: null,
       };
+
     case FETCH_PRODUCTS_CATEGORY_SUCCESS:
       return {
         ...state,
@@ -25,12 +29,20 @@ const categoryproductReducer = (state = initialState, action) => {
         categoryproduct: action.payload,
         error: null,
       };
+
     case FETCH_PRODUCTS_CATEGORY_FAILURE:
       return {
         ...state,
         loading: false,
         error: action.payload,
       };
+
+    case "SET_SELECTED_PRODUCT":
+      return {
+        ...state,
+        selectedproduct: action.payload,
+      };
+
     default:
       return state;
   }

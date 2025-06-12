@@ -1,157 +1,119 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import sideImage from "../../src/assets/images/cart.jpg";
-import { GoogleLogin } from "@react-oauth/google";
-import jwt_decode from "jwt-decode"; 
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import { useNavigate } from "react-router-dom";
+import sideImage from "../../src/assets/images/cart.jpg"; // Adjust path if needed
 
 const Register = () => {
+  const [formData, setFormData] = useState({ name: "", email: "", phonenumber: "" });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    role: "",
-  });
-  const [googledata,setGoogleData]=useState({
-    name:"",
-    email:""
-
-  })
-  console.log(setGoogleData)
-  const [message, setMessage] = useState(null); 
-  const [error, setError] = useState(""); 
-  const [loading, setLoading] = useState(false); 
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const handleSubmit = async (e) => {
+
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    if (!/[A-Z]/.test(formData.password)) {
-      setLoading(false);
-      setError("Password must contain at least one uppercase letter");
-      return;
-    }
-    // Role validation
-    if (formData.role !== "customer" && formData.role !== "admin") {
-      setLoading(false);
-      setError("Role must be either 'customer' or 'admin'");
-      return;
-    }
     try {
-      const newUser = {
-        name: formData.name,
-        email: formData.email,
-        phone_number: formData.phoneNumber,
-        password: formData.password,
-        role: formData.role,
-      };
-      const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newUser),
-        }
-      );
+      const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       const data = await response.json();
-      setLoading(false);
 
-      if (!response.ok) {
-        setError(data.message || "Failed to create account");
-        return;
+      if (response.ok) {
+        setSnackbar({ open: true, message: data.message || "Registered successfully", severity: "success" });
+        setTimeout(() => navigate("/login"), 1500);
+      } else {
+        setSnackbar({ open: true, message: data.error || "Registration failed", severity: "error" });
       }
-
-      setMessage("User registered successfully! Check your email.");
-      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
-      setLoading(false);
-      setError(error.message || "Registration failed, please try again later");
+      console.error("Registration failed:", error);
+      setSnackbar({ open: true, message: "Something went wrong", severity: "error" });
     }
   };
-  const handleGoogleSuccess = async (response) => {    
-      const { credential } = response;  
-      if (!credential) {
-        console.error("Google login failed: No credential received");
-        return;
-      }
-      const decodedToken = jwt_decode(credential);
-      setGoogleData({ name: decodedToken.name, email: decodedToken.email });
-      setFormData((prev) => ({
-      ...prev,
-      name: decodedToken.name,
-      email: decodedToken.email,
-    }));
-      console.log("Decoded Token:", decodedToken);  
-    } 
-    
-  const handleGoogleFailure = (error) => {
-    console.error("Google login failed:", error);
-  };
-    return (
+
+  return (
     <div className="container py-5">
       <div className="row align-items-center">
         <div className="col-md-6 text-center">
           <img
             src={sideImage}
-            alt="Sign Up"
+            alt="Register"
             className="img-fluid rounded"
             style={{ maxHeight: "650px" }}
           />
         </div>
+
         <div className="col-md-6 d-flex justify-content-center">
-          <div style={{ maxWidth: "400px" }}>
-            <h2 className="fw-bold mb-4">Create an Account</h2>
-            <p className="text-muted mb-4">Enter your details below</p>
-            {error && <p className="text-danger">{error}</p>} {/* Show error */}
-            {message && <p className="text-success">{message}</p>} {/* Show success */}
-            <form onSubmit={handleSubmit}>
-              {[
-                { type: "text", name: "name", placeholder: "Name" },
-                { type: "email", name: "email", placeholder: "Email" },
-                { type: "text", name: "phoneNumber", placeholder: "Phone Number" },
-                { type: "password", name: "password", placeholder: "Password" },
-                { type: "text", name: "role", placeholder: "Role (customer/admin)" },
-              ].map((input, index) => (
+          <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6">
+            <h2 className="text-3xl font-semibold text-center text-green-600 mb-6">Create your account</h2>
+            <form onSubmit={handleRegister}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
                 <input
-                  key={index}
-                  type={input.type}
-                  name={input.name}
-                  placeholder={input.placeholder}
-                  value={formData[input.name]}
+                  type="text"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
-                  className="w-full p-3 border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                  placeholder="Enter your name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
-              ))}
-
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phonenumber"
+                  value={formData.phonenumber}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
               <button
                 type="submit"
-                className="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-violet-600 focus:outline-none"
-                disabled={loading}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg transition duration-300"
               >
-                {loading ? <span className="spinner-border spinner-border-sm"></span> : "Create Account"}
+                Register
               </button>
-            </form>            
-            <div className="text-center mt-3">
-<GoogleLogin className="me-2" 
-onSuccess={handleGoogleSuccess}
-onError={handleGoogleFailure}
-/>
-            </div>
-            <p className="text-muted mt-4">
+            </form>
+            <p className="text-center text-sm text-gray-500 mt-4">
               Already have an account?{" "}
-              <Link to="/login" className="text-black">
+              <span className="text-green-600 font-medium cursor-pointer" onClick={() => navigate("/login")}>
                 Login
-              </Link>
+              </span>
             </p>
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <MuiAlert severity={snackbar.severity} elevation={6} variant="filled">
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 };

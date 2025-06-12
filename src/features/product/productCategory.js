@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import {
-  FaMugHot,
-  FaHome,
-  FaGamepad,
-  FaLeaf,
-  FaStore,
-  FaCookieBite,
-  FaIceCream,
-  FaBreadSlice,
-} from "react-icons/fa";
 import { setSelectedProduct } from "../../features/product/productActions";
 
 const ProductCategory = () => {
@@ -19,20 +9,9 @@ const ProductCategory = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const categoryIcons = [
-    { icon: <FaMugHot />, label: "Cafe", id: "1" },
-    { icon: <FaHome />, label: "Home", id: "2" },
-    { icon: <FaGamepad />, label: "Toys", id: "3" },
-    { icon: <FaLeaf />, label: "Fruits", id: "4" },
-    { icon: <FaStore />, label: "Dairy", id: "5" },
-    { icon: <FaCookieBite />, label: "Snacks", id: "6" },
-    { icon: <FaIceCream />, label: "Cold Drinks", id: "7" },
-    { icon: <FaBreadSlice />, label: "Biscuits", id: "8" },
-  ];
-
-  const handleCategoryClick = (categoryid) => {
+  const handleCategoryClick = (categoryId) => {
     const filtered = products.filter(
-      (product) => String(product.category_id) === String(categoryid)
+      (product) => String(product.category_id) === String(categoryId)
     );
     dispatch(setSelectedProduct(filtered));
     navigate("/contactpage");
@@ -51,58 +30,77 @@ const ProductCategory = () => {
   }, []);
 
   return (
-    <div
-      className="hide-scrollbar"
-      style={{
-        display: "flex",
-        gap: "10px",
-        overflowX: "auto",
-        scrollBehavior: "smooth",
-        backgroundColor: "#fff",
+    <>
+      {/* Embedded CSS styles */}
+      <style>{`
+        .category-bar {
+          display: flex;
+          overflow-x: auto;
+          white-space: nowrap;
+          background-color: #fff;
+          padding: 12px 16px;
+          position: fixed;
+          top: 50px;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          border-bottom: 1px solid #ccc;
+        }
 
-        padding: "20px 10px",
-        justifyContent: "center",
-        position: "fixed",
-        top: 40,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        borderBottom: "1px solid #ccc",
-        height:"15%",
-      
-      }}
-    >
-      {categoryIcons.map((cat, index) => (
-        <div
-          key={cat.id}
-          onClick={() => handleCategoryClick(cat.id)}
-          style={{
-            flexShrink: 0,
-            textAlign: "center",
-            cursor: "pointer",
-          }}
-        >
+        .category-bar::-webkit-scrollbar {
+          display: none;
+        }
+
+        .category-bar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        .category-item {
+          margin-right: 16px;
+          font-size: 0.95rem;
+          color: #000;
+          cursor: pointer;
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+
+        .category-logo {
+          color: #78be20;
+          font-weight: bold;
+          font-size: 1.1rem;
+          margin-right: 16px;
+          flex-shrink: 0;
+        }
+
+        .green-bar {
+          background-color: #78be20;
+          height: 5px;
+          position: fixed;
+          top: 45px;
+          left: 0;
+          right: 0;
+          z-index: 1001;
+        }
+      `}</style>
+
+      {/* Green bar */}
+      <div className="green-bar" />
+
+      {/* Scrollable category bar */}
+      <div className="category-bar">
+        <div className="category-logo">Rudra</div>
+        {userCategories.map((category) => (
           <div
-            style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "50%",
-              backgroundColor: "#f0f0f0",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              margin: "0 auto",
-              fontSize: "20px",
-            }}
+            key={category.id}
+            className="category-item"
+            onClick={() => handleCategoryClick(category.id)}
           >
-            {cat.icon}
+            {category.name}
           </div>
-          <p style={{ fontSize: "12px", marginTop: "8px" }}>
-            {userCategories[index]?.name || cat.label}
-          </p>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 };
 
