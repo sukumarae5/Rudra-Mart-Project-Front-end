@@ -19,30 +19,22 @@ export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
 export const fetchApiCartDataRequest = () => ({
   type: FETCH_API_CART_DATA_REQUEST,
 });
-
 export const fetchApiCartDataSuccess = (cartData) => ({
   type: FETCH_API_CART_DATA_SUCCESS,
   payload: cartData,
 });
-
 export const fetchApiCartDataFailure = (error) => ({
   type: FETCH_API_CART_DATA_FAILURE,
   payload: error,
 });
-
-// Remove Cart Item Actions
 export const removeCartItemRequest = (cartItemId) => ({
-
-
   type: REMOVE_CART_ITEM_REQUEST,
   payload: cartItemId,
 });
-
 export const removeCartItemSuccess = (cartItemId) => ({
   type: REMOVE_CART_ITEM_SUCCESS,
   payload: cartItemId,
 });
-
 export const removeCartItemFailure = (error) => ({
   type: REMOVE_CART_ITEM_FAILURE,
   payload: error,
@@ -54,23 +46,18 @@ export const updateCartItemQuantityRequest = (cartItemId, quantity) => {
     payload: { cartItemId, quantity },
   };
 };
-
 export const updateCartItemQuantitySuccess = (cartItemId, quantity) => ({
   type: UPDATE_CART_ITEM_QUANTITY_SUCCESS,
   payload: { cartItemId, quantity },
 });
-
 export const updateCartItemQuantityFailure = (error) => ({
   type: UPDATE_CART_ITEM_QUANTITY_FAILURE,
   payload: error,
 });
-
 export const fetcheckeoutpagedata=(Checkoutdata)=>({
   type:FETCH_CHECKEOUTPAGE_DATA,
   payload:Checkoutdata,
 })
-
-
 export const increaseQuantity = (productId) => ({
 
   type:INCREASE_QUANTITY,
@@ -79,10 +66,7 @@ export const increaseQuantity = (productId) => ({
 export const decreaseQuantity=(productId)=>({
   type:DECREASE_QUANTITY,
   payload:{productId}
-
 })
-
-// Action to remove a product
 export const removeProduct = (productId) => ({
   type: REMOVE_PRODUCT,
   payload: productId,

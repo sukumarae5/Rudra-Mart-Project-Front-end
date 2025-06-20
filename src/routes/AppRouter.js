@@ -27,7 +27,7 @@ import UserForgotPasswordPage from "../pages/UserAccontDetialsPage/UserForgotpas
 import UserForgotpasswordOtpGeneratorpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserForgotpasswordOtpGeneratorpage";
 import UserTrackingpage from "../pages/UserAccontDetialsPage/UserTrackingpage";
 import UserSetNewpasswordpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserSetNewpasswordpage"
-import VerifyOTP from "../pages/Verifyotp";
+import SubcategoryPage from "../pages/SubcategoryPage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -51,10 +51,6 @@ const AppRouter = createBrowserRouter([
       {
         path: "/contactpage",
         element: <Contactpage />,
-      },
-      {
-        path: "/verify-otp",
-        element: <VerifyOTP />,
       },
       {
         path:"/OrderPlacedSuccessfullyPage",
@@ -89,6 +85,11 @@ const AppRouter = createBrowserRouter([
         path: "/productpage",
         element: <ProductPage />,
       },
+  {
+  path: "/subcategories",
+  element: <SubcategoryPage />,
+},
+
       {
         path: "/productpage/:id", 
         element: <ProductDetailPage />,

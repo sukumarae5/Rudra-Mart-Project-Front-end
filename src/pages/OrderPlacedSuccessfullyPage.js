@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { FaGifts, FaArrowCircleRight, FaArrowAltCircleDown, FaArrowAltCircleLeft } from "react-icons/fa";
+import {
+  FaGifts,
+  FaArrowCircleRight,
+  FaArrowAltCircleDown,
+  FaArrowAltCircleLeft,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const OrderPlacedSuccessfullyPage = () => {
@@ -10,29 +15,35 @@ const OrderPlacedSuccessfullyPage = () => {
   const [invoiceUrl, setInvoiceUrl] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-  console.log(payment)
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchPayment = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const paymentRes = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/payment`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const res = await fetch(
+          `http://${process.env.REACT_APP_IP_ADDRESS}/api/payment/all`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-        if (!paymentRes.ok) throw new Error("Failed to fetch payment details");
+        if (!res.ok) throw new Error("Failed to fetch payment details");
 
-        const payments = await paymentRes.json();
-        if (!Array.isArray(payments) || payments.length === 0) throw new Error("No payment data found.");
-         
-        const latestPayment = payments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-        setPayment(latestPayment);
+        const payments = await res.json();
+        if (!Array.isArray(payments) || payments.length === 0)
+          throw new Error("No payment data found.");
+
+        const latest = payments.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        )[0];
+
+        setPayment(latest);
       } catch (err) {
+        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -42,132 +53,147 @@ const OrderPlacedSuccessfullyPage = () => {
     fetchPayment();
   }, []);
 
-  // ✅ Download invoice as PDF
   const handleDownloadInvoice = () => {
-    if (!payment) {
-      alert("Payment data not available yet.");
-      return;
-    }
-
+    if (!payment) return alert("Payment data not available yet.");
     const token = localStorage.getItem("authToken");
     const transactionId = payment.transaction_id;
 
-    fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/invoice/pdf/${transactionId}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(response => {
-        if (!response.ok) throw new Error("Failed to download invoice.");
-        return response.blob();
+    fetch(
+      `http://${process.env.REACT_APP_IP_ADDRESS}/api/invoice/pdf/${transactionId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to download invoice.");
+        return res.blob();
       })
-      .then(blob => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
         link.setAttribute("download", `Invoice_${transactionId}.pdf`);
         document.body.appendChild(link);
         link.click();
-        link.parentNode.removeChild(link);
-      })
-      .catch(err => alert(err.message));
-  };
-
-  // ✅ View invoice inside modal
-  const handleViewInvoice = () => {
-    if (!payment) {
-      alert("Payment data not available yet.");
-      return;
-    }
-
-    const token = localStorage.getItem("authToken");
-    const transactionId = payment.transaction_id;
-
-    fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/invoice/pdf/${transactionId}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to fetch invoice.");
-        return response.blob();
-      })
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        setInvoiceUrl(url);
-        setShowModal(true); // Show the modal
+        link.remove();
       })
       .catch((err) => alert(err.message));
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!payment) return <div>No payment data available.</div>;
+  const handleViewInvoice = () => {
+    if (!payment) return alert("Payment data not available yet.");
+    const token = localStorage.getItem("authToken");
+    const transactionId = payment.transaction_id;
+
+    fetch(
+      `http://${process.env.REACT_APP_IP_ADDRESS}/api/invoice/pdf/${transactionId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to view invoice.");
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setInvoiceUrl(url);
+        setShowModal(true);
+      })
+      .catch((err) => alert(err.message));
+  };
+
+  if (loading) return <div className="text-center mt-5">Loading...</div>;
+  if (error) return <div className="text-danger text-center mt-5">Error: {error}</div>;
+  if (!payment) return <div className="text-center mt-5">No payment data available.</div>;
 
   return (
     <div>
-    <div className="text-center">
-        <div className="w-100 h-100 p-5 bg-light text-danger fs-6 m-3" style={{ backgroundColor: "#c5e0cd" }}>
-          <h1 style={{ color: "#586cfc", fontSize: "20px" }}>
-            <span>
-              <FaGifts style={{ fontSize: "60px", color: "#f7d302", marginLeft: "46%" }} />
-            </span>
-            <span style={{ color: "#47f013", fontFamily: "bold", fontSize: "29px" }}>Order Placed Successfully!</span>
-            <span className="ml-2 fw-italic" style={{ color: "#070808" }}>₹ {payment.amount}!</span>
+      {/* Order Success Message */}
+      <div className="text-center">
+        <div className="p-5 m-3 bg-success-subtle rounded">
+          <FaGifts style={{ fontSize: "60px", color: "#f7d302" }} />
+          <h1 style={{ color: "#47f013", fontWeight: "bold" }}>
+            Order Placed Successfully!
           </h1>
-          <p style={{ color: "blue" }}>Your {payment.quantity} items will be delivered soon...</p>
+          <h4 className="text-dark">
+            ₹ {payment.amount}
+          </h4>
+          <p className="text-primary">Your items will be delivered soon...</p>
         </div>
       </div>
 
-      <div style={{ backgroundColor: "#c5e0cd", marginBottom:"1%" , marginLeft:"1%" ,padding:"20px",paddingLeft:"40%"}}>
-      <p><a style={{fontFamily:"bold", fontSize:"20px",}}>Name:</a><a style={{fontStyle:"italic"}}>
-        {user.name}
-        </a>
+      {/* User & Payment Info */}
+      <div
+        className="m-3 p-4 rounded"
+        style={{ backgroundColor: "#c5e0cd", maxWidth: "600px", margin: "auto" }}
+      >
+        <p><strong>Name:</strong> {user?.name || "N/A"}</p>
+        <p><strong>Phone Number:</strong> {user?.phone_number || "N/A"}</p>
+        <p><strong>Email:</strong> {user?.email || "N/A"}</p>
+        <p><strong>Transaction ID:</strong> {payment.transaction_id}</p>
+        <p><strong>Amount Paid:</strong> ₹{payment.amount}</p>
+        <p>
+          <strong>Order Placed Date:</strong>{" "}
+          {new Date(payment.created_at).toISOString().slice(0, 10)}
         </p>
-      <p><a style={{fontFamily:"bold",fontSize:"20px", }} > Phone number:</a> <a style={{fontStyle:"italic"}}>{user.phone_number}</a> </p>
-     <p><a style={{fontFamily:" bold",fontSize:"20px" }}>Email:</a> <a style={{fontStyle:"italic"}}>{user.email}</a></p>
-      <p><a style={{fontFamily:"bold" ,fontSize:"20px ",}}>Transaction ID: </a> <a style={{fontStyle:"italic"}} >{payment.transaction_id}</a></p>
-      <p> <a style={{fontFamily:"bold" ,fontSize:"20px",}}> Amount Paid: ₹{payment.amount}</a></p>
-      <p>
-  <a style={{ fontFamily: "bold", fontSize: "20px" }}>Order Placed Date:</a>
-  <a style={{ fontStyle: "italic" }}>
-    {new Date(payment.created_at).toISOString().slice(0, 10)}
-  </a>
-</p>
+        <p><strong>Address:</strong> [Add user address if available]</p>
+      </div>
 
-      <p>Address details</p>
-      
-</div>
-
-      {/* Buttons */}
-      <div className="mb-4 d-flex gap-3" style={{ paddingLeft: "30%", marginBottom:"10%" }}>
-        <Button variant="outline-danger" onClick={() => navigate("/")} className="d-flex align-items-center gap-2">
+      {/* Action Buttons */}
+      <div className="d-flex justify-content-center gap-3 mb-5">
+        <Button
+          variant="outline-danger"
+          onClick={() => navigate("/")}
+          className="d-flex align-items-center gap-2"
+        >
           <FaArrowAltCircleLeft /> Continue Shopping
         </Button>
 
-        <Button variant="outline-primary" onClick={handleDownloadInvoice} className="d-flex align-items-center gap-2">
+        <Button
+          variant="outline-primary"
+          onClick={handleDownloadInvoice}
+          className="d-flex align-items-center gap-2"
+        >
           <FaArrowAltCircleDown /> Download Invoice
         </Button>
 
-        <Button variant="outline-success" onClick={handleViewInvoice} className="d-flex align-items-center gap-2">
+        <Button
+          variant="outline-success"
+          onClick={handleViewInvoice}
+          className="d-flex align-items-center gap-2"
+        >
           <FaArrowCircleRight /> View Invoice
         </Button>
       </div>
 
       {/* Invoice Modal */}
       {showModal && (
-        <div className="modal show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Invoice</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
               </div>
               <div className="modal-body">
                 {invoiceUrl ? (
-                  <iframe src={invoiceUrl} width="100%" height="500px"></iframe>
+                  <iframe
+                    src={invoiceUrl}
+                    width="100%"
+                    height="500px"
+                    title="Invoice Preview"
+                  ></iframe>
                 ) : (
                   <p>Loading invoice...</p>
                 )}

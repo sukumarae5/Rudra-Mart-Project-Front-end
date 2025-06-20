@@ -20,7 +20,7 @@ const ProductCategory = () => {
   useEffect(() => {
     (async function () {
       try {
-        const res = await fetch("http://192.168.1.9:8082/api/categories/categories");
+        const res = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/categories/categories`);
         const data = await res.json();
         setUserCategories(data);
       } catch (err) {

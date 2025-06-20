@@ -127,7 +127,7 @@ const SellingProductspage = () => {
                     backgroundColor: "#fff",
                   }}
                 >
-                  {product.discount ? (
+                  {product.mrp && product.selling_price && product.mrp > product.selling_price ? (
                     <div
                       style={{
                         position: "absolute",
@@ -142,7 +142,7 @@ const SellingProductspage = () => {
                         zIndex: 2,
                       }}
                     >
-                      {product.discount}% OFF
+                      {Math.round(((product.mrp - product.selling_price) / product.mrp) * 100)}% OFF
                     </div>
                   ) : (
                     <div
@@ -162,9 +162,10 @@ const SellingProductspage = () => {
                         zIndex: 2,
                       }}
                     >
-                      0
+                      0%
                     </div>
                   )}
+
 
                   {product.delivery_time && (
                     <div
@@ -232,7 +233,7 @@ const SellingProductspage = () => {
                     className="d-flex justify-content-center align-items-center gap-2"
                     style={{ fontSize: "16px", fontWeight: "700" }}
                   >
-                    <span>₹{product.price}</span>
+                    <span>SP: ₹{product.selling_price}</span>
                     {product.mrp && (
                       <span
                         style={{
@@ -241,7 +242,7 @@ const SellingProductspage = () => {
                           fontSize: "14px",
                         }}
                       >
-                        ₹{product.mrp}
+                        MRP: ₹{product.mrp}
                       </span>
                     )}
                   </div>

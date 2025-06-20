@@ -9,7 +9,7 @@ export const syncCartData = (cartProducts) => async (dispatch) => {
       alert("User is not authenticated.");
       return;
     }
-
+   console.log(cartProducts)
     const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/all`, {
       method: "POST",
       headers: {
@@ -22,7 +22,7 @@ export const syncCartData = (cartProducts) => async (dispatch) => {
           id: product.id,
           name: product.name,
           quantity: product.quantity,
-          price: product.price,
+          price: product.selling_price,
         })),
       }),
     });
