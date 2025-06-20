@@ -16,8 +16,8 @@ const Categorypage = () => {
     dispatch(fetchProductCategoryRequest());
   }, [dispatch]);
 
-  const handleCategoryClick = (categoryName) => {
-    navigate("/contact", { state: { categoryName } });
+  const handleCategoryClick = (categoryId, categoryName) => {
+    navigate("/subcategories", { state: { categoryId, categoryName } });
   };
 
   if (loading) {
@@ -41,11 +41,11 @@ const Categorypage = () => {
             <Card
               className="shadow-sm border-0 h-100"
               style={{ cursor: "pointer" }}
-              onClick={() => handleCategoryClick(category.name)}
+              onClick={() => handleCategoryClick(category.id, category.name)}
             >
               <Card.Img
                 variant="top"
-                src={category.image_url} // ✅ Using image_url directly from API
+                src={category.image_url}
                 alt={category.name}
                 style={{
                   height: "90px",

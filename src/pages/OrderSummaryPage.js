@@ -25,8 +25,16 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+  }).format(value);
+
 const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  console.log(checkoutData)
   const dispatch = useDispatch();
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -49,14 +57,20 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
     dispatch(removeProduct(productId));
   };
 
-  const totalCost = checkoutData.reduce(
-    (total, item) => total + item.productPrice * item.quantity,
-    0
-  );
+ const totalCost = checkoutData.reduce((total, item) => {
+  console.log("Item:", item);
+  console.log("Running Total (before adding this item):", total);
+  const itemTotal = item.productPrice * item.quantity;
+  console.log("Item Subtotal:", itemTotal);
+  return total + itemTotal;
+}, 0);
+
 
   const handleConfirmOrder = async () => {
     if (checkoutData.length === 0) {
-      setSnackbarMessage("Your cart is empty. Add items before confirming the order.");
+      setSnackbarMessage(
+        "Your cart is empty. Add items before confirming the order."
+      );
       setSnackbarSeverity("warning");
       setSnackbarOpen(true);
       return;
@@ -111,11 +125,13 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                           <Col xs={6}>
                             <h1 className="fw-bold">{item.productName}</h1>
                             <p className="text-muted m-0">
-                              Price: ₹{item.productPrice}
+                              Price: {formatCurrency(item.productPrice)}
                             </p>
                             <p className="fw-bold">
-                              Subtotal: ₹
-                              {(item.productPrice * item.quantity).toFixed(2)}
+                              Subtotal:{" "}
+                              {formatCurrency(
+                                item.productPrice * item.quantity
+                              )}
                             </p>
                           </Col>
                           <Col xs={2} className="text-end">
@@ -161,7 +177,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                     <hr />
                     <div className="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded shadow-sm">
                       <h5 className="text-danger fw-bold">
-                        Total: ₹{totalCost}
+                        Total: {formatCurrency(totalCost)}
                       </h5>
                       <Button
                         variant="success"

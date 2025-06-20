@@ -18,7 +18,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const PaymentPage = ({ ref }) => {
+const PaymentPage = () => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +31,7 @@ const PaymentPage = ({ ref }) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "info", // "success", "error", "warning", "info"
+    severity: "info",
   });
 
   const showAlert = (message, severity = "info") => {
@@ -64,120 +64,127 @@ const PaymentPage = ({ ref }) => {
     setPaymentMethod(e.target.value);
   };
 
-  const placeOrder = async (
-    userId,
-    addressId,
-    token,
-    paymentStatus,
-    transactionId,
-    paymentMethodType
-  ) => {
-    try {
-      console.log("Starting order placement...");
+ const placeOrder = async (
+  userId,
+  addressId,
+  token,
+  paymentStatus,
+  transactionId,
+  paymentMethodType
+) => {
+  try {
+    const now = new Date().toISOString();
 
-      const orderResponse = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            userId,
-            totalPrice: totalCost,
-            status: "Pending",
-            addressId,
-            items: checkoutData.map((item) => ({
-              product_id: item.productId,
-              quantity: item.quantity,
-              price: item.productPrice,
-            })),
-          }),
-        }
-      );
+    console.log("🛒 Placing Order with:", {
+      userId,
+      addressId,
+      token,
+      total: totalCost,
+      paymentStatus,
+      paymentMethodType,
+      transactionId,
+    });
 
-      const orderResult = await orderResponse.json();
-      console.log("Order API response:", orderResult);
-
-      if (!orderResponse.ok) {
-        showAlert(orderResult.message || "Failed to place order", "error");
-        throw new Error(orderResult.message || "Failed to place order");
-      }
-
-      showAlert("Order placed successfully!", "success");
-
-      const paymentResponse = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/payment/add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            amount: totalCost,
-            payment_status: paymentStatus,
-            payment_method: paymentMethodType,
-            transaction_id: transactionId,
-          }),
-        }
-      );
-
-      const paymentResult = await paymentResponse.json();
-      console.log("Payment API response:", paymentResult);
-
-      if (!paymentResponse.ok) {
-        showAlert(paymentResult.message || "Failed to process payment", "error");
-        throw new Error(paymentResult.message || "Failed to process payment");
-      }
-
-      showAlert("Payment processed successfully!", "success");
-
-      localStorage.removeItem("cart");
-
-      setTimeout(() => {
-        navigate("/OrderPlacedSuccessfullyPage");
-      }, 1500);
-    } catch (error) {
-      console.error("Error during order/payment:", error);
-      showAlert(error.message || "Something went wrong!", "error");
-    } finally {
+    if (!userId || !addressId || !token || !paymentStatus || !paymentMethodType || !transactionId) {
+      showAlert("❗ Missing required fields. Please login again.", "error");
       setIsLoading(false);
+      return;
     }
-  };
 
-  const generateUniqueTransactionId = () => {
-    return `COD_${Date.now()}`;
-  };
+    const orderResponse = await fetch(
+      `http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/add`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          addressId,
+          total: totalCost,
+          status: paymentStatus, // or use "Pending" explicitly
+          deliveryMethod: paymentMethodType,
+          orderDate: now,
+          createdAt: now,
+          updatedAt: now,
+          items: checkoutData.map((item) => ({
+            product_id: item.productId,
+            quantity: item.quantity,
+            price: item.productPrice,
+          })),
+        }),
+      }
+    );
+
+    const orderResult = await orderResponse.json();
+    if (!orderResponse.ok) {
+      showAlert(orderResult.message || "Order failed", "error");
+      return;
+    }
+
+    const paymentResponse = await fetch(
+      `http://${process.env.REACT_APP_IP_ADDRESS}/api/payment/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          amount: totalCost,
+          payment_status: paymentStatus,
+          payment_method: paymentMethodType,
+          transaction_id: transactionId,
+        }),
+      }
+    );
+
+    const paymentResult = await paymentResponse.json();
+    if (!paymentResponse.ok) {
+      showAlert(paymentResult.message || "Payment failed", "error");
+      return;
+    }
+
+    showAlert("✅ Order & Payment successful", "success");
+    localStorage.removeItem("cart");
+
+    setTimeout(() => {
+      navigate("/OrderPlacedSuccessfullyPage");
+    }, 1500);
+  } catch (error) {
+    console.error("❌ Error during order/payment:", error);
+    showAlert(error.message || "Something went wrong!", "error");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+  const generateUniqueTransactionId = () => `COD_${Date.now()}`;
 
   const handleCashOnDelivery = async () => {
     setIsLoading(true);
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const userId = user?.id;
-      const addressId = JSON.parse(localStorage.getItem("addressId"));
-      const token = localStorage.getItem("authToken");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
+    const addressId = JSON.parse(localStorage.getItem("addressId"));
+    const token = localStorage.getItem("authToken");
 
-      if (!user || !addressId || !token) {
-        showAlert("User, Address, or Token missing! Please login again.", "warning");
-        setIsLoading(false);
-        return;
-      }
-
-      await placeOrder(
-        userId,
-        addressId,
-        token,
-        "Pending",
-        generateUniqueTransactionId(),
-        "Cash on Delivery"
-      );
-    } catch (error) {
-      console.error("Error placing COD order:", error);
-      showAlert(error.message || "Something went wrong during COD!", "error");
+    if (!userId || !addressId || !token) {
+      showAlert("User info or address missing. Please login again.", "warning");
+      setIsLoading(false);
+      return;
     }
+
+    await placeOrder(
+      userId,
+      addressId,
+      token,
+      "Pending",
+      generateUniqueTransactionId(),
+      "Cash on Delivery"
+    );
   };
 
   const loadRazorpayScript = () => {
@@ -193,57 +200,54 @@ const PaymentPage = ({ ref }) => {
 
   const handleRazorpayPayment = async () => {
     setIsLoading(true);
-    try {
-      const token = localStorage.getItem("authToken");
-      const user = JSON.parse(localStorage.getItem("user"));
-      const userId = user?.id;
-      const addressId = JSON.parse(localStorage.getItem("addressId"));
+    const token = localStorage.getItem("authToken");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
+    const addressId = JSON.parse(localStorage.getItem("addressId"));
 
-      if (!user || !addressId || !token) {
-        showAlert("User, Address, or Token missing! Please login again.", "warning");
-        setIsLoading(false);
-        return;
-      }
-
-      const isScriptLoaded = await loadRazorpayScript();
-      if (!isScriptLoaded) throw new Error("Failed to load Razorpay SDK.");
-
-      const options = {
-        key: "rzp_test_GRRNoJBdPElkDv",
-        amount: totalCost * 100,
-        currency: "INR",
-        name: "Your Store",
-        description: "Payment for Order",
-        handler: async (response) => {
-          await placeOrder(
-            userId,
-            addressId,
-            token,
-            "Paid",
-            response.razorpay_payment_id,
-            "Razorpay"
-          );
-        },
-        prefill: {
-          name: userDetails.name,
-          email: userDetails.email,
-          contact: userDetails.contact,
-        },
-        theme: { color: "#3399cc" },
-      };
-
-      new window.Razorpay(options).open();
-    } catch (error) {
-      console.error("Razorpay Error:", error);
-      showAlert(error.message, "error");
-    } finally {
+    if (!userId || !addressId || !token) {
+      showAlert("User, address, or token missing!", "warning");
       setIsLoading(false);
+      return;
     }
+
+    const isScriptLoaded = await loadRazorpayScript();
+    if (!isScriptLoaded) {
+      showAlert("Failed to load Razorpay SDK", "error");
+      setIsLoading(false);
+      return;
+    }
+
+    const options = {
+      key: "rzp_test_GRRNoJBdPElkDv",
+      amount: totalCost * 100,
+      currency: "INR",
+      name: "Your Store",
+      description: "Payment for your order",
+      handler: async (response) => {
+        await placeOrder(
+          userId,
+          addressId,
+          token,
+          "Paid",
+          response.razorpay_payment_id,
+          "Razorpay"
+        );
+      },
+      prefill: {
+        name: userDetails.name,
+        email: userDetails.email,
+        contact: userDetails.contact,
+      },
+      theme: { color: "#3399cc" },
+    };
+
+    new window.Razorpay(options).open();
   };
 
   return (
-    <div ref={ref} className="container mt-4">
-      <Row style={{ width: "103%" }}>
+    <div className="container mt-4">
+      <Row>
         <Col>
           <Accordion defaultActiveKey="0">
             <Accordion.Item eventKey="0">
@@ -279,11 +283,7 @@ const PaymentPage = ({ ref }) => {
                       variant="success"
                       className="w-100"
                     >
-                      {isLoading ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        "Place Order (COD)"
-                      )}
+                      {isLoading ? <Spinner animation="border" size="sm" /> : "Place Order (COD)"}
                     </Button>
                   )}
 
@@ -294,11 +294,7 @@ const PaymentPage = ({ ref }) => {
                       variant="primary"
                       className="w-100"
                     >
-                      {isLoading ? (
-                        <Spinner animation="border" size="sm" />
-                      ) : (
-                        "Pay with Razorpay"
-                      )}
+                      {isLoading ? <Spinner animation="border" size="sm" /> : "Pay with Razorpay"}
                     </Button>
                   )}
                 </Card>
@@ -308,7 +304,6 @@ const PaymentPage = ({ ref }) => {
         </Col>
       </Row>
 
-      {/* Snackbar Alert */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
