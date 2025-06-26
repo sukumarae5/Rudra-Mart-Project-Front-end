@@ -9,9 +9,56 @@ import {
   UPDATE_CART_ITEM_QUANTITY_REQUEST,
   UPDATE_CART_ITEM_QUANTITY_SUCCESS,
   UPDATE_CART_ITEM_QUANTITY_FAILURE,
+  ADD_TO_CART_REQUEST,
+  ADD_TO_CART_SUCCESS,
+  ADD_TO_CART_FAILURE,
 } from "../cart/cartActions";
 
 // Function to fetch cart data from API
+
+const addToCartApi = async ({ userId, productId, quantity }) => {
+  const userToken = localStorage.getItem("authToken");
+  if (!userToken) throw new Error("User not authenticated. Please log in.");
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userToken}`,
+    },
+    body: JSON.stringify({ user_id: userId, product_id: productId, quantity }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    // If it's a conflict or error contains "already", we signal a special error
+    if (response.status === 409 || errorData.message?.toLowerCase().includes("already")) {
+      const error = new Error(errorData.message || "Product already in cart");
+      error.code = "ALREADY_EXISTS"; // Attach a code for the saga
+      throw error;
+    }
+    throw new Error(errorData.message || "Failed to add item to cart");
+  }
+  return await response.json();
+};
+
+function* addToCartSaga(action) {
+  try {
+    const data = yield call(addToCartApi, action.payload);
+    yield put({ type: ADD_TO_CART_SUCCESS, payload: data });
+    yield put({ type: FETCH_API_CART_DATA_REQUEST }); // Refresh cart
+    alert("Product added to cart!");
+  } catch (error) {
+    if (error.message && error.message.toLowerCase().includes("already")) {
+      alert("This product is already in the cart."); // ✅ New error alert
+    } else {
+      alert(error.message || "Failed to add item to cart."); // ✅ New generic error
+    }
+    yield put({ type: ADD_TO_CART_FAILURE, 
+     payload: error.code === "ALREADY_EXISTS" ? "already_in_cart" : error.message 
+
+     });
+  }
+}
+
 const fetchCartDataApi = async () => {
   const userToken = localStorage.getItem("authToken");
   if (!userToken) throw new Error("User not authenticated. Please log in.");
@@ -125,4 +172,7 @@ export function* watchCartSaga() {
   yield takeLatest(FETCH_API_CART_DATA_REQUEST, fetchCartDataSaga);
   yield takeLatest(REMOVE_CART_ITEM_REQUEST, removeCartItemSaga);
   yield takeLatest(UPDATE_CART_ITEM_QUANTITY_REQUEST, updateCartItemQuantitySaga);
+  yield takeLatest(ADD_TO_CART_REQUEST, addToCartSaga);
+
 }
+

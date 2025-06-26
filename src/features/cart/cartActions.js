@@ -1,4 +1,7 @@
-// Action Types
+export const ADD_TO_CART_REQUEST = "ADD_TO_CART_REQUEST";
+export const ADD_TO_CART_SUCCESS = "ADD_TO_CART_SUCCESS";
+export const ADD_TO_CART_FAILURE = "ADD_TO_CART_FAILURE";
+
 export const FETCH_API_CART_DATA_REQUEST = "FETCH_API_CART_DATA_REQUEST";
 export const FETCH_API_CART_DATA_SUCCESS = "FETCH_API_CART_DATA_SUCCESS";
 export const FETCH_API_CART_DATA_FAILURE = "FETCH_API_CART_DATA_FAILURE";
@@ -15,7 +18,23 @@ export const FETCH_CHECKEOUTPAGE_DATA="FETCH_CHECKEOUTPAGE_DATA"
 export const INCREASE_QUANTITY = 'INCREASE_QUANTITY';
 export const DECREASE_QUANTITY ="DECREASE_QUANTITY"
 export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
-// Fetch Cart Data Actions
+
+export const addToCartRequest = (userId, productId, quantity) => ({
+  type: ADD_TO_CART_REQUEST,
+  payload: { userId, productId, quantity },
+});
+
+export const addToCartSuccess = (data) => ({
+  type: ADD_TO_CART_SUCCESS,
+  payload: data,
+});
+
+export const addToCartFailure = (error) => ({
+  type: ADD_TO_CART_FAILURE,
+  payload: error,
+});
+
+
 export const fetchApiCartDataRequest = () => ({
   type: FETCH_API_CART_DATA_REQUEST,
 });

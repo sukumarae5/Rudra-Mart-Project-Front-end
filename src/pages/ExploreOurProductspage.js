@@ -5,7 +5,7 @@ import {
   fetchproductsrequest,
   setSelectedProduct,
 } from "../features/product/productActions";
-import { fetchApiCartDataRequest } from "../features/cart/cartActions";
+import { addToCartRequest, fetchApiCartDataRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
 
 const ExploreOurProductspage = () => {
@@ -14,9 +14,13 @@ const ExploreOurProductspage = () => {
   const { products = [], loading, error } = useSelector(
     (state) => state.products || {}
   );
+  const { cartItems = [] } = useSelector((state) => state.cart || {}); 
+
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
+    dispatch(fetchApiCartDataRequest());
+
   }, [dispatch]);
 
   const handleCardClick = (product) => {
@@ -24,45 +28,29 @@ const ExploreOurProductspage = () => {
     navigate("/productpage");
   };
 
-  const handleAddToCart = async (e, product) => {
-    e.stopPropagation();
-    const userToken = localStorage.getItem("authToken");
+  const handleAddToCart = (e, product) => {
+  e.stopPropagation();
+  const userToken = localStorage.getItem("authToken");
 
-    if (!userToken) {
-      alert("Please log in");
-      navigate("/login");
+  if (!userToken) {
+    alert("Please log in");
+    navigate("/login");
+    return;
+  }
+ const user = JSON.parse(localStorage.getItem("user"));
+    console.log("cartItems:", cartItems);
+
+  const isProductInCart = cartItems.some(
+      (item) => item.user_id === user.id && item.product_id === product.id
+    );
+
+    if (isProductInCart) {
+      alert("Product already in cart");
       return;
     }
+  dispatch(addToCartRequest(user.id, product.id, 1));
 
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    try {
-      const res = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            product_id: product.id,
-            quantity: 1,
-          }),
-        }
-      );
-
-      if (res.ok) {
-        dispatch(fetchApiCartDataRequest());
-        alert("Added to cart");
-      } else {
-        alert("Failed to add to cart");
-      }
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
-  };
+};
 
   return (
     <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>

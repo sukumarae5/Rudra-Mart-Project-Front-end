@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { IoArrowBack } from "react-icons/io5";
 import { useDispatch } from "react-redux";
+import { updateUserRequest } from "../../features/user/userActions";
+
 
 const EditUserForm = () => {
   const location = useLocation();
@@ -12,9 +14,8 @@ const EditUserForm = () => {
   const [updatedUser, setUpdatedUser] = useState({
     name: "",
     email: "",
-    phone_number: "",
-    password: "",
-    role: "",
+    phonenumber: "",
+    
   });
 
   const [successMessage, setSuccessMessage] = useState("");
@@ -24,7 +25,7 @@ const EditUserForm = () => {
       setUpdatedUser({
         name: user.name || "",
         email: user.email || "",
-        phone_number: user.phone_number || "",
+        phonenumber: user.phonenumber || "",
         password:user.password || "", 
         role: user.role || "",
       });
@@ -39,42 +40,23 @@ const EditUserForm = () => {
     }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = (event) => {
+  event.preventDefault();
 
-    const { name, email, password, phone_number, role } = updatedUser;
+  const { name, email, phonenumber } = updatedUser;
 
-    if (!name || !email || !password || !phone_number || !role) {
-      alert("All fields are required.");
-      return;
-    }
+  if (!name || !email ||  !phonenumber ) {
+    alert("All fields are required.");
+    return;
+  }
 
-    try {
-      const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/admin/update/${user.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedUser),
-        }
-      );
+  dispatch(updateUserRequest(user.id, updatedUser));
+  alert("User update request sent!");
 
-      const data = await response.json();
-      if (!response.ok) {
-        alert(`Error: ${data.error || "Failed to update user"}`);
-        return;
-      }
-      alert("Selected user updated successfully!");
-      setTimeout(() => {
-        setSuccessMessage("");
-        navigate("/admin/adminusers");
-      }, 2000); 
-    } catch (error) {
-      console.error("Error updating user:", error);
-      alert("Error: Could not update user");
-    }
-  };
-
+  setTimeout(() => {
+    navigate("/admin/adminusers");
+  }, 1000);
+};
   if (!user?.id) {
     return <p>Error: User data is missing.</p>;
   }
@@ -142,37 +124,14 @@ const EditUserForm = () => {
           <Form.Label>Phone Number</Form.Label>
           <Form.Control
             type="text"
-            name="phone_number"
-            value={updatedUser.phone_number}
+            name="phonenumber"
+            value={updatedUser.phonenumber}
             onChange={handleChange}
             placeholder="Enter phone number"
             required
           />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="userPassword">
-          <Form.Label>New Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            value={updatedUser.password}
-            onChange={handleChange}
-            placeholder="Enter new password"
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="userRole">
-          <Form.Label>Role</Form.Label>
-          <Form.Control
-            type="text"
-            name="role"
-            value={updatedUser.role}
-            onChange={handleChange}
-            placeholder="Enter role"
-            required
-          />
-        </Form.Group>
 
         {/* Bottom Buttons */}
         <Row className="mt-4">

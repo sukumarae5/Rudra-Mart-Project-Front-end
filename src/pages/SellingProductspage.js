@@ -5,20 +5,25 @@ import {
   fetchproductsrequest,
   setSelectedProduct,
 } from "../features/product/productActions";
-import { fetchApiCartDataRequest } from "../features/cart/cartActions";
+import { addToCartRequest, fetchApiCartDataRequest } from "../features/cart/cartActions";
 import { useNavigate } from "react-router-dom";
 
 const SellingProductspage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const { products = [], loading, error } = useSelector(
     (state) => state.products || {}
   );
+    const { cartItems = [] } = useSelector((state) => state.cart || {}); 
+  
 
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
+        dispatch(fetchApiCartDataRequest());
+    
   }, [dispatch]);
 
   const handleCardClick = (product) => {
@@ -26,37 +31,27 @@ const SellingProductspage = () => {
     navigate("/productpage");
   };
 
-  const handleAddToCart = async (e, product) => {
-    e.stopPropagation();
-    const userToken = localStorage.getItem("authToken");
-    if (!userToken) {
-      alert("Please log in");
-      navigate("/login");
-      return;
-    }
+  
+const handleAddToCart = (e, product) => {
+  e.stopPropagation();
+  const userToken = localStorage.getItem("authToken");
+  if (!userToken) {
+    alert("Please log in");
+    navigate("/login");
+    return;
+  }
+  const user = JSON.parse(localStorage.getItem("user"));
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    const res = await fetch(
-      `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: 1,
-        }),
-      }
+   const isProductInCart = cartItems.some(
+      (item) => item.user_id === user.id && item.product_id === product.id
     );
 
-    if (res.ok) {
-      dispatch(fetchApiCartDataRequest());
-      alert("Added to cart");
+    if (isProductInCart) {
+      alert("Product already in cart");
+      return;
     }
-  };
+  dispatch(addToCartRequest(user.id, product.id, 1));
+};
 
   return (
     <Container fluid style={{ marginTop: "30px", marginBottom: "30px" }}>

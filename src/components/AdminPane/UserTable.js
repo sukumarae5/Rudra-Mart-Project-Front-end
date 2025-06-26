@@ -22,12 +22,13 @@ import {
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchusersrequest } from "../../features/user/userActions";
+import { deleteUsersRequest, fetchusersrequest } from "../../features/user/userActions";
 
 const UserTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { users = [] } = useSelector((state) => state.users || {});
+  console.log(users)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,41 +54,19 @@ const UserTable = () => {
     navigate("/admin/edituser", { state: { user: userToEdit } });
   };
 
-  const handleDeleteSelectedUsers = async () => {
-    if (selectedUsers.length === 0) {
-      alert("Please select at least one user to delete.");
-      return;
-    }
+  const handleDeleteSelectedUsers = () => {
+  if (selectedUsers.length === 0) {
+    alert("Please select at least one user to delete.");
+    return;
+  }
 
-    if (!window.confirm("Are you sure you want to delete selected users?")) {
-      return;
-    }
+  if (!window.confirm("Are you sure you want to delete selected users?")) {
+    return;
+  }
 
-    try {
-      await Promise.all(
-        selectedUsers.map(async (userId) => {
-          const response = await fetch(
-            `http://192.168.1.10:8081/api/users/admindelete/${userId}`,
-            {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-            }
-          );
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(data.error || "Failed to delete user");
-          }
-        })
-      );
-
-      alert("Selected users deleted successfully!");
-      dispatch(fetchusersrequest());
-      setSelectedUsers([]);
-    } catch (error) {
-      console.error("Error deleting users:", error);
-      alert("Error: Could not delete users");
-    }
-  };
+  dispatch(deleteUsersRequest(selectedUsers));
+  setSelectedUsers([]);
+};
 
   const handleCheckboxChange = (userId) => {
     setSelectedUsers((prev) =>
@@ -197,7 +176,6 @@ const UserTable = () => {
                 <TableCell>S.NO</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>Password</TableCell>
                 <TableCell>Phone Number</TableCell>
               </TableRow>
             </TableHead>
@@ -214,8 +192,7 @@ const UserTable = () => {
                     <TableCell>{indexOfFirstUser + index + 1}</TableCell>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.password}</TableCell>
-                    <TableCell>{user.phone_number}</TableCell>
+                    <TableCell>{user.phonenumber}</TableCell>
                   </TableRow>
                 ))
               ) : (

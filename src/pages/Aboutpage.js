@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Image } from "react-bootstrap";
-import aboutpageimage1 from "../assets/images/aboutpageimage1.png";
+// import aboutpageimage1 from "../assets/images/aboutpageimage1.png";
 import { IoStorefrontOutline } from "react-icons/io5";
 import { BiDollarCircle } from "react-icons/bi";
 import { BsHandbag } from "react-icons/bs";
@@ -9,8 +9,8 @@ import { RiCustomerServiceLine } from "react-icons/ri";
 import { AiTwotoneSafetyCertificate } from "react-icons/ai";
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
-import aboutpageimage2 from "../assets/images/image 46.jpg";
-import aboutpageimage3 from "../assets/images/image 47.png";
+// import aboutpageimage2 from "../assets/images/image 46.jpg";
+// import aboutpageimage3 from "../assets/images/image 47.png";
 import aboutpageimage4 from "../assets/images/image 51.png";
 import { CiTwitter } from "react-icons/ci";
 import { CiInstagram } from "react-icons/ci";
@@ -57,7 +57,7 @@ const AboutPage = () => {
 
         {/* Right Section - Image */}
         <Col md={6} className="text-center">
-          <Image src={aboutpageimage1} alt="Shopping Experience" fluid className="rounded shadow" />
+          {/* <Image src={aboutpageimage1} alt="Shopping Experience" fluid className="rounded shadow" /> */}
         </Col>
       </Row>
 
@@ -105,11 +105,11 @@ const AboutPage = () => {
   <Col>
     <Card style={{ width: '18rem' }}>
       <div style={{}}>
-      <Card.Img
+      {/* <Card.Img
         variant="top"
         style={{ height: '250px', width: '100%',paddingLeft:"40px",paddingRight:"40px", }}
         src={aboutpageimage2}
-        />
+        /> */}
         </div>
       <Card.Body style={{paddingLeft:"30%"}}>
         <Card.Title>Tom Cruise</Card.Title>
@@ -126,11 +126,11 @@ const AboutPage = () => {
   </Col>
   <Col>
     <Card style={{ width: '18rem' }}>
-      <Card.Img
+      {/* <Card.Img
         variant="top"
         style={{ height: '250px', width: '100%',paddingLeft:"40px",paddingRight:"40px"}}
         src={aboutpageimage3}
-      />
+      /> */}
       <Card.Body style={{paddingLeft:"30%"}}>
         <Card.Title>Emma Watson</Card.Title>
         <Card.Text>
