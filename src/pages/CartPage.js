@@ -14,7 +14,7 @@ import { FaHeart, FaTruck, FaUndo } from "react-icons/fa";
 import ReactImageMagnify from "react-image-magnify";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 const ProductPage = ({ quantity = 1, onQuantityChange = () => {}, onBuy = () => {} }) => {
   // ---- Get Products and Selected Product from the Store ----
