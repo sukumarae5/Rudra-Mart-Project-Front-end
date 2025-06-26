@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { Container, Row, Col, Form, Button, Modal } from "react-bootstrap";
-import sideImage from "../../src/assets/images/cart.jpg"; // Optional
+// import sideImage from "../../src/assets/images/cart.jpg"; // Optional
 
 const Login = () => {
   const [phone, setPhone] = useState("");

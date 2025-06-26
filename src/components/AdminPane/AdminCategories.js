@@ -209,7 +209,7 @@ const AdminCategories = () => {
                   <tr key={category.id}>
                     <td className="text-start">
                       <img
-                        src={`http://${process.env.REACT_APP_IP_ADDRESS}/uploads/${category.image}`}
+                        src={category.image_url}
                         alt={category.name}
                         style={{
                           width: "50px",

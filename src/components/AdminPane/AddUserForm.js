@@ -1,21 +1,29 @@
-import React, { useState } from "react";
-import { Form, Button, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Form, Button, Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import { addUserRequest } from "../../features/user/userActions";
 
 const AddUserForm = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // State for user data
+  const { addUserSuccess, addUserError } = useSelector((state) => state.users);
+
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
-    phone_number: "",
-    password: "",
-    role: "",
+    phonenumber: "",
   });
 
-  // Handle input changes
+  useEffect(() => {
+    if (addUserSuccess) {
+      alert(addUserSuccess);
+      navigate("/admin/adminusers");
+    }
+  }, [addUserSuccess, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewUser((prevUser) => ({
@@ -24,71 +32,39 @@ const AddUserForm = () => {
     }));
   };
 
-  // Handle form submission
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
+    console.log(newUser);
+    const { name, email, phonenumber } = newUser;
 
-    if (
-      !newUser.name ||
-      !newUser.email ||
-      !newUser.password ||
-      !newUser.phone_number ||
-      !newUser.role
-    ) {
-      alert(
-        "All fields (Name, Email, Password, Phone Number, Role) are required."
-      );
+    if (!name || !email || !phonenumber) {
+      alert("All fields (Name, Email, PhoneNumber) are required.");
       return;
     }
 
-    try {
-      const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/users/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newUser),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(`Error: ${data.error || "Failed to add user"}`);
-        return;
-      }
-
-      alert("User added successfully!");
-      navigate("/admin/adminusers"); // Redirect to users list
-    } catch (error) {
-      console.error("Error adding user:", error);
-      alert("Error: Could not add user");
-    }
+    dispatch(addUserRequest(newUser));
   };
 
   return (
     <div className="container mt-4">
-      {/* Top Section: Back Button & Save/Cancel Buttons */}
+      {/* Top Navigation */}
       <Row className="align-items-center mb-3">
         <Col xs={6}>
           <Button
             variant="link"
             onClick={() => navigate("/admin/adminusers")}
             className="text-primary d-flex align-items-center"
-            style={{ fontSize: "1.2rem", gap: "5px" }} // Adds spacing between icon and text
+            style={{ fontSize: "1.2rem", gap: "5px" }}
           >
-            <IoArrowBack size={24} />{" "}
-            {/* Increased icon size for better visibility */}
+            <IoArrowBack size={24} />
             <span>Back</span>
           </Button>
-
-          <Col xs={12} md={6} className="text-md-start text-center">
-            <h1
-              style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}
-            >
-              New Users
-            </h1>
-          </Col>
+          <h1
+            className="mt-2"
+            style={{ fontSize: "2rem", fontWeight: "bold", color: "#131523" }}
+          >
+            New User
+          </h1>
         </Col>
         <Col xs={6} className="text-end">
           <Button
@@ -106,7 +82,8 @@ const AddUserForm = () => {
 
       {/* Form Section */}
       <div className="card p-4 shadow-sm">
-        <Form onSubmit={handleSubmit}>
+        {addUserError && <Alert variant="danger">{addUserError}</Alert>}
+        <Form>
           <Form.Group className="mb-3" controlId="userName">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -118,6 +95,7 @@ const AddUserForm = () => {
               required
             />
           </Form.Group>
+
           <Form.Group className="mb-3" controlId="userEmail">
             <Form.Label>Email</Form.Label>
             <Form.Control
@@ -125,61 +103,25 @@ const AddUserForm = () => {
               name="email"
               value={newUser.email}
               onChange={handleChange}
-              placeholder="Enter user email"
+              placeholder="Enter email"
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="userPhone">
-            <Form.Label>Phone Number</Form.Label>
+
+          <Form.Group className="mb-3" controlId="userPhonenumber">
+            <Form.Label>Phone number</Form.Label>
+
             <Form.Control
               type="text"
-              name="phone_number"
-              value={newUser.phone_number}
+              name="phonenumber" // ✅ Match the state key
+              value={newUser.phonenumber}
               onChange={handleChange}
               placeholder="Enter phone number"
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="userPassword">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              name="password"
-              value={newUser.password}
-              onChange={handleChange}
-              placeholder="Enter new password"
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="userRole">
-            <Form.Label>Role</Form.Label>
-            <Form.Control
-              type="text"
-              name="role"
-              value={newUser.role}
-              onChange={handleChange}
-              placeholder="Enter user role"
-              required
-            />
-          </Form.Group>
         </Form>
       </div>
-
-      {/* Bottom Section: Save/Cancel Buttons */}
-      <Row className="mt-4">
-        <Col className="text-end">
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/adminusers")}
-            className="me-2"
-          >
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            Save
-          </Button>
-        </Col>
-      </Row>
     </div>
   );
 };

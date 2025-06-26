@@ -1,257 +1,319 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Container, Table, Button, Form, Row, Col } from "react-bootstrap";
 import {
-  fetchApiCartDataRequest,
-  fetcheckeoutpagedata,
-  removeCartItemRequest,
-  updateCartItemQuantityRequest,
-} from "../features/cart/cartActions";
-import { useNavigate } from "react-router-dom";
-import { Box, CircularProgress } from "@mui/material";
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Container,
+  Grid,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { FaHeart, FaTruck, FaUndo } from "react-icons/fa";
+import ReactImageMagnify from "react-image-magnify";
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+import { useSelector } from "react-redux";
 
-const CartPage = () => {
-  const dispatch = useDispatch();
-  const { cartItems = [], error } = useSelector((state) => state.cart);
-  const { products = [] } = useSelector((state) => state.products || {});
-  const navigate = useNavigate();
+const ProductPage = ({ quantity = 1, onQuantityChange = () => {}, onBuy = () => {} }) => {
+  // ---- Get Products and Selected Product from the Store ----
+  const products = useSelector((state) => state.products?.products || []);
+  const selectedProduct = useSelector((state) => state.products?.selectedProduct || {});
 
-  const [couponCode, setCouponCode] = useState("");
-  const [couponDiscount, setCouponDiscount] = useState(0);
-
+  // ---- State ----
+  const [product, setProduct] = useState(selectedProduct);
   useEffect(() => {
-    dispatch(fetchApiCartDataRequest());
-  }, [dispatch]);
+    setProduct(selectedProduct);
+  }, [selectedProduct]);
 
-  const handleRemoveItem = (cartItemId) => {
-    dispatch(removeCartItemRequest(cartItemId));
-  };
+  if (!product || Object.keys(product).length === 0) {
+    return (
+      <Box textAlign="center" mt={10}>
+        <Typography color="error" fontSize={20}>
+          No product selected!
+        </Typography>
+      </Box>
+    );
+  }
 
-  const handleQuantityChange = (cartItemId, quantity) => {
-    if (quantity > 0) {
-      dispatch(updateCartItemQuantityRequest(cartItemId, quantity));
-    }
-  };
+  const {
+    name: title = "No Title",
+    description = "No Description Available",
+    image_url = "",
+    price = "0",
+    stock = 0,
+    category_id,
+    id,
+  } = product;
 
-  // Calculate MRP total and Selling Price total
-  const { totalSellingPrice, totalMrp } = cartItems.reduce(
-    (acc, cartItem) => {
-      const product = products.find((p) => p.id === cartItem.product_id);
-      const mrp = parseFloat(product?.mrp || 0);
-      const selling = parseFloat(product?.selling_price || cartItem.price || 0);
-      const quantity = cartItem.quantity;
-
-      acc.totalMrp += mrp * quantity;
-      acc.totalSellingPrice += selling * quantity;
-      return acc;
-    },
-    { totalMrp: 0, totalSellingPrice: 0 }
+  // ---- Related Products ----
+  const relatedProducts = products.filter(
+    (p) => p.category_id === category_id && p.id !== id
   );
 
-  const productDiscount = totalMrp - totalSellingPrice;
-  const finalCost = (totalSellingPrice - couponDiscount).toFixed(2);
-
-  const handleApplyCoupon = () => {
-    if (couponCode === "DISCOUNT10") {
-      setCouponDiscount(0.1 * totalSellingPrice);
-      alert("Coupon applied successfully! 10% discount applied.");
-    } else if (couponCode === "FLAT50") {
-      setCouponDiscount(50);
-      alert("Coupon applied successfully! ₹50 discount applied.");
-    } else {
-      alert("Invalid coupon code!");
-      setCouponDiscount(0);
-    }
+  // ---- Carousel Responsive Options ----
+  const responsive = {
+    superLargeDesktop: { breakpoint: { max: 4000, min: 1921 }, items: 5 },
+    desktop: { breakpoint: { max: 1920, min: 1024 }, items: 4 },
+    tablet: { breakpoint: { max: 1024, min: 768 }, items: 2 },
+    mobile: { breakpoint: { max: 768, min: 0 }, items: 1 },
   };
-
-  const handleBuyNow = (cartItem) => {
-    const product = products.find((p) => p.id === cartItem.product_id);
-    const checkoutData = [
-      {
-        userId: cartItem.user_id,
-        productId: cartItem.product_id,
-        productName: product?.name || "Unknown",
-        productImage: product?.image_url || "",
-        productPrice: parseFloat(product?.selling_price || 0),
-        quantity: cartItem.quantity,
-        totalPrice: parseFloat(product?.selling_price || 0) * cartItem.quantity,
-      },
-    ];
-    dispatch(fetcheckeoutpagedata(checkoutData));
-    navigate("/CheckoutPage");
-  };
-
-  const handleProceedToCheckout = () => {
-    const checkoutData = cartItems.map((cartItem) => {
-      const product = products.find((p) => p.id === cartItem.product_id);
-      return {
-        userId: cartItem.user_id,
-        productId: cartItem.product_id,
-        productName: product?.name || "Unknown",
-        productImage: product?.image_url || "",
-        productPrice: parseFloat(product?.selling_price || product?.price || 0),
-        quantity: cartItem.quantity,
-        totalPrice:
-          parseFloat(product?.selling_price || product?.price || 0) * cartItem.quantity,
-      };
-    });
-    dispatch(fetcheckeoutpagedata(checkoutData));
-    navigate("/CheckoutPage");
-  };
-
+  
   return (
-    <Container className="mt-4" style={{ padding: "2%", backgroundColor: "#f8f9fa", borderRadius: "10px" }}>
-      <h1 className="text-center mb-4 text-danger">Shopping Cart</h1>
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
-      {!cartItems.length ? (
-        <h4 className="text-center text-muted">
-          <Box display="flex" justifyContent="center" alignItems="center" height="200px">
-            <CircularProgress />
-          </Box>
-          Your cart is empty.
-        </h4>
-      ) : (
-        <>
-          <Table bordered responsive className="mb-4" style={{ backgroundColor: "white", borderRadius: "8px" }}>
-            <thead style={{ backgroundColor: "#343a40", color: "white" }}>
-              <tr>
-                <th>Product</th>
-                <th>Price Details</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartItems.map((cartItem) => {
-                const product = products.find((p) => p.id === cartItem.product_id);
-                const mrp = parseFloat(product?.mrp || 0);
-                const selling = parseFloat(product?.selling_price || cartItem.price || 0);
-                const subtotal = selling * cartItem.quantity;
+    <Box p={3}>
+      <Card elevation={4} sx={{ borderRadius: 3, p: 3 }}>
+        <Grid container spacing={4}>
+          
+          {/* Main Image */}
+          <Grid item xs={12} md={6}>
+            <Box maxWidth={400} mx="auto">
+              <ReactImageMagnify
+                smallImage={{
+                  alt: "Product",
+                  isFluidWidth: true,
+                  src: image_url,
+                }}
+                largeImage={{
+                  src: image_url,
+                  width: 1200,
+                  height: 1200,
+                }}
+                enlargedImagePosition="beside"
+              />
+            </Box>
+          </Grid>
 
-                return (
-                  <tr key={cartItem.id}>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <img
-                          src={product?.image_url}
-                          alt={product?.name || cartItem.product_name}
-                          className="me-2"
-                          style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "5px" }}
-                        />
-                        <span className="fw-bold text-dark">{product?.name || cartItem.product_name}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div>
-                        <span className="text-danger fw-bold">₹{selling.toFixed(2)}</span>
-                        <br />
-                        <small className="text-muted text-decoration-line-through">₹{mrp.toFixed(2)}</small>
-                        <br />
-                        {mrp > selling && (
-                          <small className="text-success fw-bold">
-                            {Math.round(((mrp - selling) / mrp) * 100)}% OFF
-                          </small>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="number"
-                        min="1"
-                        value={cartItem.quantity}
-                        onChange={(e) => handleQuantityChange(cartItem.id, e.target.value)}
-                        style={{ width: "60px" }}
-                      />
-                    </td>
-                    <td className="text-success">₹{subtotal.toFixed(2)}</td>
-                    <td>
-                      <Button variant="danger" onClick={() => handleRemoveItem(cartItem.id)}>Remove</Button>
-                      <Button variant="warning" className="ms-2" onClick={() => handleBuyNow(cartItem)}>Buy Now</Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
+          {/* Details Section */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h4" fontWeight="bold" mb={2}>
+              {title}
+            </Typography>
 
-          <Row className="mb-4">
-            <Col md={6} className="d-flex align-items-center">
-              <Form className="w-100">
-                <Row className="align-items-center">
-                  <Col xs={8}>
-                    <Form.Group className="mb-0">
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col xs={4}>
-                    <Button
-                      variant="danger"
-                      style={{ background: "linear-gradient(45deg,rgb(131, 218, 240), #ff6f61)" }}
-                      onClick={handleApplyCoupon}
-                    >
-                      Apply Coupon
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Col>
+            <Typography variant="h5" color="primary" mb={2}>
+              ₹ {(price * quantity).toFixed(2)}
+            </Typography>
 
-            <Col md={6}>
-              <div className="p-3 bg-light border rounded">
-                <h4 className="text-center text-primary">Cart Summary</h4>
-                <div className="d-flex justify-content-between">
-                  <span>Total MRP:</span>
-                  <span>₹{totalMrp.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <span>Total Selling Price:</span>
-                  <span>₹{totalSellingPrice.toFixed(2)}</span>
-                </div>
-                <div className="d-flex justify-content-between">
-                  <span>Product Discount:</span>
-                  <span className="text-success">-₹{productDiscount.toFixed(2)}</span>
-                </div>
-                {couponDiscount > 0 && (
-                  <div className="d-flex justify-content-between">
-                    <span>Coupon Discount:</span>
-                    <span className="text-success">-₹{couponDiscount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="d-flex justify-content-between">
-                  <span>Shipping:</span>
-                  <span className="text-success">Free</span>
-                </div>
-                <hr />
-                <div className="d-flex justify-content-between">
-                  <strong>Grand Total:</strong>
-                  <strong className="text-success">₹{finalCost}</strong>
-                </div>
-                <div className="d-flex justify-content-center mt-3">
-                  <Button
-                    className="w-100"
-                    style={{
-                      background: "linear-gradient(45deg, rgb(247, 122, 153), #ff6f61)",
-                      border: "none",
-                      fontWeight: "bold",
+            <Typography color="textSecondary" mb={2}>
+              {description}
+            </Typography>
+
+            <Typography
+              mb={2}
+              color={stock > 0 ? "textPrimary" : "error"}
+              fontWeight="bold"
+            >
+              Stock: {stock > 0 ? stock : "Out of Stock"}
+            </Typography>
+
+            <Box display="flex" gap={2} mb={2}>
+              <Typography>Colors:</Typography>
+              {["blue", "pink"].map((color) => (
+                <Box
+                  key={color}
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: color,
+                    borderRadius: "50%",
+                    border: "2px solid #333",
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1} mb={3}>
+              <Typography>Size:</Typography>
+              {["XS", "S", "M", "L", "XL"].map((size) => (
+                <Box
+                  key={size}
+                  px={2}
+                  py={0.5}
+                  sx={{
+                    border: "1px solid #444",
+                    borderRadius: 1,
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  {size}
+                </Box>
+              ))}
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={2} mb={3}>
+              <Box display="flex" border="1px solid #aaa" borderRadius={1}>
+                <Button
+                  onClick={() => onQuantityChange("decrement")}
+                  sx={{
+                    minWidth: 40,
+                    color: "black",
+                    borderRight: "1px solid #000",
+                  }}
+                >
+                  -
+                </Button>
+                <Box px={3} py={1.5}>
+                  {quantity}
+                </Box>
+                <Button
+                  onClick={() => onQuantityChange("increment")}
+                  sx={{
+                    minWidth: 40,
+                    color: "black",
+                    borderLeft: "1px solid #000",
+                  }}
+                >
+                  +
+                </Button>
+              </Box>
+
+              <Button
+                variant="contained"
+                color="error"
+                onClick={onBuy}
+                disabled={stock === 0}
+              >
+                Buy Now
+              </Button>
+
+              <IconButton>
+                <FaHeart
+                  style={{
+                    fill: "#dc3545",
+                    stroke: "black",
+                    strokeWidth: "30px",
+                  }}
+                />
+              </IconButton>
+            </Box>
+
+            <Box border="1px solid #ccc" borderRadius={2} p={2} maxWidth={350}>
+              <Box display="flex" gap={2} mb={1}>
+                <FaTruck size={20} />
+                <Box>
+                  <Typography fontWeight="bold">Free Delivery</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Enter your postal code for Delivery Availability
+                  </Typography>
+                </Box>
+              </Box>
+              <hr />
+              <Box display="flex" gap={2} mt={1}>
+                <FaUndo size={20} />
+                <Box>
+                  <Typography fontWeight="bold">Easy Returns</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Free 30 Days Delivery Returns. Details
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
+      </Card>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <Container sx={{ mt: 6 }}>
+          <Typography variant="h5" textAlign="center" mb={3}>
+            Related Products
+          </Typography>
+          <Carousel
+            responsive={responsive}
+            infinite
+            autoPlay={false}
+            arrows
+            customLeftArrow={<button className="custom-arrow custom-left">‹</button>}
+            customRightArrow={<button className="custom-arrow custom-right">›</button>}
+          >
+            {relatedProducts.map((related) => (
+              <Box key={related.id} px={1}>
+                <Card
+                  sx={{
+                    width: 220,
+                    height: 340,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: "transform 0.3s",
+                    ":hover": {
+                      boxShadow: 6,
+                      transform: "translateY(-6px)",
+                    },
+                    cursor: "pointer",
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    image={related.image_url}
+                    alt={related.name}
+                    sx={{
+                      height: 180,
+                      width: "100%",
+                      objectFit: "cover",
                     }}
-                    onClick={handleProceedToCheckout}
+                    onError={(e) => (e.target.src = "/placeholder.jpg")}
+                  />
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    }}
                   >
-                    Proceed to Checkout
-                  </Button>
-                </div>
-              </div>
-            </Col>
-          </Row>
-        </>
+                    <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                      {related.name}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {related.description}
+                    </Typography>
+                    <Typography fontSize={14} color="green" fontWeight="bold">
+                      ₹{parseFloat(related.price).toLocaleString("en-IN")}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Box>
+            ))}
+          </Carousel>
+        </Container>
       )}
-    </Container>
+      <style>{`
+        .custom-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          background: white;
+          border: 1px solid #ccc;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          font-size: 24px;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .custom-left {
+          left: 10px;
+        }
+        .custom-right {
+          right: 10px;
+        }
+      `}</style>
+    </Box>
   );
 };
 
-export default CartPage;
+export default ProductPage;

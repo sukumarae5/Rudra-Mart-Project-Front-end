@@ -28,6 +28,7 @@ import UserForgotpasswordOtpGeneratorpage from "../pages/UserAccontDetialsPage/U
 import UserTrackingpage from "../pages/UserAccontDetialsPage/UserTrackingpage";
 import UserSetNewpasswordpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserSetNewpasswordpage"
 import SubcategoryPage from "../pages/SubcategoryPage";
+import Subcategoryproductspage from "../pages/Subcategoryproductspage";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -88,6 +89,10 @@ const AppRouter = createBrowserRouter([
   {
   path: "/subcategories",
   element: <SubcategoryPage />,
+},
+{
+  path: "/Subcategoryproductspage",
+  element: <Subcategoryproductspage />,
 },
 
       {

@@ -11,7 +11,10 @@ import {
   FETCH_CHECKEOUTPAGE_DATA,
   INCREASE_QUANTITY,
   REMOVE_PRODUCT,
-  DECREASE_QUANTITY
+  DECREASE_QUANTITY,
+  ADD_TO_CART_REQUEST,
+  ADD_TO_CART_SUCCESS,
+  ADD_TO_CART_FAILURE
 } from "./cartActions";
 
 const initialState = {
@@ -23,6 +26,13 @@ const initialState = {
 
 const cartReducer = (state = initialState, action) => {
   switch (action.type) {
+    case ADD_TO_CART_REQUEST:
+  return { ...state, loading: true };
+case ADD_TO_CART_SUCCESS:
+  return { ...state, loading: false, };
+case ADD_TO_CART_FAILURE:
+  return { ...state, loading: false, error: action.payload };
+
     case FETCH_API_CART_DATA_REQUEST:
       return { ...state, loading: true };
 
@@ -62,13 +72,13 @@ const cartReducer = (state = initialState, action) => {
     case UPDATE_CART_ITEM_QUANTITY_FAILURE:
       return { ...state, loading: false, error: action.payload };
 
-    // ONLY UPDATE checkoutData when increasing quantity
+    
     case INCREASE_QUANTITY:
       return {
         ...state,
         checkoutData: state.checkoutData.map((item) =>
           item.productId === action.payload.productId
-            ? { ...item, quantity: item.quantity + 1 }  // Increase quantity in checkoutData
+            ? { ...item, quantity: item.quantity + 1 }  
             : item
         ),
       };

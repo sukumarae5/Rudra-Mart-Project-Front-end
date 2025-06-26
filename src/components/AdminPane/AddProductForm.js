@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
+import {
+  Container,
+  Form,
+  Button,
+  Row,
+  Col,
+  Spinner,
+} from "react-bootstrap";
 import { IoArrowBack } from "react-icons/io5";
 
 const AddProductForm = () => {
@@ -10,15 +17,26 @@ const AddProductForm = () => {
 
   const [product, setProduct] = useState({
     name: "",
+    slug: "",
     description: "",
     price: "",
-    stock: "",
+    mrp: "",
     category_id: "",
+    stock: "",
+    unit: "",
     image_url: "",
+    weight: "",
+    is_active: false,
+    is_featured: false,
   });
 
   const handleChange = (e) => {
-    setProduct({ ...product, [e.target.name]: e.target.value });
+    const { name, value, checked, type } = e.target;
+
+    setProduct((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -27,81 +45,46 @@ const AddProductForm = () => {
 
     if (
       !product.name ||
+      !product.slug ||
       !product.price ||
-      !product.stock ||
+      !product.mrp ||
       !product.category_id ||
+      !product.stock ||
+      !product.unit ||
       !product.image_url
     ) {
+      alert("Please fill in all required fields.");
       setLoading(false);
-      alert("All fields are required");
-      return;
-    }
-
-    if (isNaN(product.price) || Number(product.price) <= 0) {
-      setLoading(false);
-      alert("Price must be a valid number greater than zero");
-      return;
-    }
-
-    if (!Number.isInteger(Number(product.stock)) || Number(product.stock) < 0) {
-      setLoading(false);
-      alert("Stock must be a positive integer");
       return;
     }
 
     try {
-      const newProduct = {
-        id: Date.now(),
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        stock: product.stock,
-        category_id: product.category_id,
-        image_url: product.image_url,
-        created_at: new Date().toISOString(),
-      };
-
-      console.log("Product data being sent to API:", newProduct);
-
       const response = await fetch(
         `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/productregister`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newProduct),
+          body: JSON.stringify(product),
         }
       );
-
-      setLoading(false);
-
       const data = await response.json();
 
       if (!response.ok) {
-        console.log("Error response:", data);
-        setError(data.message || "Failed to add product");
-        alert(`Error: ${data.message || "Failed to add product"}`);
-        return;
+        alert(data.message || "Error adding product");
+      } else {
+        alert(data.message || "Product added successfully");
+        navigate("/admin/adminproducts");
       }
-
-      alert(`Success: ${data.message || "Product added successfully"}`);
-      navigate("/admin/adminproducts");
     } catch (error) {
+      alert(error.message || "Error adding product, please try again later");
+    } finally {
       setLoading(false);
-      console.error("Error during product addition:", error);
-      setError(
-        error.message || "Failed to add product, please try again later"
-      );
-      alert(
-        `Error: ${
-          error.message || "Failed to add product, please try again later"
-        }`
-      );
     }
   };
 
   return (
     <Container className="mt-4">
-      {/* Top Section: Back Button, Header & Save/Cancel Buttons */}
+      {/* Header Section */}
       <Row className="align-items-center mb-3">
         <Col xs={6}>
           <Button
@@ -113,121 +96,212 @@ const AddProductForm = () => {
             <IoArrowBack size={24} />
             <span>Back</span>
           </Button>
-          <Col xs={12} md={6} className="text-md-start text-center">
-            <h1
-              style={{ fontSize: "2rem", color: " #131523", fontWeight: "bold" }}
-            >
-              Add Product
-            </h1>
+        </Col>
+      </Row>
+
+      <Row className="align-items-center mb-3">
+        <Col xs={6}>
+          <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>Add Product</h1>
+        </Col>
+      </Row>
+
+      <Form onSubmit={handleSubmit} className="p-3 border rounded shadow">
+        {/* Product Name & Slug */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Product Name *</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={product.name}
+                onChange={handleChange}
+                placeholder="Enter product name"
+                required
+              />
+            </Form.Group>
           </Col>
-        </Col>
-        <Col xs={6} className="text-end">
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/adminproducts")}
-            className="me-2"
-          >
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={loading}>
-            {loading ? "Adding..." : "Save"}
-          </Button>
-        </Col>
-      </Row>
+          <Col>
+            <Form.Group>
+              <Form.Label>Slug *</Form.Label>
+              <Form.Control
+                type="text"
+                name="slug"
+                value={product.slug}
+                onChange={handleChange}
+                placeholder="Enter product slug"
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-      {/* Form Section */}
-      <Card className="shadow p-4">
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Product Name:</Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              value={product.name}
+        {/* Description */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Description *</Form.Label>
+              <Form.Control
+                as="textarea"
+                name="description"
+                value={product.description}
+                onChange={handleChange}
+                placeholder="Enter product description"
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Selling Price & MRP */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Selling Price *</Form.Label>
+              <Form.Control
+                type="number"
+                name="price"
+                value={product.price}
+                onChange={handleChange}
+                placeholder="Enter selling price"
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>MRP *</Form.Label>
+              <Form.Control
+                type="number"
+                name="mrp"
+                value={product.mrp}
+                onChange={handleChange}
+                placeholder="Enter MRP"
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Category, Stock, Unit */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Category ID *</Form.Label>
+              <Form.Control
+                type="text"
+                name="category_id"
+                value={product.category_id}
+                onChange={handleChange}
+                placeholder="Enter category ID"
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>Stock *</Form.Label>
+              <Form.Control
+                type="number"
+                name="stock"
+                value={product.stock}
+                onChange={handleChange}
+                placeholder="Enter stock quantity"
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>Unit *</Form.Label>
+              <Form.Control
+                type="text"
+                name="unit"
+                value={product.unit}
+                onChange={handleChange}
+                placeholder="Enter unit (e.g., pcs, kg)"
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Image URL */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Image URL *</Form.Label>
+              <Form.Control
+                type="text"
+                name="image_url"
+                value={product.image_url}
+                onChange={handleChange}
+                placeholder="Enter image URL"
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Weight (in kg) */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Weight (in kg)</Form.Label>
+              <Form.Control
+                type="number"
+                step="0.01"
+                name="weight"
+                value={product.weight}
+                onChange={handleChange}
+                placeholder="Enter weight in kg"
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Active & Featured Switches */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Check
+              type="switch"
+              id="active-switch"
+              label="Active"
+              name="is_active"
+              checked={product.is_active}
               onChange={handleChange}
-              placeholder="Enter product name"
-              required
             />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Description:</Form.Label>
-            <Form.Control
-              as="textarea"
-              name="description"
-              value={product.description}
+            <Form.Check
+              type="switch"
+              id="featured-switch"
+              label="Featured"
+              name="is_featured"
+              checked={product.is_featured}
               onChange={handleChange}
-              placeholder="Enter product description"
-              rows={3}
-              required
             />
-          </Form.Group>
+          </Col>
+        </Row>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Price:</Form.Label> 
-            <Form.Control
-              type="number"
-              name="price"
-              value={product.price}
-              onChange={handleChange}
-              placeholder="Enter product price"
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Stock:</Form.Label>
-            <Form.Control
-              type="number"
-              name="stock"
-              value={product.stock}
-              onChange={handleChange}
-              placeholder="Enter product stock"
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Category ID:</Form.Label>
-            <Form.Control
-              type="number"
-              name="category_id"
-              value={product.category_id}
-              onChange={handleChange}
-              placeholder="Enter category ID"
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Image URL:</Form.Label>
-            <Form.Control
-              type="text"
-              name="image_url"
-              value={product.image_url}
-              onChange={handleChange}
-              placeholder="Enter image URL"
-              required
-            />
-          </Form.Group>
-        </Form>
-      </Card>
-
-      {/* Bottom Section: Save/Cancel Buttons */}
-      <Row className="mt-4">
-        <Col className="text-end">
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/adminproducts")}
-            className="me-2"
-          >
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={loading}>
-            {loading ? "Adding..." : "Save"}
-          </Button>
-        </Col>
-      </Row>
+        {/* Buttons */}
+        <Row className="mt-4">
+          <Col xs={6}>
+            <Button variant="secondary" onClick={() => navigate("/admin/adminproducts")}>
+              Cancel
+            </Button>
+          </Col>
+          <Col xs={6} className="text-end">
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Spinner animation="border" size="sm" /> Adding...
+                </>
+              ) : (
+                "Save Product"
+              )}
+            </Button>
+          </Col>
+        </Row>
+      </Form>
     </Container>
   );
 };

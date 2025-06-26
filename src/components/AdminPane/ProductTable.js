@@ -21,9 +21,7 @@ import { BiSearch } from "react-icons/bi";
 const ProductTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { productsWithCategory = [] } = useSelector(
-    (state) => state.products || {}
-  );
+  const { productsWithCategory = [] } = useSelector((state) => state.products || {});
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -39,28 +37,25 @@ const ProductTable = () => {
   useEffect(() => {
     if (productsWithCategory.length > 0) {
       const uniqueCategories = [
-        ...new Set(productsWithCategory.map((p) => p.category_name)),
+        ...new Set(productsWithCategory.map((p) => p.category_name || "Unknown")),
       ];
       setCategories(uniqueCategories);
     }
   }, [productsWithCategory]);
 
   const filteredProducts = productsWithCategory.filter((product) => {
-    const matchesSearchQuery = product.product_name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const name = (product.product_name || "").toLowerCase();
+    const category = product.category_name || "";
+    const matchesSearchQuery = name.includes(searchQuery.toLowerCase());
 
     return filterCategory === "All"
       ? matchesSearchQuery
-      : matchesSearchQuery && product.category_name === filterCategory;
+      : matchesSearchQuery && category === filterCategory;
   });
 
   const indexOfLastProduct = currentPage * itemsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
@@ -107,10 +102,7 @@ const ProductTable = () => {
 
           {/* Show Inactive Toggle */}
           <Col xs={6} sm={6} md={3} lg={2}>
-            <div
-              className="d-flex align-items-center justify-content-end gap-1"
-              style={{ minHeight: "44px" }}
-            >
+            <div className="d-flex align-items-center justify-content-end gap-1" style={{ minHeight: "44px" }}>
               <Form.Check
                 type="switch"
                 id="show-inactive-switch"
@@ -179,8 +171,8 @@ const ProductTable = () => {
                   <tr key={product.product_id}>
                     <td className="text-start">
                       <img
-                        src={product.product_image || "/placeholder.png"}
-                        alt={product.product_name}
+                        src={product.image_url || "/placeholder.png"}
+                        alt={product.name || "Unnamed"}
                         style={{
                           width: "50px",
                           height: "50px",
@@ -189,10 +181,10 @@ const ProductTable = () => {
                         }}
                       />
                     </td>
-                    <td className="text-break">{product.product_name}</td>
-                    <td>{product.category_name}</td>
-                    <td>₹ {product.product_price.toLocaleString()}</td>
-                    <td>{product.stock}</td>
+                    <td className="text-break">{product.name || "Unnamed"}</td>
+                    <td>{product.category_name || "N/A"}</td>
+                    <td>₹ {(product.selling_price ?? 0).toLocaleString()}</td>
+                    <td>{product.stock ?? "N/A"}</td>
                     <td>{product.status || "Active"}</td>
                     <td>
                       <div className="d-flex justify-content-center gap-2">
@@ -202,7 +194,7 @@ const ProductTable = () => {
                           onClick={() =>
                             navigate("/admin/editproduct", { state: { product } })
                           }
-                          aria-label={`Edit ${product.product_name}`}
+                          aria-label={`Edit ${product.product_name || "product"}`}
                         >
                           <MdModeEditOutline size={20} />
                         </Button>
@@ -218,7 +210,7 @@ const ProductTable = () => {
                               // Add delete logic here
                             }
                           }}
-                          aria-label={`Delete ${product.product_name}`}
+                          aria-label={`Delete ${product.product_name || "product"}`}
                         >
                           <MdOutlineDeleteOutline size={20} />
                         </Button>

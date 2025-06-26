@@ -19,7 +19,7 @@ import Categorypage from "./Categorypage";
 import ExploreOurProductspage from "./ExploreOurProductspage";
 import NewArrivalpage from "./NewArrivalpage";
 
-import image3 from "../assets/images/images22.jpg"
+// import image3 from "../assets/images/images22.jpg"
 import SellingProductspage from "./SellingProductspage";
 
 const HomePage = () => {
@@ -174,7 +174,7 @@ const HomePage = () => {
        
       <Row className="mb-4" style={{marginTop:"7%"}} >
         <Col>
-          <div className="mx-2"
+          {/* <div className="mx-2"
             style={{
             
   backgroundImage: `url(${image3})`,
@@ -219,7 +219,7 @@ const HomePage = () => {
                 Shop Now →
               </Button>
             </div>
-          </div>
+          </div> */}
         </Col>
       </Row>
 

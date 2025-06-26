@@ -1,74 +1,74 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Form, Button, Row, Col, Alert } from "react-bootstrap";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Form,
+  Button,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { IoArrowBack } from "react-icons/io5";
 
-const EditProductForm = () => {
-  const location = useLocation();
+const AddProductForm = () => {
   const navigate = useNavigate();
-  const product = location.state?.product; // Get selected product from navigation state
 
-  // Ensure product details exist
-  useEffect(() => {
-    if (!product) {
-      alert("No product selected! Redirecting...");
-      navigate("/admin/adminproducts");
-    }
-  }, [product, navigate]);
-
-  // Initialize state with existing product data
   const [formData, setFormData] = useState({
-    product_name: product?.product_name || "",
-    product_description: product?.product_description || "",
-    product_price: product?.product_price || "",
-    stock: product?.stock || "",
-    product_image: product?.product_image || "",
-    category_id: product?.category_id || "",
+    product_name: "",
+    slug: "",
+    product_description: "",
+    selling_price: "",
+    mrp: "",
+    category_id: "",
+    stock: "",
+    unit: "",
+    product_image: "",
+    weight: "",
+    is_active: false,
+    is_featured: false,
   });
+  const [loading, setLoading] = useState(false);
 
   // Handle input changes
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, checked, type } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  // Handle form submission
+  // Save new product
   const handleSave = async (event) => {
     event.preventDefault();
-    
-    if (!product || !product.product_id) {
-      alert("Invalid product data.");
-      return;
-    }
+    setLoading(true);
 
     try {
       const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/updateproduct/${product.product_id}`,
+        `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/addproduct`,
         {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
-
       const data = await response.json();
 
       if (response.ok) {
-        alert("Product updated successfully!");
+        alert("Product added successfully!");
         navigate("/admin/adminproducts");
       } else {
-        alert(`Error: ${data.error || "Failed to update product"}`);
+        alert(data.error || "Error adding product");
       }
     } catch (error) {
-      alert("Error updating product:", error.message);
+      alert("Error adding product: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
-
+  
   return (
     <div className="container-fluid">
-      {/* Header with Back Button */}
+      {/* Header */}
       <Row className="align-items-center mb-3">
         <Col xs={6}>
           <Button
@@ -83,98 +83,188 @@ const EditProductForm = () => {
         </Col>
       </Row>
 
-      {/* Title and Buttons */}
       <Row className="align-items-center mb-3">
         <Col xs={6}>
           <h1 className="text-start" style={{ fontSize: "2rem", fontWeight: "bold" }}>
-            Edit Product
+            Add Product
           </h1>
-        </Col>
-        <Col xs={6} className="d-flex justify-content-end">
-          <Button variant="secondary" onClick={() => navigate("/admin/adminproducts")} className="me-2">
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            Save Changes
-          </Button>
         </Col>
       </Row>
 
-      {/* Product Edit Form */}
       <Form onSubmit={handleSave} className="p-3 border rounded shadow">
-        <Form.Group className="mb-3">
-          <Form.Label>Product Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="product_name"
-            value={formData.product_name}
-            onChange={handleChange}
-            placeholder="Enter product name"
-            required
-          />
-        </Form.Group>
+        {/* Product Name & Slug */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Product Name *</Form.Label>
+              <Form.Control
+                type="text"
+                name="product_name"
+                value={formData.product_name}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>Slug *</Form.Label>
+              <Form.Control
+                type="text"
+                name="slug"
+                value={formData.slug}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            name="product_description"
-            value={formData.product_description}
-            onChange={handleChange}
-            placeholder="Enter product description"
-            required
-          />
-        </Form.Group>
+        {/* Description */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Description *</Form.Label>
+              <Form.Control
+                as="textarea"
+                name="product_description"
+                value={formData.product_description}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Price (Rs)</Form.Label>
-          <Form.Control
-            type="number"
-            name="product_price"
-            value={formData.product_price}
-            onChange={handleChange}
-            placeholder="Enter product price"
-            required
-          />
-        </Form.Group>
+        {/* Selling Price & MRP */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Selling Price *</Form.Label>
+              <Form.Control
+                type="number"
+                name="selling_price"
+                value={formData.selling_price}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>MRP *</Form.Label>
+              <Form.Control
+                type="number"
+                name="mrp"
+                value={formData.mrp}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Stock</Form.Label>
-          <Form.Control
-            type="number"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
-            placeholder="Enter stock quantity"
-            required
-          />
-        </Form.Group>
+        {/* Category, Stock, Unit */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Category *</Form.Label>
+              <Form.Control
+                as="select"
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="1">Dairy & Breakfast</option>
+                <option value="2">Fruits</option>
+                <option value="3">Vegetables</option>
+                {/* Add more as needed */}
+              </Form.Control>
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>Stock *</Form.Label>
+              <Form.Control
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>Unit *</Form.Label>
+              <Form.Control
+                type="text"
+                name="unit"
+                value={formData.unit}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Image URL</Form.Label>
-          <Form.Control
-            type="text"
-            name="product_image"
-            value={formData.product_image}
-            onChange={handleChange}
-            placeholder="Enter image URL"
-            required
-          />
-        </Form.Group>
+        {/* Image URL */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Image URL *</Form.Label>
+              <Form.Control
+                type="text"
+                name="product_image"
+                value={formData.product_image}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Category ID</Form.Label>
-          <Form.Control
-            type="number"
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            placeholder="Enter category ID"
-            required
-          />
-        </Form.Group>
+        {/* Weight */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Weight (in kg)</Form.Label>
+              <Form.Control
+                type="number"
+                step="0.01"
+                name="weight"
+                value={formData.weight}
+                onChange={handleChange}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        {/* Save & Cancel Buttons */}
+        {/* Active & Featured Switches */}
+        <Row className="mb-3">
+          <Col>
+            <Form.Check
+              type="switch"
+              id="active-switch"
+              label="Active"
+              name="is_active"
+              checked={formData.is_active}
+              onChange={handleChange}
+            />
+            <Form.Check
+              type="switch"
+              id="featured-switch"
+              label="Featured"
+              name="is_featured"
+              checked={formData.is_featured}
+              onChange={handleChange}
+            />
+          </Col>
+        </Row>
+
+        {/* Buttons */}
         <Row className="mt-4">
           <Col xs={6}>
             <Button variant="secondary" onClick={() => navigate("/admin/adminproducts")}>
@@ -182,8 +272,8 @@ const EditProductForm = () => {
             </Button>
           </Col>
           <Col xs={6} className="text-end">
-            <Button variant="primary" type="submit">
-              Save Changes
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save Product"}
             </Button>
           </Col>
         </Row>
@@ -192,4 +282,4 @@ const EditProductForm = () => {
   );
 };
 
-export default EditProductForm;
+export default AddProductForm;
