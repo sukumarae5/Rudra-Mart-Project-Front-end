@@ -9,6 +9,10 @@ import {
   FETCH_ALL_ORDER_REQUEST,
   FETCH_ALL_ORDER_SUCCESS,
   FETCH_ALL_ORDER_FAILURE,
+  DELETE_ORDER_SUCCESS,
+  UPDATE_ORDER_FAILURE,
+  DELETE_ORDER_FAILURE,
+  UPDATE_ORDER_SUCCESS,
 } from "./orderActions";
 
 const initialState = {
@@ -43,6 +47,28 @@ const orderReducer = (state = initialState, action) => {
       case FETCH_USER_ORDER_FAILURE:
       case FETCH_ALL_ORDER_FAILURE:
       return { ...state, loading: false, error: action.payload };
+
+      case UPDATE_ORDER_SUCCESS:
+  return {
+    ...state,
+    loading: false,
+    allOrders: state.allOrders.map((order) =>
+      order.id === action.payload.id ? action.payload : order
+    ),
+  };
+
+case DELETE_ORDER_SUCCESS:
+  return {
+    ...state,
+    loading: false,
+    allOrders: state.allOrders.filter(
+      (order) => order.id !== action.payload
+    ),
+  };
+
+case UPDATE_ORDER_FAILURE:
+case DELETE_ORDER_FAILURE:
+  return { ...state, loading: false, error: action.payload };
 
     default:
       return state;

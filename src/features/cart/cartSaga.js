@@ -1,4 +1,4 @@
-import { takeLatest, call, put } from "redux-saga/effects";
+import { takeLatest, call, put, takeEvery } from "redux-saga/effects";
 import {
   FETCH_API_CART_DATA_REQUEST,
   FETCH_API_CART_DATA_SUCCESS,
@@ -61,7 +61,11 @@ function* addToCartSaga(action) {
 
 const fetchCartDataApi = async () => {
   const userToken = localStorage.getItem("authToken");
-  if (!userToken) throw new Error("User not authenticated. Please log in.");
+  console.log(userToken)
+if (!userToken) {
+  alert("Please login to update cart.");
+  throw new Error("User not authenticated. Please log in.");
+}
 
   const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/my-cart`, {
     method: "GET",
@@ -169,10 +173,10 @@ function* updateCartItemQuantitySaga(action) {
 
 // Watcher Saga for Cart Actions
 export function* watchCartSaga() {
-  yield takeLatest(FETCH_API_CART_DATA_REQUEST, fetchCartDataSaga);
-  yield takeLatest(REMOVE_CART_ITEM_REQUEST, removeCartItemSaga);
-  yield takeLatest(UPDATE_CART_ITEM_QUANTITY_REQUEST, updateCartItemQuantitySaga);
-  yield takeLatest(ADD_TO_CART_REQUEST, addToCartSaga);
+  yield takeEvery(FETCH_API_CART_DATA_REQUEST, fetchCartDataSaga);
+  yield takeEvery(REMOVE_CART_ITEM_REQUEST, removeCartItemSaga);
+  yield takeEvery(UPDATE_CART_ITEM_QUANTITY_REQUEST, updateCartItemQuantitySaga);
+  yield takeEvery(ADD_TO_CART_REQUEST, addToCartSaga);
 
 }
 

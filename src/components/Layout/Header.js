@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Navbar, Nav, Form, Container, Badge, InputGroup, Modal, Button,
+  Dropdown,
 } from "react-bootstrap";
 import { Link, useNavigate, Outlet } from "react-router-dom";
 import { BsCart3 } from "react-icons/bs";
@@ -9,6 +10,7 @@ import { CiUser } from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchApiCartDataRequest } from "../../features/cart/cartActions";
 import Footer from "./Footer";
+import { FaUserCircle } from "react-icons/fa";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,6 +29,8 @@ const Header = () => {
   useEffect(() => {
     dispatch(fetchApiCartDataRequest());
   }, [dispatch]);
+
+  const isLoggedIn = !!localStorage.getItem("authToken");
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -170,29 +174,55 @@ const Header = () => {
           </Form>
 
           <Nav className="ms-auto d-flex align-items-center">
-            <Nav.Link as={Link} to="/login" className="d-flex align-items-center me-3">
-              <CiUser size={20} />
-              <span className="d-none d-sm-inline ms-1">Account</span>
-            </Nav.Link>
+  {/* Home Link */}
+  <Nav.Link as={Link} to="/" className="d-flex align-items-center me-3">
+    <span className="d-none d-sm-inline ms-1">Home</span>
+  </Nav.Link>
 
-<Nav.Link as={Link} to="/cartpage" className="d-flex align-items-center me-3 position-relative">
-  <BsCart3 size={20} />
-  <Badge
-    pill
-    bg="danger"
-    className="position-absolute"
-    style={{
-      fontSize: "0.65rem",
-      top: "-6px",
-      right: "-10px",
-    }}
-  >
-    {cartCount}
-  </Badge>
-  <span className="d-none d-sm-inline ms-1">Cart</span>
-</Nav.Link>
+  {/* Account/Login or Logout */}
+  {isLoggedIn ? (
+    <Dropdown className="me-3">
+      <Dropdown.Toggle variant="light" className="d-flex align-items-center border-0">
+        <FaUserCircle size={20} />
+        <span className="d-none d-sm-inline ms-1">Account</span>
+      </Dropdown.Toggle>
+      <Dropdown.Menu>
+        <Dropdown.Item onClick={() => {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("user");
+          navigate("/login");
+          window.location.reload();
+        }}>
+          Logout
+        </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown>
+  ) : (
+    <Nav.Link as={Link} to="/login" className="d-flex align-items-center me-3">
+      <CiUser size={20} />
+      <span className="d-none d-sm-inline ms-1">Account</span>
+    </Nav.Link>
+  )}
 
-          </Nav>
+  {/* Cart */}
+  <Nav.Link as={Link} to="/cartpagemain" className="d-flex align-items-center me-3 position-relative">
+    <BsCart3 size={20} />
+    <Badge
+      pill
+      bg="danger"
+      className="position-absolute"
+      style={{
+        fontSize: "0.65rem",
+        top: "-6px",
+        right: "-10px",
+      }}
+    >
+      {cartCount}
+    </Badge>
+    <span className="d-none d-sm-inline ms-1">Cart</span>
+  </Nav.Link>
+</Nav>
+
         </Container>
       </Navbar>
 

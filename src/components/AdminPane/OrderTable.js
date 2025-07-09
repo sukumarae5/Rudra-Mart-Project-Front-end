@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchAllOrderRequest } from "../../features/order/orderActions";
+import { deleteOrderRequest, fetchAllOrderRequest } from "../../features/order/orderActions";
 import {
   Button,
   Form,
@@ -26,7 +26,7 @@ const OrderTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("All");
   const [selectedOrders, setSelectedOrders] = useState([]);
-
+  console.log(allOrders)
   useEffect(() => {
     dispatch(fetchAllOrderRequest());
   }, [dispatch]);
@@ -52,20 +52,14 @@ const OrderTable = () => {
     setSelectedOrders([]);
   };
 
-  const handleDeleteOrder = async (orderId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this order?");
-    if (!confirmed) return;
-
-    try {
-      // Uncomment and implement delete API here
-      // await deleteOrder(orderId);
-      alert("Order deleted successfully!");
-      dispatch(fetchAllOrderRequest());
-    } catch (error) {
-      console.error("Error deleting order:", error);
-      alert("Failed to delete order.");
-    }
-  };
+  const handleDeleteOrder = (orderId) => {
+  const confirmed = window.confirm("Are you sure you want to delete this order?");
+  if (confirmed) {
+    dispatch(deleteOrderRequest(orderId));
+    alert("Order delete requested.");
+    navigate("/admin/adminorders");
+  }
+};
 
   return (
     <div className="container-fluid ">
@@ -160,8 +154,8 @@ const OrderTable = () => {
                         >
                           {order.status || "N/A"}
                         </td>
-                        <td className="fw-bold">₹{order.total_price}</td>
-                        <td>{new Date(order.order_created_at).toLocaleDateString()}</td>
+                        <td className="fw-bold">₹{order.total}</td>
+                        <td>{new Date(order.order_date).toLocaleDateString()}</td>
                         <td className="d-flex gap-2 justify-content-center">
                           <Button
                             variant="outline-primary"

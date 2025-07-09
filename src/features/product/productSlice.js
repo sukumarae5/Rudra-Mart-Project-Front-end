@@ -9,6 +9,18 @@ import {
   FETCH_PRODUCTS_WITH_CATEGORY_REQUEST,
   FETCH_PRODUCTS_WITH_CATEGORY_SUCCESS,
   FETCH_PRODUCTS_WITH_CATEGORY_FAILURE,
+  CREATE_PRODUCT_REQUEST,
+  CREATE_PRODUCT_SUCCESS,
+  CREATE_PRODUCT_FAILURE,
+  UPDATE_PRODUCT_REQUEST,
+  UPDATE_PRODUCT_SUCCESS,
+  UPDATE_PRODUCT_FAILURE,
+  FETCH_PRODUCT_SUCCESS,
+  FETCH_PRODUCT_FAILURE,
+  FETCH_PRODUCT_REQUEST,
+   DELETE_PRODUCT_REQUEST,
+  DELETE_PRODUCT_SUCCESS,
+  DELETE_PRODUCT_FAILURE,
 } from "./productActions";
 
 const initialState = {
@@ -17,6 +29,9 @@ const initialState = {
   selectedProduct: [],
   addToWishlist: [],
   productsWithCategory: [],
+  createdMessage: "",
+  product: null,
+  updateMessage: "",
   loading: false,
   error: null,
 };
@@ -70,6 +85,60 @@ const productReducer = (state = initialState, action) => {
     case FETCH_PRODUCTS_WITH_CATEGORY_FAILURE:
       return { ...state, loading: false, error: action.payload };
 
+      case CREATE_PRODUCT_REQUEST:
+      return { ...state, loading: true, error: null };
+
+    case CREATE_PRODUCT_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        createdMessage: action.payload,
+      };
+
+    case CREATE_PRODUCT_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+      case FETCH_PRODUCT_REQUEST:
+      return { ...state, loading: true, product: null, error: null };
+
+    case FETCH_PRODUCT_SUCCESS:
+      return { ...state, loading: false, product: action.payload };
+
+    case FETCH_PRODUCT_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+    case UPDATE_PRODUCT_REQUEST:
+      return { ...state, loading: true, error: null, updateMessage: null };
+
+    case UPDATE_PRODUCT_SUCCESS:
+      return { ...state, loading: false, updateMessage: action.payload };
+
+    case UPDATE_PRODUCT_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+      case DELETE_PRODUCT_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+    
+      case DELETE_PRODUCT_SUCCESS:
+  return {
+    ...state,
+    loading: false,
+    products: state.products.filter((product) => product.id !== action.payload),
+  };
+
+    case DELETE_PRODUCT_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+      
     default:
       return state;
   }

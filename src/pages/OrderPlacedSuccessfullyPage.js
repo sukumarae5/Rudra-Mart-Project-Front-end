@@ -129,7 +129,7 @@ const OrderPlacedSuccessfullyPage = () => {
         style={{ backgroundColor: "#c5e0cd", maxWidth: "600px", margin: "auto" }}
       >
         <p><strong>Name:</strong> {user?.name || "N/A"}</p>
-        <p><strong>Phone Number:</strong> {user?.phone_number || "N/A"}</p>
+        <p><strong>Phone Number:</strong> {user?.phone || "N/A"}</p>
         <p><strong>Email:</strong> {user?.email || "N/A"}</p>
         <p><strong>Transaction ID:</strong> {payment.transaction_id}</p>
         <p><strong>Amount Paid:</strong> ₹{payment.amount}</p>

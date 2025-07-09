@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Container,
   Form,
@@ -9,82 +10,143 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { IoArrowBack } from "react-icons/io5";
+import { fetchSubcategoryRequest } from "../../features/subcategories/subcategoryAction";
+import { fetchProductCategoryRequest } from "../../features/categories/categoriesAction";
+import { createProductRequest } from "../../features/product/productActions";
 
 const AddProductForm = () => {
   const navigate = useNavigate();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+
+  // Ensure arrays for categories and subcategories
+  const categoryState = useSelector((state) => state.categoryproducts);
+  const subcategoryState = useSelector((state) => state.subcategory);
+
+  const categoryproduct = Array.isArray(categoryState?.categoryproduct)
+    ? categoryState.categoryproduct
+    : [];
+
+  const subcategories = Array.isArray(subcategoryState?.subcategories)
+    ? subcategoryState.subcategories
+    : [];
+
+  const {
+    createdMessage = null,
+    error = null,
+    loading: isSubmitting = false,
+  } = useSelector((state) => state.products || {});
 
   const [product, setProduct] = useState({
     name: "",
     slug: "",
     description: "",
-    price: "",
+    selling_price: "",
     mrp: "",
-    category_id: "",
     stock: "",
     unit: "",
     image_url: "",
-    weight: "",
+    weight_kg: "",
     is_active: false,
     is_featured: false,
+    category_name: "",
+    subcategory_name: "",
   });
+
+  useEffect(() => {
+    dispatch(fetchProductCategoryRequest());
+    dispatch(fetchSubcategoryRequest());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (createdMessage) {
+      alert(createdMessage);
+      navigate("/admin/adminproducts");
+    }
+
+    if (error) {
+      alert(error);
+    }
+  }, [createdMessage, error, navigate]);
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-
     setProduct((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const getCategoryIdByName = (name) => {
+    const category = categoryproduct.find((cat) => cat.name === name);
+    return category ? category.id : null;
+  };
 
-    if (
-      !product.name ||
-      !product.slug ||
-      !product.price ||
-      !product.mrp ||
-      !product.category_id ||
-      !product.stock ||
-      !product.unit ||
-      !product.image_url
-    ) {
+  const getSubcategoryIdByName = (name) => {
+    const subcategory = subcategories.find((sub) => sub.name === name);
+    return subcategory ? subcategory.id : null;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const {
+      name,
+      slug,
+      selling_price,
+      mrp,
+      stock,
+      unit,
+      image_url,
+      category_name,
+      subcategory_name,
+    } = product;
+
+    const requiredFields = [
+      name,
+      slug,
+      selling_price,
+      mrp,
+      stock,
+      unit,
+      image_url,
+      category_name,
+      subcategory_name,
+    ];
+
+    if (requiredFields.some((field) => !field)) {
       alert("Please fill in all required fields.");
-      setLoading(false);
       return;
     }
 
-    try {
-      const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/productregister`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(product),
-        }
-      );
-      const data = await response.json();
+    const category_id = getCategoryIdByName(category_name);
+    const subcategory_id = getSubcategoryIdByName(subcategory_name);
 
-      if (!response.ok) {
-        alert(data.message || "Error adding product");
-      } else {
-        alert(data.message || "Product added successfully");
-        navigate("/admin/adminproducts");
-      }
-    } catch (error) {
-      alert(error.message || "Error adding product, please try again later");
-    } finally {
-      setLoading(false);
+    if (!category_id || !subcategory_id) {
+      alert("Invalid category or subcategory selected.");
+      return;
     }
+
+    const payload = {
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      selling_price: product.selling_price,
+      mrp: product.mrp,
+      stock: product.stock,
+      unit: product.unit,
+      image_url: product.image_url,
+      weight_kg: product.weight_kg,
+      active: product.is_active ? 1 : 0,
+      featured: product.is_featured ? 1 : 0,
+      category_id,
+      subcategory_id,
+    };
+
+    dispatch(createProductRequest(payload));
   };
 
   return (
     <Container className="mt-4">
-      {/* Header Section */}
       <Row className="align-items-center mb-3">
         <Col xs={6}>
           <Button
@@ -106,7 +168,6 @@ const AddProductForm = () => {
       </Row>
 
       <Form onSubmit={handleSubmit} className="p-3 border rounded shadow">
-        {/* Product Name & Slug */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
@@ -116,7 +177,6 @@ const AddProductForm = () => {
                 name="name"
                 value={product.name}
                 onChange={handleChange}
-                placeholder="Enter product name"
                 required
               />
             </Form.Group>
@@ -129,14 +189,12 @@ const AddProductForm = () => {
                 name="slug"
                 value={product.slug}
                 onChange={handleChange}
-                placeholder="Enter product slug"
                 required
               />
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Description */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
@@ -146,24 +204,21 @@ const AddProductForm = () => {
                 name="description"
                 value={product.description}
                 onChange={handleChange}
-                placeholder="Enter product description"
                 required
               />
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Selling Price & MRP */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
               <Form.Label>Selling Price *</Form.Label>
               <Form.Control
                 type="number"
-                name="price"
-                value={product.price}
+                name="selling_price"
+                value={product.selling_price}
                 onChange={handleChange}
-                placeholder="Enter selling price"
                 required
               />
             </Form.Group>
@@ -176,28 +231,58 @@ const AddProductForm = () => {
                 name="mrp"
                 value={product.mrp}
                 onChange={handleChange}
-                placeholder="Enter MRP"
                 required
               />
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Category, Stock, Unit */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
-              <Form.Label>Category ID *</Form.Label>
-              <Form.Control
-                type="text"
-                name="category_id"
-                value={product.category_id}
+              <Form.Label>Category *</Form.Label>
+              <Form.Select
+                name="category_name"
+                value={product.category_name}
                 onChange={handleChange}
-                placeholder="Enter category ID"
                 required
-              />
+              >
+                <option value="">Select Category</option>
+                {categoryproduct.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
           </Col>
+          <Col>
+            <Form.Group>
+              <Form.Label>Subcategory *</Form.Label>
+              <Form.Select
+                name="subcategory_name"
+                value={product.subcategory_name}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Subcategory</option>
+                {subcategories
+                  .filter(
+                    (sub) =>
+                      sub.category_id ===
+                      getCategoryIdByName(product.category_name)
+                  )
+                  .map((sub) => (
+                    <option key={sub.id} value={sub.name}>
+                      {sub.name}
+                    </option>
+                  ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
           <Col>
             <Form.Group>
               <Form.Label>Stock *</Form.Label>
@@ -206,7 +291,6 @@ const AddProductForm = () => {
                 name="stock"
                 value={product.stock}
                 onChange={handleChange}
-                placeholder="Enter stock quantity"
                 required
               />
             </Form.Group>
@@ -219,14 +303,12 @@ const AddProductForm = () => {
                 name="unit"
                 value={product.unit}
                 onChange={handleChange}
-                placeholder="Enter unit (e.g., pcs, kg)"
                 required
               />
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Image URL */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
@@ -236,31 +318,26 @@ const AddProductForm = () => {
                 name="image_url"
                 value={product.image_url}
                 onChange={handleChange}
-                placeholder="Enter image URL"
                 required
               />
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Weight (in kg) */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
               <Form.Label>Weight (in kg)</Form.Label>
               <Form.Control
-                type="number"
-                step="0.01"
-                name="weight"
-                value={product.weight}
+                type="text"
+                name="weight_kg"
+                value={product.weight_kg}
                 onChange={handleChange}
-                placeholder="Enter weight in kg"
               />
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Active & Featured Switches */}
         <Row className="mb-3">
           <Col>
             <Form.Check
@@ -282,16 +359,18 @@ const AddProductForm = () => {
           </Col>
         </Row>
 
-        {/* Buttons */}
         <Row className="mt-4">
           <Col xs={6}>
-            <Button variant="secondary" onClick={() => navigate("/admin/adminproducts")}>
+            <Button
+              variant="secondary"
+              onClick={() => navigate("/admin/adminproducts")}
+            >
               Cancel
             </Button>
           </Col>
           <Col xs={6} className="text-end">
-            <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? (
+            <Button variant="primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
                   <Spinner animation="border" size="sm" /> Adding...
                 </>

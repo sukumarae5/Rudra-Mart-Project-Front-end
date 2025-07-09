@@ -1,11 +1,18 @@
+import AddBannerForm from "../components/AdminPane/AddBannerForm";
+import AddCategoryForm from "../components/AdminPane/AddCategoryForm";
 import AddProductForm from "../components/AdminPane/AddProductForm";
+import AddSubcategoryForm from "../components/AdminPane/AddSubcategoryForm";
 import AddUserForm from "../components/AdminPane/AddUserForm";
+import AdminBanners from "../components/AdminPane/AdminBanners";
 import AdminCategories from "../components/AdminPane/AdminCategories";
 import AdminInbox from "../components/AdminPane/AdminInbox";
+import AdminSubcategories from "../components/AdminPane/AdminSubCategories";
 import CategoryCard from "../components/AdminPane/CategoryCard";
 import Dashboard from "../components/AdminPane/Dashboard";
+import EditCategoryForm from "../components/AdminPane/EditCategoryForm";
 import EditOrdersForm from "../components/AdminPane/EditOrdersForm";
 import EditProductForm from "../components/AdminPane/EditProductForm";
+import EditSubcategoryForm from "../components/AdminPane/EditSubcateoryForm";
 import EditUserForm from "../components/AdminPane/EditUserForm";
 import OrderTable from "../components/AdminPane/OrderTable";
 import ProductTable from "../components/AdminPane/ProductTable";
@@ -35,11 +42,19 @@ const AdminRoute = [
     element: <EditUserForm />,
   },
   {
-    path: "editproduct", // Nested route
+    path: "editproduct/:id", 
     element: <EditProductForm />,
   },
   {
-    path: "editorders", // Nested route
+    path: "editcategoryform/:id", 
+    element: <EditCategoryForm />,
+  },
+  {
+    path: "editsubcategoryform/:id", 
+    element: <EditSubcategoryForm />,
+  },
+  {
+    path: "editorders", 
     element: <EditOrdersForm />,
   },
   {
@@ -50,9 +65,30 @@ const AdminRoute = [
     path:"addproducts",
     element:<AddProductForm />
   },{
+    path:"addcategoryform",
+    element:<AddCategoryForm />
+  },
+  {
+    path:"addsubcategoryform",
+    element:<AddSubcategoryForm />
+  },
+  {
     path:"categories",
     element:<AdminCategories/>
-  },{
+  },
+  {
+    path:"adminbanners",
+    element:<AdminBanners/>
+  },
+  {
+    path:"addbanners",
+    element:<AddBannerForm/>
+  },
+  {
+    path:"subcategories",
+    element:<AdminSubcategories/>
+  },
+  {
     path:"categoriesproducts",
     element:<CategoryCard/>
   },{

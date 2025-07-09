@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Badge, Col, Row } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
 import { Button } from "@mui/material";
 
 import {
@@ -14,222 +14,205 @@ import {
   removeWishlistProductRequest,
 } from "../features/wishlist/wishlistAction";
 
+import { fetchBannersRequest } from "../features/banners/bannerActions"; // ✅ banner action
+
 import ProductCategory from "../features/product/productCategory";
 import Categorypage from "./Categorypage";
 import ExploreOurProductspage from "./ExploreOurProductspage";
 import NewArrivalpage from "./NewArrivalpage";
-
-// import image3 from "../assets/images/images22.jpg"
 import SellingProductspage from "./SellingProductspage";
 
 const HomePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { products = [], loading = false, error = null } =
-    useSelector((state) => state.products || {});
-  const { cartItems = [] } = useSelector((state) => state.cart || {});
-  const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
-  const wishlistItems = Array.isArray(wishlistData[0])
-    ? wishlistData[0]
-    : wishlistData;
+  // // Product, Cart, Wishlist
+  // const { products = [] } = useSelector((state) => state.products || {});
+  // const { cartItems = [] } = useSelector((state) => state.cart || {});
+  // const { wishlistData = [] } = useSelector((state) => state.wishlist || {});
+  // const wishlistItems = Array.isArray(wishlistData[0])
+  //   ? wishlistData[0]
+  //   : wishlistData;
 
-  const [timeLeft, setTimeLeft] = useState(3600);
-  const [ratings, setRatings] = useState({});
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  // Banner from Redux
+  const { banners, loading: bannerLoading, error: bannerError } = useSelector(
+    (state) => state.banners || {}
+  );
 
-  const showSnackbar = (message, severity = "success") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
+  // Snackbar state
+  // const [snackbarOpen, setSnackbarOpen] = useState(false);
+  // const [snackbarMessage, setSnackbarMessage] = useState("");
+  // const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  // const showSnackbar = (message, severity = "success") => {
+  //   setSnackbarMessage(message);
+  //   setSnackbarSeverity(severity);
+  //   setSnackbarOpen(true);
+  // };
 
   useEffect(() => {
     dispatch(fetchproductsrequest());
+    dispatch(fetchBannersRequest()); // ✅ Fetch banners using Redux
   }, [dispatch]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // const handleAddToCart = async (event, product) => {
+  //   event.stopPropagation();
+  //   try {
+  //     const userToken = localStorage.getItem("authToken");
+  //     const userData = localStorage.getItem("user");
 
-  const calculateTimeUnits = (seconds) => {
-    const days = Math.floor(seconds / (3600 * 24));
-    const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return { days, hours, minutes, secs };
-  };
+  //     if (!userData) {
+  //       showSnackbar("User not found. Please log in.", "error");
+  //       return;
+  //     }
 
-  const { days, hours, minutes, secs } = calculateTimeUnits(timeLeft);
+  //     const user = JSON.parse(userData);
 
-  const scrollProducts = (direction) => {
-    const container = document.getElementById("product-scroll-container");
-    const scrollAmount = 300;
-    if (container) {
-      container.scrollLeft += direction === "left" ? -scrollAmount : scrollAmount;
-    }
-  };
+  //     const isProductInCart = cartItems.some(
+  //       (item) => item.user_id === user.id && item.product_id === product.id
+  //     );
+  //     if (isProductInCart) {
+  //       showSnackbar("Product already in cart", "warning");
+  //       return;
+  //     }
 
-  const handleAddToCart = async (event, product) => {
-    event.stopPropagation();
-    try {
-      const userToken = localStorage.getItem("authToken");
-      const userData = localStorage.getItem("user");
+  //     const cartItem = {
+  //       user_id: user.id,
+  //       product_id: product.id,
+  //       quantity: 1,
+  //     };
 
-      if (!userData) {
-        showSnackbar("User not found. Please log in.", "error");
-        return;
-      }
+  //     const response = await fetch(
+  //       `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${userToken}`,
+  //         },
+  //         body: JSON.stringify(cartItem),
+  //       }
+  //     );
 
-      const user = JSON.parse(userData);
+  //     const data = await response.json();
+  //     if (!response.ok) {
+  //       showSnackbar(`Error: ${data.message || response.statusText}`, "error");
+  //       return;
+  //     }
 
-      const isProductInCart = cartItems.some(
-        (item) => item.user_id === user.id && item.product_id === product.id
-      );
-      if (isProductInCart) {
-        showSnackbar("Product already in cart", "warning");
-        return;
-      }
+  //     showSnackbar("Product added to cart!", "success");
+  //     dispatch(fetchApiCartDataRequest());
+  //   } catch (error) {
+  //     console.error("Error adding product to cart:", error);
+  //     showSnackbar(`Error: ${error.message}`, "error");
+  //   }
+  // };
 
-      const cartItem = {
-        user_id: user.id,
-        product_id: product.id,
-        quantity: 1,
-      };
+  // const handleCardClick = (productId, product) => {
+  //   dispatch(setSelectedProduct(product));
+  //   navigate("/productpage");
+  // };
 
-      const response = await fetch(
-        `http://${process.env.REACT_APP_IP_ADDRESS}/api/cart/add`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-          body: JSON.stringify(cartItem),
-        }
-      );
+  // const handleWishlistClick = (e, product) => {
+  //   e.stopPropagation();
+  //   const userData = localStorage.getItem("user");
+  //   if (!userData) {
+  //     showSnackbar("User not found", "error");
+  //     return;
+  //   }
 
-      const data = await response.json();
-      if (!response.ok) {
-        showSnackbar(`Error: ${data.message || response.statusText}`, "error");
-        return;
-      }
+  //   const user = JSON.parse(userData);
+  //   if (!user?.id || !product?.id) {
+  //     showSnackbar("Invalid user or product data", "error");
+  //     return;
+  //   }
 
-      showSnackbar("Product added to cart!", "success");
-      dispatch(fetchApiCartDataRequest());
-    } catch (error) {
-      console.error("Error adding product to cart:", error);
-      showSnackbar(`Error: ${error.message}`, "error");
-    }
-  };
+  //   dispatch(addToWishlistRequest(product.id));
+  // };
 
-  const handleRating = (rating, productId) => {
-    setRatings((prevRatings) => ({ ...prevRatings, [productId]: rating }));
-  };
+  // const removeItem = (event, productid) => {
+  //   event.stopPropagation();
+  //   const wishlistItem = wishlistItems.find(
+  //     (item) => Number(item.product_id) === Number(productid)
+  //   );
 
-  const handleCardClick = (productId, product) => {
-    dispatch(setSelectedProduct(product));
-    navigate("/productpage");
-  };
-
-  const handleWishlistClick = (e, product) => {
-    e.stopPropagation();
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      showSnackbar("User not found", "error");
-      return;
-    }
-
-    const user = JSON.parse(userData);
-    if (!user?.id || !product?.id) {
-      showSnackbar("Invalid user or product data", "error");
-      return;
-    }
-
-    dispatch(addToWishlistRequest(product.id));
-  };
-
-  const removeItem = (event, productid) => {
-    event.stopPropagation();
-    const wishlistItem = wishlistItems.find(
-      (item) => Number(item.product_id) === Number(productid)
-    );
-
-    if (wishlistItem) {
-      dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));
-      showSnackbar("Removed from wishlist", "info");
-    } else {
-      showSnackbar("Product not found in wishlist", "warning");
-    }
-  };
+  //   if (wishlistItem) {
+  //     dispatch(removeWishlistProductRequest(wishlistItem.wishlist_id));
+  //     showSnackbar("Removed from wishlist", "info");
+  //   } else {
+  //     showSnackbar("Product not found in wishlist", "warning");
+  //   }
+  // };
 
   return (
     <div>
-       <ProductCategory />
-       
-      <Row className="mb-4" style={{marginTop:"7%"}} >
+      {/* Product Category Navbar */}
+     
+      {/* Banner Section */}
+      <Row className="mb-4">
         <Col>
-          {/* <div className="mx-2"
-            style={{
-            
-  backgroundImage: `url(${image3})`,
-  backgroundSize: "cover",            // Ensures the image covers the container
-  backgroundPosition: "center",       // Centers the image
-  backgroundRepeat: "no-repeat",      // Prevents tiling
-  borderRadius: "20px",
-  height: "320px",                    // Can be changed to a relative unit if needed
-  width: "100%",                      // Makes the container take full width of its parent
-  maxWidth: "100%",                   // Prevents overflow
-  overflow: "hidden",
-  position: "relative",
-  }}
-          >
+          {bannerLoading ? (
+            <p className="text-center">Loading banner...</p>
+          ) : bannerError ? (
+            <p className="text-danger text-center">{bannerError}</p>
+          ) : banners.length > 0 ? (
             <div
+              className="mx-2"
               style={{
-                position: "absolute",
-                top: "50%",
-                left: "40px",
-                transform: "translateY(-50%)",
-                color: "white",
-                maxWidth: "400px",
-                padding: "20px",
+                backgroundImage: `url(${banners[0].image_url})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                borderRadius: "20px",
+                height: "320px",
+                width: "100%",
+                maxWidth: "100%",
+                overflow: "hidden",
+                position: "relative",
               }}
             >
-              <h2 style={{ fontWeight: "bold", fontSize: "32px" }}>
-                Groceries delivered in <br /> 10 minutes
-              </h2>
-              <p style={{ marginBottom: "20px", fontSize: "16px" }}>
-                Fresh produce, daily essentials & more
-              </p>
-              <Button
-                variant="light"
+              <div
                 style={{
-                  fontWeight: "bold",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  background: "white",
-                  color: "green",
+                  position: "absolute",
+                  top: "50%",
+                  left: "40px",
+                  transform: "translateY(-50%)",
+                  color: "white",
+                  maxWidth: "400px",
+                  padding: "20px",
                 }}
               >
-                Shop Now →
-              </Button>
+                <h2 style={{ fontWeight: "bold", fontSize: "32px" }}>
+                  {banners[0].description ||
+                    "Groceries delivered in 10 minutes"}
+                </h2>
+                <p style={{ marginBottom: "20px", fontSize: "16px" }}>
+                  {banners[0].offers || "Fresh produce, daily essentials & more"}
+                </p>
+                <Button
+                  variant="light"
+                  style={{
+                    fontWeight: "bold",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    background: "white",
+                    color: "green",
+                  }}
+                >
+                  Shop Now →
+                </Button>
+              </div>
             </div>
-          </div> */}
+          ) : (
+            <p className="text-center">No banner available</p>
+          )}
         </Col>
       </Row>
-
-      {/* Other Pages */}
-     
+       <ProductCategory />
+      {/* Sections */}
       <Categorypage />
-      
-      {/* <Categories /> */}
       <ExploreOurProductspage />
-       <SellingProductspage />
+      <SellingProductspage />
       <NewArrivalpage />
     </div>
   );

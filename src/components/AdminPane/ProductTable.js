@@ -12,7 +12,7 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchProductsWithCategoryRequest } from "../../features/product/productActions";
+import { deleteProductRequest, fetchProductsWithCategoryRequest } from "../../features/product/productActions";
 import PaginationComponent from "./Pagination";
 import { GoPlus } from "react-icons/go";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
@@ -57,7 +57,12 @@ const ProductTable = () => {
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
+   const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      dispatch(deleteProductRequest(id));
+      navigate("/admin/adminproducts")
+    }
+  };
   return (
     <div className="container-fluid px-1">
       <Card className="border-0 rounded-3">
@@ -192,7 +197,7 @@ const ProductTable = () => {
                           variant="outline-primary"
                           size="sm"
                           onClick={() =>
-                            navigate("/admin/editproduct", { state: { product } })
+                            navigate(`/admin/editproduct/${product.id}`, { state: { product } })
                           }
                           aria-label={`Edit ${product.product_name || "product"}`}
                         >
@@ -201,15 +206,7 @@ const ProductTable = () => {
                         <Button
                           variant="outline-danger"
                           size="sm"
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `Are you sure you want to delete ${product.product_name}?`
-                              )
-                            ) {
-                              // Add delete logic here
-                            }
-                          }}
+                          onClick={() => handleDelete(product.id)}
                           aria-label={`Delete ${product.product_name || "product"}`}
                         >
                           <MdOutlineDeleteOutline size={20} />

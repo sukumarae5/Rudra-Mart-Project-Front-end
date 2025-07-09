@@ -57,7 +57,7 @@ const Login = () => {
           severity: "warning",
         });
         setTimeout(() => {
-          navigate("/register", { state: { phone } });
+          navigate("/signup", { state: { phone } });
         }, 1500);
       } else {
         setSnackbar({

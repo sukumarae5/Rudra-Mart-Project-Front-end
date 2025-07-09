@@ -9,6 +9,12 @@ import {
   fetchAllOrderSuccess,
   fetchAllOrderFailure,
   fetchUserOrderFailure,
+  DELETE_ORDER_REQUEST,
+  UPDATE_ORDER_REQUEST,
+  deleteOrderFailure,
+  deleteOrderSuccess,
+  updateOrderSuccess,
+  updateOrderFailure,
 } from "./orderActions";
 
 // Function to fetch orders from API
@@ -78,7 +84,6 @@ const fetchAllOrdersApi = async () => {
         "Content-Type": "application/json",
       },
     });
-    console.log(response)
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Error fetching all orders");
@@ -119,10 +124,63 @@ function*fetchUserSaga(){
 yield put(fetchUserOrderFailure(error.message))    
   }
 }
+
+const updateOrderApi = async ({ orderId, status }) => {
+ console.log(orderId, status)
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/status/${orderId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({status}),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update order");
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+const deleteOrderApi = async (orderId) => {
+  console.log(orderId)
+  const response = await fetch(`http://${process.env.REACT_APP_IP_ADDRESS}/api/orders/${orderId}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete order");
+  }
+
+  return orderId;
+};
+
+function* updateOrderSaga(action) {
+  try {
+    const updatedOrder = yield call(updateOrderApi, action.payload);
+    yield put(updateOrderSuccess(updatedOrder));
+  } catch (error) {
+    yield put(updateOrderFailure(error.message));
+  }
+}
+
+// Delete Saga
+function* deleteOrderSaga(action) {
+  try {
+    const deletedOrderId = yield call(deleteOrderApi, action.payload);
+    yield put(deleteOrderSuccess(deletedOrderId));
+  } catch (error) {
+    yield put(deleteOrderFailure(error.message));
+  }
+}
+
 // Root saga to listen for FETCH_ORDERS_REQUEST action
 export default function* orderSaga() {
   yield takeEvery(FETCH_ORDERS_REQUEST, fetchOrderSaga);
   yield takeEvery(FETCH_USER_ORDER_REQUEST,fetchUserSaga);
   yield takeEvery(FETCH_ALL_ORDER_REQUEST, fetchAllOrdersSaga);
-  
+  yield takeEvery(UPDATE_ORDER_REQUEST, updateOrderSaga);
+yield takeEvery(DELETE_ORDER_REQUEST, deleteOrderSaga);
+
 }

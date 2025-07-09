@@ -29,6 +29,7 @@ import UserTrackingpage from "../pages/UserAccontDetialsPage/UserTrackingpage";
 import UserSetNewpasswordpage from "../pages/UserAccontDetialsPage/UserForgotpasswordpage/UserSetNewpasswordpage"
 import SubcategoryPage from "../pages/SubcategoryPage";
 import Subcategoryproductspage from "../pages/Subcategoryproductspage";
+import CartPageMain from "../pages/CartPageMain";
 const AppRouter = createBrowserRouter([
 
   { 
@@ -62,7 +63,10 @@ const AppRouter = createBrowserRouter([
         path:"/ExploreOurProductspage",
         element:<ExploreOurProductspage/>
       },
-     
+       {
+        path: "/cartpagemain",
+        element: <CartPageMain />,
+      },
       {
         path: "/cartpage",
         element: <CartPage />,

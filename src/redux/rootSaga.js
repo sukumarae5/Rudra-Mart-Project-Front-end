@@ -9,6 +9,7 @@ import addressSaga from '../features/address/addressSaga';
 import wishlistSaga from '../features/wishlist/wishlistSaga';
 import dashboardSaga from '../features/admin/adminSaga';
 import subcategorySaga from '../features/subcategories/subcategorySaga';
+import bannerSaga from '../features/banners/bannerSaga';
 
 function* rootSaga() {
   yield all([
@@ -20,7 +21,8 @@ function* rootSaga() {
     addressSaga(),
     dashboardSaga(),
     categorySaga(), 
-    subcategorySaga()
+    subcategorySaga(),
+    bannerSaga()
   ]);
 }
 

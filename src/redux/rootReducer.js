@@ -9,6 +9,7 @@ import wishlistReducer from '../features/wishlist/wishlistSlice';
 import dashboardReducer from '../features/admin/adminSlice';
 import categoryProductReducer from '../features/categories/categorieSlice'; // renamed for camelCase
 import subcategoryReducer from '../features/subcategories/subcategorySlice';
+import bannerReducer from '../features/banners/bannerSlice';
 
 const rootReducer = combineReducers({
   products: productReducer,
@@ -19,7 +20,8 @@ const rootReducer = combineReducers({
   wishlist: wishlistReducer,
   admindashboard: dashboardReducer,
   categoryproducts: categoryProductReducer,
-  subcategory:subcategoryReducer
+  subcategory:subcategoryReducer,
+  banners : bannerReducer
 });
 
 export default rootReducer;
