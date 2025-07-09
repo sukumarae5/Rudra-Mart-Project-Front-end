@@ -158,20 +158,22 @@ const Header = () => {
             {locationName}
           </Button>
 
-          <Form className="flex-grow-1 mx-2" onSubmit={handleSearch}>
-            <InputGroup>
-              <InputGroup.Text className="bg-white border-end-0">
-                <BiSearch />
-              </InputGroup.Text>
-              <Form.Control
-                type="text"
-                placeholder="Search for groceries, electronics, fashion, home & kitchen..."
-                className="border-start-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </InputGroup>
-          </Form>
+         <Form className="flex-grow-1 mx-2" onSubmit={handleSearch}>
+  <InputGroup>
+    <InputGroup.Text className="bg-white border-end-0">
+      <BiSearch />
+    </InputGroup.Text>
+    <Form.Control
+      type="text"
+      placeholder="Search for groceries, electronics, fashion, home & kitchen..."
+      className="border-start-0"
+      value={searchQuery}
+      style={{ height: "38%", width: "70%" }} // ✅ Proper size
+      onChange={(e) => setSearchQuery(e.target.value)}
+    />
+  </InputGroup>
+</Form>
+
 
           <Nav className="ms-auto d-flex align-items-center">
   {/* Home Link */}
@@ -200,7 +202,7 @@ const Header = () => {
   ) : (
     <Nav.Link as={Link} to="/login" className="d-flex align-items-center me-3">
       <CiUser size={20} />
-      <span className="d-none d-sm-inline ms-1">Account</span>
+      <span className="d-none d-sm-inline ms-1" style={{fontSize:"50%"}}>Account</span>
     </Nav.Link>
   )}
 
