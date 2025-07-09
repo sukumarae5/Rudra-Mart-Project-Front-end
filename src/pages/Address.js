@@ -9,8 +9,7 @@ import {
   Card,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaHome } from "react-icons/fa";
-import Accordion from "react-bootstrap/Accordion";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
@@ -19,7 +18,7 @@ const MuiSnackbarAlert = React.forwardRef(function Alert(props, ref) {
 });
 MuiSnackbarAlert.displayName = "MuiSnackbarAlert";
 
-const Address = ({ scrollToOrderSummary }) => {
+const Address = () => {
   const navigate = useNavigate();
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -177,19 +176,7 @@ const Address = ({ scrollToOrderSummary }) => {
 
   const handleEditAddress = (address) => {
     setSelectedAddress(address);
-    setFormData({
-      full_name: address.full_name || "",
-      phone_number: address.phone_number || "",
-      pincode: address.pincode || "",
-      house_no: address.house_no || "",
-      street: address.street || "",
-      landmark: address.landmark || "",
-      city: address.city || "",
-      state: address.state || "",
-      country: address.country || "",
-      address_type: address.address_type || "Home",
-      is_default: address.is_default || false,
-    });
+    setFormData({ ...address });
     setNewAddress(true);
   };
 
@@ -213,196 +200,167 @@ const Address = ({ scrollToOrderSummary }) => {
   }, [savedAddresses]);
 
   return (
-    <Container
-      fluid
-      style={{ background: "#e3f2fd", padding: "10px 0 0 40px", width: "97%" }}
-    >
-      <Row className="justify-content-center my-2">
-        <Accordion defaultActiveKey="0">
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>
-              <FaHome /> Select The Address
-            </Accordion.Header>
-            <Accordion.Body>
-              <Col md={12} className="p-4 bg-white rounded shadow-sm mb-4">
-                <h3 className="text-primary mb-4 d-flex align-items-center">
-                  <FaMapMarkerAlt className="me-2" /> Delivery Address
-                </h3>
+    <Container fluid className="py-4 px-3" style={{ backgroundColor: "#f7f7f7" }}>
+      <Row className="justify-content-center">
+        <Col md={12} className="bg-white rounded shadow-sm p-4">
+          <h3 className="mb-4 d-flex align-items-center">
+            <FaMapMarkerAlt className="me-2 text-danger" />
+            <span
+              style={{
+                backgroundColor: "#fff3cd",
+                padding: "4px 8px",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                color: "#d35400",
+              }}
+            >
+              Delivery Address
+            </span>
+          </h3>
 
-                {loading && <Spinner animation="border" />}
-                {savedAddresses.length > 0 ? (
-                  savedAddresses.map((addr) => (
-                    <Card key={addr.id} className="mb-3">
-                      <Card.Body>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <Form.Check
-                            type="radio"
-                            name="address"
-                            checked={selectedAddress?.id === addr.id}
-                            onChange={() => handleSelectAddressForPayment(addr)}
-                            label={
-                              <>
-                                <strong>{addr.full_name}</strong> (
-                                {addr.phone_number})<br />
-                                {addr.house_no}, {addr.street}, {addr.landmark},{" "}
-                                {addr.city}, {addr.state}, {addr.pincode},{" "}
-                                {addr.country}
-                              </>
-                            }
+          {loading && <Spinner animation="border" />}
+
+          {savedAddresses.length > 0 ? (
+            savedAddresses.map((addr) => (
+              <Card
+                key={addr.id}
+                className={`mb-3 ${selectedAddress?.id === addr.id ? "border-primary" : ""}`}
+              >
+                <Card.Body className="d-flex justify-content-between align-items-start">
+                  <Form.Check
+                    type="radio"
+                    name="address"
+                    checked={selectedAddress?.id === addr.id}
+                    onChange={() => handleSelectAddressForPayment(addr)}
+                    label={
+                      <>
+                        <strong>{addr.full_name}</strong> ({addr.phone_number})<br />
+                        {addr.house_no}, {addr.street}, {addr.landmark}, {addr.city},{" "}
+                        {addr.state}, {addr.pincode}, {addr.country}
+                      </>
+                    }
+                  />
+                  <div>
+                    <Button
+                      className="btn btn-sm btn-warning me-2"
+                      onClick={() => handleEditAddress(addr)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDeleteAddress(addr.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            ))
+          ) : (
+            <p>No saved addresses. Please add one.</p>
+          )}
+
+          <Button
+            variant="link"
+            className="text-primary mb-3"
+            onClick={() => {
+              setNewAddress(true);
+              setSelectedAddress(null);
+              setFormData(initialFormState);
+            }}
+          >
+            + Add New Address
+          </Button>
+
+          {newAddress && (
+            <Card className="mt-4">
+              <Card.Body>
+                <Form onSubmit={handleAddOrUpdateAddress}>
+                  <Row>
+                    {Object.keys(initialFormState).map((field) => {
+                      if (field === "is_default") {
+                        return (
+                          <Col md={6} key={field} className="mb-3">
+                            <Form.Check
+                              type="checkbox"
+                              label="Set as Default"
+                              name={field}
+                              checked={formData[field]}
+                              onChange={handleChange}
+                            />
+                          </Col>
+                        );
+                      }
+                      if (field === "address_type") {
+                        return (
+                          <Col md={6} key={field} className="mb-3">
+                            <Form.Label>Address Type</Form.Label>
+                            <Form.Select
+                              name={field}
+                              value={formData[field]}
+                              onChange={handleChange}
+                            >
+                              <option value="Home">Home</option>
+                              <option value="Work">Work</option>
+                            </Form.Select>
+                          </Col>
+                        );
+                      }
+                      return (
+                        <Col md={6} key={field} className="mb-3">
+                          <Form.Label>
+                            {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            name={field}
+                            value={formData[field]}
+                            onChange={handleChange}
+                            required
                           />
-                          <div>
-                            <Button
-                              variant="warning"
-                              size="sm"
-                              onClick={() => handleEditAddress(addr)}
-                              className="me-2"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              onClick={() => handleDeleteAddress(addr.id)}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  ))
-                ) : (
-                  <p className="text-muted">
-                    No saved addresses. Please add a new address.
-                  </p>
-                )}
+                        </Col>
+                      );
+                    })}
+                  </Row>
+                  <div className="d-flex">
+                    <Button type="submit" className="fw-bold">
+                      {loading ? "Saving..." : selectedAddress ? "Update" : "Save"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="ms-2"
+                      onClick={handleCancel}
+                      disabled={loading}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </Form>
+              </Card.Body>
+            </Card>
+          )}
 
-                <Button
-                  variant="link"
-                  className="text-primary"
-                  onClick={() => {
-                    setNewAddress(true);
-                    setSelectedAddress(null);
-                    setFormData(initialFormState);
-                  }}
-                >
-                  + Add New Address
-                </Button>
-
-                {newAddress && (
-                  <Card className="mt-4">
-                    <Card.Body>
-                      <h4 className="text-primary mb-3">
-                        {selectedAddress ? "Edit Address" : "Add New Address"}
-                      </h4>
-                      <Form onSubmit={handleAddOrUpdateAddress}>
-                        {Object.keys(initialFormState).map((field) => {
-                          if (field === "is_default") {
-                            return (
-                              <Form.Group className="mb-3" key={field}>
-                                <Form.Check
-                                  type="checkbox"
-                                  label="Set as Default Address"
-                                  name={field}
-                                  checked={formData[field]}
-                                  onChange={handleChange}
-                                />
-                              </Form.Group>
-                            );
-                          }
-
-                          if (field === "address_type") {
-                            return (
-                              <Form.Group className="mb-3" key={field}>
-                                <Form.Label>Address Type</Form.Label>
-                                <Form.Select
-                                  name={field}
-                                  value={formData[field]}
-                                  onChange={handleChange}
-                                >
-                                  <option value="Home">Home</option>
-                                  <option value="Work">Work</option>
-                                </Form.Select>
-                              </Form.Group>
-                            );
-                          }
-
-                          return (
-                            <Form.Group className="mb-3" key={field}>
-                              <Form.Label>
-                                {field
-                                  .replace(/_/g, " ")
-                                  .replace(/\b\w/g, (c) => c.toUpperCase())}
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                name={field}
-                                value={formData[field]}
-                                onChange={handleChange}
-                                required
-                              />
-                            </Form.Group>
-                          );
-                        })}
-                        <div className="d-flex">
-                          <Button
-                            variant="primary"
-                            type="submit"
-                            disabled={loading}
-                          >
-                            {loading
-                              ? selectedAddress
-                                ? "Updating..."
-                                : "Saving..."
-                              : selectedAddress
-                              ? "Update Address"
-                              : "Save Address"}
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={handleCancel}
-                            disabled={loading}
-                            className="ms-2"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </Form>
-                    </Card.Body>
-                  </Card>
-                )}
-
-                <div className="d-flex justify-content-end mt-3">
-                  <Button
-                    className="px-4 py-2 fw-bold"
-                    onClick={() => {
-                      if (savedAddresses.length === 0) {
-                        showAlert(
-                          "Please add an address before continuing.",
-                          "warning"
-                        );
-                        return;
-                      }
-
-                      if (!selectedAddress?.id) {
-                        showAlert(
-                          "Please select an address before continuing.",
-                          "warning"
-                        );
-                        return;
-                      }
-
-                      localStorage.setItem("addressId", selectedAddress.id);
-                      scrollToOrderSummary(); // or navigate("/order-summary") if you're using route navigation
-                    }}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </Col>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+          <div className="d-flex justify-content-end mt-4">
+            <Button
+              className="fw-bold"
+              onClick={() => {
+                if (savedAddresses.length === 0) {
+                  showAlert("Please add an address.", "warning");
+                  return;
+                }
+                if (!selectedAddress?.id) {
+                  showAlert("Please select an address.", "warning");
+                  return;
+                }
+                localStorage.setItem("addressId", selectedAddress.id);
+                navigate("/ordersummarypage");
+              }}
+            >
+              Next
+            </Button>
+          </div>
+        </Col>
       </Row>
 
       <Snackbar
