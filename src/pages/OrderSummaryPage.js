@@ -15,16 +15,16 @@ import {
   increaseQuantity,
   removeProduct,
 } from "../features/cart/cartActions";
-
-// ✅ MUI components
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { useNavigate } from "react-router-dom";
 
-// ✅ Snackbar Alert component for MUI
+// MUI Alert Component
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+// Currency Formatter
 const formatCurrency = (value) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -34,12 +34,12 @@ const formatCurrency = (value) =>
 
 const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
-  console.log(checkoutData)
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // "error", "info", etc.
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -57,20 +57,13 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
     dispatch(removeProduct(productId));
   };
 
- const totalCost = checkoutData.reduce((total, item) => {
-  console.log("Item:", item);
-  console.log("Running Total (before adding this item):", total);
-  const itemTotal = item.productPrice * item.quantity;
-  console.log("Item Subtotal:", itemTotal);
-  return total + itemTotal;
-}, 0);
+  const totalCost = checkoutData.reduce((total, item) => {
+    return total + item.productPrice * item.quantity;
+  }, 0);
 
-
-  const handleConfirmOrder = async () => {
+  const handleConfirmOrder = () => {
     if (checkoutData.length === 0) {
-      setSnackbarMessage(
-        "Your cart is empty. Add items before confirming the order."
-      );
+      setSnackbarMessage("Your cart is empty. Add items before confirming the order.");
       setSnackbarSeverity("warning");
       setSnackbarOpen(true);
       return;
@@ -81,15 +74,8 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
     setSnackbarOpen(true);
 
     setTimeout(() => {
-      if (onConfirmOrder) {
-        onConfirmOrder();
-      } else {
-        const paymentSection = document.getElementById("payment-section");
-        if (paymentSection) {
-          paymentSection.scrollIntoView({ behavior: "smooth" });
-        }
-      }
-    }, 3000); // Wait for snackbar to finish
+      navigate("/paymentpage"); // ✅ Make sure this route exists in App.js
+    }, 3000);
   };
 
   return (
@@ -107,7 +93,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                     {checkoutData.length > 0 ? (
                       checkoutData.map((item) => (
                         <Row
-                          key={item.id}
+                          key={item.productId}
                           className="align-items-center p-3 border-bottom"
                         >
                           <Col xs={3} className="text-center">
@@ -128,10 +114,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                               Price: {formatCurrency(item.productPrice)}
                             </p>
                             <p className="fw-bold">
-                              Subtotal:{" "}
-                              {formatCurrency(
-                                item.productPrice * item.quantity
-                              )}
+                              Subtotal: {formatCurrency(item.productPrice * item.quantity)}
                             </p>
                           </Col>
                           <Col xs={2} className="text-end">
@@ -139,9 +122,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                onClick={() =>
-                                  handleDecreaseQuantity(item.productId)
-                                }
+                                onClick={() => handleDecreaseQuantity(item.productId)}
                               >
                                 <FaMinus />
                               </Button>
@@ -149,9 +130,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                               <Button
                                 variant="outline-success"
                                 size="sm"
-                                onClick={() =>
-                                  handleIncreaseQuantity(item.productId)
-                                }
+                                onClick={() => handleIncreaseQuantity(item.productId)}
                               >
                                 <FaPlus />
                               </Button>
@@ -160,9 +139,7 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
                             <Button
                               variant="danger"
                               size="sm"
-                              onClick={() =>
-                                handleRemoveProduct(item.productId)
-                              }
+                              onClick={() => handleRemoveProduct(item.productId)}
                             >
                               <FaTrash />
                             </Button>
@@ -195,7 +172,6 @@ const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
         </Row>
       </Container>
 
-      {/* ✅ Snackbar Alert */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

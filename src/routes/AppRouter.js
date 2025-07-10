@@ -30,7 +30,7 @@ import UserSetNewpasswordpage from "../pages/UserAccontDetialsPage/UserForgotpas
 import SubcategoryPage from "../pages/SubcategoryPage";
 import Subcategoryproductspage from "../pages/Subcategoryproductspage";
 import CartPageMain from "../pages/CartPageMain";
-
+import OrderSummaryPage from "../pages/OrderSummaryPage";
 const AppRouter = createBrowserRouter([
 
   {     
@@ -47,8 +47,12 @@ const AppRouter = createBrowserRouter([
       },
       
       {
-        path:"/PaymentPage",
+        path:"/paymentpage",
         element:<PaymentPage/>
+      },
+       {
+        path:"/ordersummarypage",
+        element:<OrderSummaryPage/>
       },
       {
         path: "/contactpage",

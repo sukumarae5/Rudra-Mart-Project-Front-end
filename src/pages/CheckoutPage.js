@@ -26,12 +26,12 @@ const CheckoutPage = () => {
         <Row>
           <Address scrollToOrderSummary={scrollToOrderSummary}/>
         </Row>
-        <Row>
+      {/* <Row>
           <OrderSummaryPage ref={orderSummaryRef} onConfirmOrder={handleConfirmOrder}/>
         </Row>
         <Row>
           <PaymentPage ref={paymentRef}/>
-        </Row>
+        </Row> */}
       </Container>
 
     </div>

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 import {
-  FaGifts,
-  FaArrowCircleRight,
-  FaArrowAltCircleDown,
-  FaArrowAltCircleLeft,
+  FaCheckCircle,
+  FaTruck,
+  FaHome,
+  FaUser,
+  FaEnvelope,
+  FaDownload,
+  FaEye,
+  FaArrowLeft,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -40,7 +44,6 @@ const OrderPlacedSuccessfullyPage = () => {
         const latest = payments.sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         )[0];
-
         setPayment(latest);
       } catch (err) {
         console.error(err);
@@ -108,66 +111,82 @@ const OrderPlacedSuccessfullyPage = () => {
   if (!payment) return <div className="text-center mt-5">No payment data available.</div>;
 
   return (
-    <div>
-      {/* Order Success Message */}
-      <div className="text-center">
-        <div className="p-5 m-3 bg-success-subtle rounded">
-          <FaGifts style={{ fontSize: "60px", color: "#f7d302" }} />
-          <h1 style={{ color: "#47f013", fontWeight: "bold" }}>
-            Order Placed Successfully!
-          </h1>
-          <h4 className="text-dark">
-            ₹ {payment.amount}
-          </h4>
-          <p className="text-primary">Your items will be delivered soon...</p>
-        </div>
-      </div>
-
-      {/* User & Payment Info */}
-      <div
-        className="m-3 p-4 rounded"
-        style={{ backgroundColor: "#c5e0cd", maxWidth: "600px", margin: "auto" }}
-      >
-        <p><strong>Name:</strong> {user?.name || "N/A"}</p>
-        <p><strong>Phone Number:</strong> {user?.phone || "N/A"}</p>
-        <p><strong>Email:</strong> {user?.email || "N/A"}</p>
-        <p><strong>Transaction ID:</strong> {payment.transaction_id}</p>
-        <p><strong>Amount Paid:</strong> ₹{payment.amount}</p>
-        <p>
-          <strong>Order Placed Date:</strong>{" "}
-          {new Date(payment.created_at).toISOString().slice(0, 10)}
+    <div className="container mt-4">
+      <div className="text-center mb-4">
+        <FaCheckCircle size={50} color="green" />
+        <h4 className="fw-bold mt-3">Order #{payment.transaction_id} Placed Successfully!</h4>
+        <p className="text-muted">
+          We’ll email you the tracking details once your item ships.
         </p>
-        <p><strong>Address:</strong> [Add user address if available]</p>
       </div>
 
-      {/* Action Buttons */}
+      <Card className="shadow-sm border-0 mb-4">
+        <Card.Body>
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <h6 className="text-dark fw-bold"><FaTruck className="me-2" />Delivery Info</h6>
+              <p className="mb-1">Standard Shipping</p>
+              <p className="text-success fw-bold">
+                Arrives by {new Date(payment.created_at).toDateString()}
+              </p>
+              <small className="text-muted">Sold by Your Store</small><br />
+              <small>Order #{payment.transaction_id}</small>
+            </div>
+
+            <div className="col-md-6">
+              <h6 className="text-dark fw-bold"><FaHome className="me-2" />Shipping Address</h6>
+              <p className="mb-1"><FaUser className="me-1" />{user?.name}</p>
+              <p className="mb-1 text-muted">[User's Address Placeholder]</p>
+              <p className="mb-1"><FaEnvelope className="me-1" />{user?.email}</p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="d-flex justify-content-around text-center mt-3">
+            <div>
+              <FaCheckCircle color="green" size={24} />
+              <div>Placed</div>
+            </div>
+            <div>
+              <FaCheckCircle color="#ccc" size={24} />
+              <div>Processing</div>
+            </div>
+            <div>
+              <FaCheckCircle color="#ccc" size={24} />
+              <div>Shipped</div>
+            </div>
+            <div>
+              <FaCheckCircle color="#ccc" size={24} />
+              <div>Delivered</div>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="d-flex justify-content-between">
+            <div>
+              <strong>Product:</strong> Crayola 83-Piece Bundle Set<br />
+              <span className="text-muted">Qty: 1</span>
+            </div>
+            <div className="fw-bold fs-5 text-primary">₹{payment.amount}</div>
+          </div>
+        </Card.Body>
+      </Card>
+
       <div className="d-flex justify-content-center gap-3 mb-5">
-        <Button
-          variant="outline-danger"
-          onClick={() => navigate("/")}
-          className="d-flex align-items-center gap-2"
-        >
-          <FaArrowAltCircleLeft /> Continue Shopping
+        <Button variant="outline-danger" onClick={() => navigate("/")}>
+          <FaArrowLeft className="me-2" /> Continue Shopping
         </Button>
-
-        <Button
-          variant="outline-primary"
-          onClick={handleDownloadInvoice}
-          className="d-flex align-items-center gap-2"
-        >
-          <FaArrowAltCircleDown /> Download Invoice
+        <Button variant="outline-primary" onClick={handleDownloadInvoice}>
+          <FaDownload className="me-2" /> Download Invoice
         </Button>
-
-        <Button
-          variant="outline-success"
-          onClick={handleViewInvoice}
-          className="d-flex align-items-center gap-2"
-        >
-          <FaArrowCircleRight /> View Invoice
+        <Button variant="outline-success" onClick={handleViewInvoice}>
+          <FaEye className="me-2" /> View Invoice
         </Button>
       </div>
 
-      {/* Invoice Modal */}
+      {/* Modal for Invoice */}
       {showModal && (
         <div
           className="modal show d-block"
