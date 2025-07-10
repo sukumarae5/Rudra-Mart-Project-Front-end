@@ -17,7 +17,7 @@ const Footer = () => {
       <div className="max-w-screen-xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
         
         {/* Company Info */}
-        <div style={{ position: "relative", right: "100px" }}>
+        <div style={{ position: "relative",  }}>
           <h2 className="text-2xl font-bold text-white mb-2">
             <span className="text-[#1b59f8]">Rudra</span>
             <span className="text-yellow-400">E-Mart</span>
@@ -98,13 +98,13 @@ const Footer = () => {
         <div className="max-w-screen-xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center text-sm">
           <p
             className="text-gray-400 mb-2 md:mb-0 text-center md:text-left"
-            style={{ position: "relative", right: "100px" }}
+            style={{ position: "relative",  }}
           >
             © 2024 Rudra E-Mart. All rights reserved.
           </p>
           <div
             className="flex items-center space-x-8 ml-[20px]"
-            style={{ position: "relative", left: "100px" }}
+            style={{ position: "relative", }}
           >
             <span className="text-gray-400">Follow us:</span>
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">

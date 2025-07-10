@@ -7,9 +7,8 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 
 const SearchPage = () => {
-  const { products = [] } = useSelector((state) => state.products);
-  const { cartItems = [] } = useSelector((state) => state.cart);
-  const { searchproduct = '' } = useSelector((state) => state.products);
+  const { products = [], searchproduct = '' } = useSelector((state) => state.products || {});
+  const { cartItems = [] } = useSelector((state) => state.cart || {});
   const [filteredProducts, setFilteredProducts] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -25,39 +24,45 @@ const SearchPage = () => {
   };
 
   useEffect(() => {
-    if (!searchproduct) return;
+    if (!searchproduct || typeof searchproduct !== 'string') {
+      setFilteredProducts([]);
+      return;
+    }
 
-    const lowerCaseSearch = searchproduct.toLowerCase();
-    const matchingProducts = products.filter(
-      (product) => product?.name?.toLowerCase().includes(lowerCaseSearch)
+    const lowerSearch = searchproduct.toLowerCase().trim();
+
+    const matches = products.filter((product) =>
+      product?.name?.toLowerCase().includes(lowerSearch)
     );
-    setFilteredProducts(matchingProducts);
+
+    console.log("Search query:", searchproduct);
+    console.log("Filtered products:", matches);
+    setFilteredProducts(matches);
   }, [products, searchproduct]);
 
   const handleAddToCart = async (event, product) => {
     event.stopPropagation();
-
     try {
       const userToken = localStorage.getItem('authToken');
       if (!userToken) {
-        showSnackbar('Session expired or user not authenticated. Please log in.', 'error');
+        showSnackbar('Please log in.', 'error');
         navigate('/login');
         return;
       }
 
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user || !user.id) {
-        showSnackbar('User information missing. Please log in again.', 'error');
+        showSnackbar('User info missing.', 'error');
         navigate('/login');
         return;
       }
 
-      const isProductInCart = cartItems.some(
+      const isInCart = cartItems.some(
         (item) => item.user_id === user.id && item.product_id === product.id
       );
 
-      if (isProductInCart) {
-        showSnackbar('Product is already in the cart.', 'warning');
+      if (isInCart) {
+        showSnackbar('Already in cart.', 'warning');
         return;
       }
 
@@ -83,10 +88,10 @@ const SearchPage = () => {
         return;
       }
 
-      showSnackbar('Product successfully added to cart.', 'success');
+      showSnackbar('Added to cart!', 'success');
       dispatch(fetchApiCartDataRequest());
     } catch (error) {
-      console.error('Error adding product to cart:', error);
+      console.error('Add to cart error:', error);
       showSnackbar(`Error: ${error.message}`, 'error');
     }
   };
@@ -102,7 +107,7 @@ const SearchPage = () => {
 
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || !user.id) {
-      showSnackbar('User not authenticated. Please log in.', 'error');
+      showSnackbar('Login required.', 'error');
       navigate('/login');
       return;
     }
@@ -111,11 +116,11 @@ const SearchPage = () => {
       {
         user_id: user.id,
         productId: product.id,
-        productName: product?.name || 'Unknown',
-        productImage: product?.image_url || '',
-        productPrice: parseFloat(product?.price || 0),
+        productName: product.name || 'Unknown',
+        productImage: product.image_url || '',
+        productPrice: parseFloat(product.price || 0),
         quantity: 1,
-        totalPrice: parseFloat(product?.price || 0),
+        totalPrice: parseFloat(product.price || 0),
       },
     ];
 
@@ -125,83 +130,91 @@ const SearchPage = () => {
 
   return (
     <div style={{ padding: '20px', backgroundColor: '#f0f8ea', minHeight: '100vh' }}>
-      <h2 style={{ color: '#2d6a4f', textAlign: 'center' }}>Search Results: {searchproduct}</h2>
+      <h2 style={{ color: '#2d6a4f', textAlign: 'center' }}>
+        Search Results: {searchproduct}
+      </h2>
+
       {filteredProducts.length > 0 ? (
-        <div>
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              style={{
-                display: 'flex',
-                border: '1px solid #a3b18a',
-                borderRadius: '12px',
-                padding: '15px',
-                marginBottom: '20px',
-                backgroundColor: '#ffffff',
-                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-                alignItems: 'center',
-              }}
-            >
-              <div style={{ flex: '1' }}>
-                <img
-                  src={product.image_url}
-                  alt={product.name}
+        filteredProducts.map((product) => (
+          <div
+            key={product.id}
+            style={{
+              display: 'flex',
+              border: '1px solid #a3b18a',
+              borderRadius: '12px',
+              padding: '15px',
+              marginBottom: '20px',
+              backgroundColor: '#ffffff',
+              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ flex: '1' }}>
+              <img
+                src={product.image_url}
+                alt={product.name}
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  objectFit: 'cover',
+                  borderRadius: '8px',
+                  border: '2px solid #588157',
+                }}
+              />
+            </div>
+            <div style={{ flex: '3', marginLeft: '20px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#344e41' }}>
+                {product.name}
+              </h3>
+              <p style={{ color: '#40916c', fontWeight: 'bold' }}>₹{product.price}</p>
+              <p style={{ fontSize: '14px', color: '#555' }}>
+              <span className='font-deconraction-underline'>selling_price:{product.selling_price}</span>   {product.mrp
+}
+              </p>
+              <p style={{ color: '#dda15e' }}>{product.ratings} Ratings</p>
+              <p style={{ fontSize: '14px', color: '#666' }}>{product.description}</p>
+              <p style={{ fontSize: '14px', color: '#666' }}>{product.stock}</p>
+              <div style={{ display: 'flex' }}>
+                <Button
                   style={{
-                    width: '150px',
-                    height: '150px',
-                    objectFit: 'cover',
-                    borderRadius: '8px',
-                    border: '2px solid #588157',
+                    background: 'linear-gradient(90deg, #6a994e 0%, #40916c 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 15px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    marginTop: '10px',
                   }}
-                />
-              </div>
-              <div style={{ flex: '3', marginLeft: '20px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#344e41' }}>{product.name}</h3>
-                <p style={{ color: '#40916c', fontWeight: 'bold' }}>₹{product.price}</p>
-                <p style={{ fontSize: '14px', color: '#555' }}>RAM: {product.ram} | Storage: {product.storage}</p>
-                <p style={{ color: '#dda15e' }}>{product.ratings} Ratings</p>
-                <p style={{ fontSize: '14px', color: '#666' }}>{product.description}</p>
-                <p style={{ fontSize: '14px', color: '#666' }}>{product.stock}</p>
-                <div style={{ display: 'flex' }}>
-                  <Button
-                    style={{
-                      background: 'linear-gradient(90deg, #6a994e 0%, #40916c 100%)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 15px',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      marginTop: '10px',
-                    }}
-                    onClick={(e) => handleAddToCart(e, product)}
-                  >
-                    Add to Cart
-                  </Button>
-                  <Button
-                    style={{
-                      background: 'linear-gradient(90deg, rgb(241, 14, 14) 0%, rgb(245, 72, 72) 100%)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 15px',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      marginTop: '10px',
-                      marginLeft: '10px',
-                    }}
-                    onClick={(e) => handleBuy(e, product.id)}
-                  >
-                    Buy Now
-                  </Button>
-                </div>
+                  onClick={(e) => handleAddToCart(e, product)}
+                >
+                  Add to Cart
+                </Button>
+                <Button
+                  style={{
+                    background: 'linear-gradient(90deg, rgb(241, 14, 14) 0%, rgb(245, 72, 72) 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 15px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    marginTop: '10px',
+                    marginLeft: '10px',
+                  }}
+                  onClick={(e) => handleBuy(e, product.id)}
+                >
+                  Buy Now
+                </Button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))
       ) : (
-        <p style={{ color: '#a3b18a', textAlign: 'center' }}>No matching products found.</p>
+        <p style={{ color: '#a3b18a', textAlign: 'center' }}>
+          No matching products found for "{searchproduct}"
+        </p>
       )}
 
-      {/* Snackbar Notification */}
+      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

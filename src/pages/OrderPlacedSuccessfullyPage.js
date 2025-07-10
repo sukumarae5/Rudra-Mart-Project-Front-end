@@ -112,13 +112,19 @@ const OrderPlacedSuccessfullyPage = () => {
 
   return (
     <div className="container mt-4">
-      <div className="text-center mb-4">
-        <FaCheckCircle size={50} color="green" />
-        <h4 className="fw-bold mt-3">Order #{payment.transaction_id} Placed Successfully!</h4>
-        <p className="text-muted">
-          We’ll email you the tracking details once your item ships.
-        </p>
-      </div>
+      <div className="text-center mt-4">
+  <div className="d-flex justify-content-center align-items-center gap-2">
+    <FaCheckCircle size={30} color="green" />
+    <span className="fw-semibold fs-5">Order Placed Successfully</span>
+  </div>
+
+  <h4 className="fw-bold mt-3">Order #{payment.transaction_id}</h4>
+  
+  <p className="text-center mb-4">
+    We’ll email you the tracking details once your item ships.
+  </p>
+</div>
+
 
       <Card className="shadow-sm border-0 mb-4">
         <Card.Body>

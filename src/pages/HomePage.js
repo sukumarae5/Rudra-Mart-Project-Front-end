@@ -149,7 +149,7 @@ const HomePage = () => {
       {/* Product Category Navbar */}
      
       {/* Banner Section */}
-      <Row className="mb-4">
+      <Row style={{marginTop:"3%",}}>
         <Col>
           {bannerLoading ? (
             <p className="text-center">Loading banner...</p>
@@ -157,7 +157,7 @@ const HomePage = () => {
             <p className="text-danger text-center">{bannerError}</p>
           ) : banners.length > 0 ? (
             <div
-              className="mx-2"
+              className="mx-1"
               style={{
                 backgroundImage: `url(${banners[0].image_url})`,
                 backgroundSize: "cover",

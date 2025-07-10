@@ -1,13 +1,5 @@
 import React, { useState, forwardRef } from "react";
-import {
-  Accordion,
-  Card,
-  Row,
-  Col,
-  Button,
-  Image,
-  Container,
-} from "react-bootstrap";
+import { Accordion,Card,Row,Col,Button,Image,Container,} from "react-bootstrap";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -34,6 +26,7 @@ const formatCurrency = (value) =>
 
 const OrderSummaryPage = forwardRef(({ onConfirmOrder }, ref) => {
   const { checkoutData = [] } = useSelector((state) => state.cart || {});
+  console.log(checkoutData)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

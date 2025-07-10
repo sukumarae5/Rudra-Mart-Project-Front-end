@@ -71,12 +71,12 @@ const ProductCategory = () => {
           background-color: #fff;
           padding: 12px 16px;
           position: fixed;
-          top: 65px;
+          top: 57px;
           left: 0;
           right: 0;
-          z-index: 1000;
+          z-index: 100;
           border-bottom: 1px solid #ccc;
-          height: 60px;
+          height: 58px;
           align-items: center;
         }
 
