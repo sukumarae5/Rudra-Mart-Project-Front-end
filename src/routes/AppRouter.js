@@ -33,8 +33,7 @@ import CartPageMain from "../pages/CartPageMain";
 import OrderSummaryPage from "../pages/OrderSummaryPage";
 const AppRouter = createBrowserRouter([
 
-  { 
-        
+  {     
     path: "/",
     element: <AppLayout />,
     children: [
@@ -64,6 +63,7 @@ const AppRouter = createBrowserRouter([
         element:<OrderPlacedSuccessfullyPage/>
 
       },
+     
       {
         path:"/ExploreOurProductspage",
         element:<ExploreOurProductspage/>

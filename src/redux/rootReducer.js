@@ -10,6 +10,8 @@ import dashboardReducer from '../features/admin/adminSlice';
 import categoryProductReducer from '../features/categories/categorieSlice'; // renamed for camelCase
 import subcategoryReducer from '../features/subcategories/subcategorySlice';
 import bannerReducer from '../features/banners/bannerSlice';
+import deliveryReducer from '../features/delivery/deliverySlice';
+import deliveryBoyReducer from '../features/deliveryboydetails/deliveryBoySlice';
 
 const rootReducer = combineReducers({
   products: productReducer,
@@ -21,7 +23,9 @@ const rootReducer = combineReducers({
   admindashboard: dashboardReducer,
   categoryproducts: categoryProductReducer,
   subcategory:subcategoryReducer,
-  banners : bannerReducer
+  banners : bannerReducer,
+  delivery: deliveryReducer,
+  deliveryBoy: deliveryBoyReducer,
 });
 
 export default rootReducer;

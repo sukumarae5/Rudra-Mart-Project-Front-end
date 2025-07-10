@@ -18,7 +18,7 @@ import {
 } from "../../features/categories/categoriesAction";
 import { fetchSubcategoryRequest } from "../../features/subcategories/subcategoryAction";
 import { useNavigate } from "react-router-dom";
-import PaginationComponent from "../AdminPane/Pagination"; // ✅ Add this line
+import PaginationComponent from "../AdminPane/Pagination";
 
 const AdminCategories = () => {
   const dispatch = useDispatch();
@@ -46,7 +46,7 @@ const AdminCategories = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    setCurrentPage(1); // reset to first page when search or toggle
+    setCurrentPage(1);
   }, [searchQuery, showInactive]);
 
   const filteredCategories = categoryproduct.filter(
@@ -54,6 +54,7 @@ const AdminCategories = () => {
       cat.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (showInactive || cat.status)
   );
+
   const handleDeleteCategory = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       dispatch(deleteCategoryRequest(id));
@@ -150,11 +151,14 @@ const AdminCategories = () => {
           <Spinner animation="border" variant="primary" />
         </div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div className="table-responsive" style={{ minHeight: "200px" }}>
           <Table
-            responsive
-            className="text-center align-middle border"
-            style={{ minWidth: "700px" }}
+            striped
+            bordered
+            hover
+            responsive="md"
+            className="text-center align-middle"
+            style={{ minWidth: "700px", fontSize: "0.92rem" }}
           >
             <thead className="bg-primary text-white">
               <tr>
@@ -174,19 +178,27 @@ const AdminCategories = () => {
                       <img
                         src={category.image_url}
                         alt={category.name}
+                        className="rounded"
                         style={{
                           width: "50px",
                           height: "50px",
                           objectFit: "cover",
-                          borderRadius: "4px",
                         }}
                       />
                     </td>
-                    <td>{category.name}</td>
-                    <td>{category.slug || "N/A"}</td>
-                    <td>{category.description || "N/A"}</td>
-                    <td>{category.status ? "Active" : "Inactive"}</td>
-                    <td className="d-flex justify-content-center gap-2">
+                    <td className="text-wrap">{category.name}</td>
+                    <td className="text-wrap">{category.slug || "N/A"}</td>
+                    <td className="text-wrap">{category.description || "N/A"}</td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          category.status ? "bg-success" : "bg-secondary"
+                        }`}
+                      >
+                        {category.status ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="d-flex justify-content-center gap-2 flex-wrap">
                       <Button
                         variant="outline-primary"
                         size="sm"
@@ -216,7 +228,7 @@ const AdminCategories = () => {
             </tbody>
           </Table>
 
-          {/* ✅ Pagination Component Below Table */}
+          {/* Pagination */}
           {totalPages > 1 && (
             <PaginationComponent
               currentPage={currentPage}

@@ -1,15 +1,18 @@
 import AddBannerForm from "../components/AdminPane/AddBannerForm";
 import AddCategoryForm from "../components/AdminPane/AddCategoryForm";
+import AddDeliveryBoy from "../components/AdminPane/AddDeliveryBoy";
 import AddProductForm from "../components/AdminPane/AddProductForm";
 import AddSubcategoryForm from "../components/AdminPane/AddSubcategoryForm";
 import AddUserForm from "../components/AdminPane/AddUserForm";
 import AdminBanners from "../components/AdminPane/AdminBanners";
 import AdminCategories from "../components/AdminPane/AdminCategories";
+import AdminDeliveryPage from "../components/AdminPane/AdminDeliveryPage";
 import AdminInbox from "../components/AdminPane/AdminInbox";
 import AdminSubcategories from "../components/AdminPane/AdminSubCategories";
-import CategoryCard from "../components/AdminPane/CategoryCard";
 import Dashboard from "../components/AdminPane/Dashboard";
 import EditCategoryForm from "../components/AdminPane/EditCategoryForm";
+import EditDeliveryPage from "../components/AdminPane/EditDelivereyPage";
+import EditDeliveryBoy from "../components/AdminPane/EditDeliveryBoy";
 import EditOrdersForm from "../components/AdminPane/EditOrdersForm";
 import EditProductForm from "../components/AdminPane/EditProductForm";
 import EditSubcategoryForm from "../components/AdminPane/EditSubcateoryForm";
@@ -22,11 +25,11 @@ import AdminReportsPage from "../pages/AdminPages/AdminReportsPage";
 
 const AdminRoute = [
   {
-    path: "admindashboard",  
+    path: "admindashboard",
     element: <Dashboard />,
   },
   {
-    path: 'adminusers',
+    path: "adminusers",
     element: <UserTable />,
   },
   {
@@ -35,72 +38,88 @@ const AdminRoute = [
   },
   {
     path: "adminorders",
-    element: <OrderTable/>
+    element: <OrderTable />,
   },
   {
-    path: 'edituser',
+    path: "edituser",
     element: <EditUserForm />,
   },
   {
-    path: "editproduct/:id", 
+    path: "editproduct/:id",
     element: <EditProductForm />,
   },
   {
-    path: "editcategoryform/:id", 
+    path: "editcategoryform/:id",
     element: <EditCategoryForm />,
   },
   {
-    path: "editsubcategoryform/:id", 
+    path: "editsubcategoryform/:id",
     element: <EditSubcategoryForm />,
   },
   {
-    path: "editorders", 
+    path: "add-delivery-boy",
+    element: <AddDeliveryBoy />,
+  },
+  {
+    path: "edit-delivery-boy/:id",
+    element: <EditDeliveryBoy />,
+  },
+  {
+    path: "editdelivery/:id",
+    element: <EditDeliveryPage />,
+  },
+  {
+    path: "editorders",
     element: <EditOrdersForm />,
   },
   {
-    path:"addusers",
-    element:<AddUserForm/>
+    path: "addusers",
+    element: <AddUserForm />,
   },
   {
-    path:"addproducts",
-    element:<AddProductForm />
-  },{
-    path:"addcategoryform",
-    element:<AddCategoryForm />
+    path: "addproducts",
+    element: <AddProductForm />,
   },
   {
-    path:"addsubcategoryform",
-    element:<AddSubcategoryForm />
+    path: "addcategoryform",
+    element: <AddCategoryForm />,
   },
   {
-    path:"categories",
-    element:<AdminCategories/>
+    path: "addsubcategoryform",
+    element: <AddSubcategoryForm />,
   },
   {
-    path:"adminbanners",
-    element:<AdminBanners/>
+    path: "categories",
+    element: <AdminCategories />,
   },
   {
-    path:"addbanners",
-    element:<AddBannerForm/>
+    path: "adminbanners",
+    element: <AdminBanners />,
   },
   {
-    path:"subcategories",
-    element:<AdminSubcategories/>
+    path: "admindeliverypage",
+    element: <AdminDeliveryPage />,
   },
   {
-    path:"categoriesproducts",
-    element:<CategoryCard/>
-  },{
-    path:"adminprofile",
-    element:<AdminProfileSettingPage/>
-  },{
-    path:"adminreports",
-    element:<AdminReportsPage/>
+    path: "addbanners",
+    element: <AddBannerForm />,
   },
   {
-    path:"admininbox",
-    element:<AdminInbox/>
+    path: "subcategories",
+    element: <AdminSubcategories />,
+  },
+
+  {
+    path: "adminprofile",
+    element: <AdminProfileSettingPage />,
+  },
+  {
+    path: "adminreports",
+    element: <AdminReportsPage />,
+  },
+  {
+    path: "admininbox",
+    element: <AdminInbox />,
   },
 ];
 

@@ -12,7 +12,10 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { deleteProductRequest, fetchProductsWithCategoryRequest } from "../../features/product/productActions";
+import {
+  deleteProductRequest,
+  fetchProductsWithCategoryRequest,
+} from "../../features/product/productActions";
 import PaginationComponent from "./Pagination";
 import { GoPlus } from "react-icons/go";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
@@ -57,25 +60,27 @@ const ProductTable = () => {
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-   const handleDelete = (id) => {
+
+  const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       dispatch(deleteProductRequest(id));
-      navigate("/admin/adminproducts")
+      navigate("/admin/adminproducts");
     }
   };
+
   return (
-    <div className="container-fluid px-1">
+    <div className="container-fluid px-2">
       <Card className="border-0 rounded-3">
         <Row className="mb-3">
           <Col>
-            <h1>Admin Dashboard</h1>
+            <h2 className="fw-bold">Admin Dashboard</h2>
           </Col>
         </Row>
 
-        <Row className="align-items-center mb-3 g-1">
-          {/* Search */}
-          <Col xs={12} sm={12} md={6} lg={5} xl={6}>
-            <InputGroup style={{ height: "38px" }}>
+        {/* Search and Filters */}
+        <Row className="align-items-center mb-3 g-3 flex-wrap">
+          <Col xs={12} sm={12} md={6} lg={5}>
+            <InputGroup>
               <InputGroup.Text>
                 <BiSearch />
               </InputGroup.Text>
@@ -88,13 +93,11 @@ const ProductTable = () => {
             </InputGroup>
           </Col>
 
-          {/* Category Filter */}
           <Col xs={6} sm={6} md={3} lg={2}>
             <DropdownButton
               variant="outline-secondary"
               title={`Category: ${filterCategory}`}
               onSelect={(selectedFilter) => setFilterCategory(selectedFilter)}
-              style={{ height: "38px" }}
             >
               <Dropdown.Item eventKey="All">All</Dropdown.Item>
               {categories.map((category, index) => (
@@ -105,30 +108,27 @@ const ProductTable = () => {
             </DropdownButton>
           </Col>
 
-          {/* Show Inactive Toggle */}
           <Col xs={6} sm={6} md={3} lg={2}>
-            <div className="d-flex align-items-center justify-content-end gap-1" style={{ minHeight: "44px" }}>
+            <div className="d-flex align-items-center justify-content-end gap-1">
               <Form.Check
                 type="switch"
                 id="show-inactive-switch"
                 checked={showInactive}
-                className="fs-5"
                 onChange={(e) => setShowInactive(e.target.checked)}
                 style={{ transform: "scale(1.2)" }}
               />
-              <label htmlFor="show-inactive-switch" className="text-center">
+              <label htmlFor="show-inactive-switch" className="text-nowrap">
                 Show Inactive
               </label>
             </div>
           </Col>
 
-          {/* Reload & Add Product */}
-          <Col xl={2} md={12} lg={3} sm={12} className="d-flex justify-content-end gap-3 mt-lg-0 align-items-center">
+          <Col xs={12} md={6} lg={3} className="d-flex justify-content-end gap-2 mt-2 mt-lg-0">
             <Button
               variant="outline-secondary"
               onClick={() => window.location.reload()}
               className="d-flex justify-content-center align-items-center"
-              style={{ width: "44px", height: "38px", fontSize: "1.0rem" }}
+              style={{ width: "44px", height: "38px" }}
               aria-label="Reload page"
             >
               ⟳
@@ -143,22 +143,17 @@ const ProductTable = () => {
                 backgroundColor: "#1E5EFF",
                 border: "none",
                 height: "40px",
-                whiteSpace: "nowrap",
               }}
             >
-              <GoPlus className="me-2" size={25} />
-              Add Product
+              <GoPlus className="me-2" size={20} />
+              <span className="d-none d-sm-inline">Add Product</span>
             </Button>
           </Col>
         </Row>
 
-        {/* Table */}
-        <div style={{ overflowX: "auto" }}>
-          <Table
-            responsive
-            className="text-center align-middle border"
-            style={{ minWidth: "700px" }}
-          >
+        {/* Product Table */}
+        <div className="table-responsive" style={{ overflowX: "auto" }}>
+          <Table className="text-center align-middle border mb-0" style={{ minWidth: "700px" }}>
             <thead className="bg-primary text-white">
               <tr>
                 <th className="text-start" style={{ minWidth: "70px" }}>Image</th>
@@ -178,6 +173,7 @@ const ProductTable = () => {
                       <img
                         src={product.image_url || "/placeholder.png"}
                         alt={product.name || "Unnamed"}
+                        className="img-fluid"
                         style={{
                           width: "50px",
                           height: "50px",
@@ -186,7 +182,9 @@ const ProductTable = () => {
                         }}
                       />
                     </td>
-                    <td className="text-break">{product.name || "Unnamed"}</td>
+                    <td className="text-break" style={{ wordBreak: "break-word" }}>
+                      {product.name || "Unnamed"}
+                    </td>
                     <td>{product.category_name || "N/A"}</td>
                     <td>₹ {(product.selling_price ?? 0).toLocaleString()}</td>
                     <td>{product.stock ?? "N/A"}</td>
