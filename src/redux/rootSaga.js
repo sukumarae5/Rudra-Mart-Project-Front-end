@@ -10,6 +10,8 @@ import wishlistSaga from '../features/wishlist/wishlistSaga';
 import dashboardSaga from '../features/admin/adminSaga';
 import subcategorySaga from '../features/subcategories/subcategorySaga';
 import bannerSaga from '../features/banners/bannerSaga';
+import deliverySaga from '../features/delivery/deliverySaga';
+import deliveryBoySaga from '../features/deliveryboydetails/deliveryBoySaga';
 
 function* rootSaga() {
   yield all([
@@ -22,7 +24,9 @@ function* rootSaga() {
     dashboardSaga(),
     categorySaga(), 
     subcategorySaga(),
-    bannerSaga()
+    bannerSaga(),
+    deliverySaga(),
+    deliveryBoySaga(),
   ]);
 }
 
