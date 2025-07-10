@@ -157,7 +157,7 @@ const HomePage = () => {
             <p className="text-danger text-center">{bannerError}</p>
           ) : banners.length > 0 ? (
             <div
-              className="mx-1"
+              className="mx-1 "
               style={{
                 backgroundImage: `url(${banners[0].image_url})`,
                 backgroundSize: "cover",
