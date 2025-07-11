@@ -10,9 +10,12 @@ const ProductCategory = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { categoryproduct = [], loading, error } = useSelector(
-    (state) => state.categoryproducts || {}
-  );
+  const categoryData = useSelector((state) => state.categoryproducts);
+  const categoryproduct = Array.isArray(categoryData?.categoryproduct)
+    ? categoryData.categoryproduct
+    : [];
+  const loading = categoryData?.loading;
+  const error = categoryData?.error;
 
   const [userCategories, setUserCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
@@ -44,8 +47,9 @@ const ProductCategory = () => {
     navigate("/contactpage");
   };
 
-  const visibleCategories = userCategories.slice(0, 5);
-  const hiddenCategories = userCategories.slice(5);
+  const visibleCategories = showMore
+    ? userCategories
+    : userCategories.slice(0, 5);
 
   return (
     <>
@@ -67,12 +71,12 @@ const ProductCategory = () => {
           background-color: #fff;
           padding: 12px 16px;
           position: fixed;
-          top: 5px;
+          top: 57px;
           left: 0;
           right: 0;
-          z-index: 1000;
+          z-index: 100;
           border-bottom: 1px solid #ccc;
-          height: 60px;
+          height: 58px;
           align-items: center;
         }
 
@@ -107,44 +111,55 @@ const ProductCategory = () => {
           flex-shrink: 0;
         }
 
-        .more-dropdown {
-          position: absolute;
-          top: 60px;
-          right: 16px;
-          background: white;
-          box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-          border-radius: 8px;
-          padding: 10px;
-          z-index: 2000;
-        }
-
-        .more-item {
-          padding: 6px 12px;
-          cursor: pointer;
-          color: #333;
-          white-space: nowrap;
-        }
-
-        .more-item:hover {
-          background-color: #f0f0f0;
-        }
-
-        .category-wrapper {
-          margin-top: 70px;
-        }
-
         .dots-button {
-          font-size: 20px;
+          font-size: 18px;
           font-weight: bold;
           cursor: pointer;
           margin-left: 8px;
+          color: #666;
+          padding: 4px 8px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          user-select: none;
+        }
+
+        .category-wrapper {
+          margin-top: 130px; /* Push content down */
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .category-bar {
+            top: 55px;
+            height: 50px;
+            padding: 8px 12px;
+          }
+
+          .category-item {
+            font-size: 0.85rem;
+            margin-right: 12px;
+          }
+
+          .category-logo {
+            font-size: 1rem;
+            margin-right: 12px;
+          }
+
+          .dots-button {
+            font-size: 16px;
+            padding: 3px 6px;
+          }
+
+          .category-wrapper {
+            margin-top: 110px;
+          }
         }
       `}</style>
 
       {/* Green Top Bar */}
       <div className="green-bar" />
 
-      {/* Fixed Horizontal Scrollable Category Bar */}
+      {/* Category Bar */}
       <div className="category-bar">
         <div className="category-logo">Rudra</div>
 
@@ -158,31 +173,14 @@ const ProductCategory = () => {
           </div>
         ))}
 
-        {hiddenCategories.length > 0 && (
+        {userCategories.length > 5 && (
           <div className="dots-button" onClick={() => setShowMore(!showMore)}>
-            ...
-          </div>
-        )}
-
-        {showMore && (
-          <div className="more-dropdown">
-            {hiddenCategories.map((category) => (
-              <div
-                key={category.id}
-                className="more-item"
-                onClick={() => {
-                  handleCategoryClick(category.id);
-                  setShowMore(false);
-                }}
-              >
-                {category.name}
-              </div>
-            ))}
+            {showMore ? "Show Less" : "..."}
           </div>
         )}
       </div>
 
-      {/* Spacer */}
+      {/* Page Content Spacer */}
       <div className="category-wrapper" />
     </>
   );

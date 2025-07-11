@@ -7,8 +7,6 @@ import {
   Row,
   Col,
   Card,
-  Dropdown,
-  DropdownButton,
   Spinner,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,17 +16,20 @@ import {
   fetchAllOrderRequest,
 } from "../../features/order/orderActions";
 import { MdModeEditOutline, MdOutlineDeleteOutline } from "react-icons/md";
-import PaginationComponent from "./Pagination";
 import { BiSearch } from "react-icons/bi";
+import PaginationComponent from "./Pagination";
 
 const OrderTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { allOrders = [], loading, error } = useSelector((state) => state.orders || {});
+  const { allOrders = [], loading, error } = useSelector(
+    (state) => state.orders || {}
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterOption, setFilterOption] = useState("All");
+  const [showInactive, setShowInactive] = useState(true);
 
   const itemsPerPage = 10;
   const indexOfLastOrder = currentPage * itemsPerPage;
@@ -41,10 +42,10 @@ const OrderTable = () => {
   const filteredOrders = allOrders.filter((order) => {
     const matchesSearch =
       order?.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order?.total?.toString().includes(searchQuery);
-    return filterOption === "All"
-      ? matchesSearch
-      : matchesSearch && order?.status === filterOption;
+      order?.total?.toString().includes(searchQuery) ||
+      order?.order_id?.toString().includes(searchQuery);
+
+    return showInactive ? matchesSearch : matchesSearch && order?.status !== "Inactive";
   });
 
   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
@@ -57,16 +58,11 @@ const OrderTable = () => {
   };
 
   return (
-    <div className="container-fluid mt-3">
-      <Card className="p-4 shadow border-0 rounded-3">
-        <Row className="align-items-center mb-4">
-          <Col>
-            <h4 className="fw-bold">Admin Dashboard</h4>
-          </Col>
-        </Row>
-
-        <Row className="align-items-center mb-3">
-          <Col xs={12} md={6}>
+    <div className="container py-4">
+      <Card className="p-4 border-0 shadow-sm rounded-4">
+        {/* Header Row */}
+        <Row className="align-items-center mb-3 g-2">
+          <Col xs={12} md={6} lg={5}>
             <InputGroup>
               <InputGroup.Text>
                 <BiSearch />
@@ -80,42 +76,52 @@ const OrderTable = () => {
             </InputGroup>
           </Col>
 
-          <Col md={3}>
-            <Form.Select
-              value={filterOption}
-              onChange={(e) => setFilterOption(e.target.value)}
+          <Col xs={7} md={4} className="d-flex align-items-center gap-2">
+            <Form.Check
+              type="switch"
+              id="show-inactive-switch"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+            />
+            <label htmlFor="show-inactive-switch" className="mb-0">
+              Show Inactive
+            </label>
+          </Col>
+
+          <Col xs={5} md={3} className="text-end">
+            <Button
+              variant="success"
+              className="px-3"
+              onClick={() => navigate("/admin/addorderform")}
             >
-              <option value="All">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Processing">Processing</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Shipped">Shipped</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-              <option value="Returned">Returned</option>
-            </Form.Select>
+              + Add Order
+            </Button>
           </Col>
         </Row>
 
+        {/* Table */}
         {loading ? (
-          <Spinner animation="border" />
+          <div className="text-center py-4">
+            <Spinner animation="border" variant="primary" />
+          </div>
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : (
           <div className="table-responsive">
             <Table
-              striped
               bordered
               hover
               responsive
               className="align-middle text-center"
+              style={{ minWidth: "900px", fontSize: "0.92rem" }}
             >
-              <thead className="table-light">
+              <thead>
                 <tr>
                   <th>Order ID</th>
                   <th>Customer</th>
-                  <th>Status</th>
                   <th>Total (₹)</th>
+                  <th>Status</th>
+                  <th>Payment</th>
                   <th>Date</th>
                   <th>Actions</th>
                 </tr>
@@ -125,11 +131,26 @@ const OrderTable = () => {
                   currentOrders.map((order) => (
                     <tr key={order.order_id}>
                       <td className="fw-semibold">#{order.order_id}</td>
-                      <td>{order.user_id || "N/A"}</td>
-                      <td>{order.status || "N/A"}</td>
+                      <td>{order.customer_name || order.user_id || "N/A"}</td>
                       <td>₹{order.total}</td>
+                      <td>
+                        <span
+                          className={`badge rounded-pill ${
+                            order.status === "Delivered"
+                              ? "bg-success"
+                              : order.status === "Cancelled"
+                              ? "bg-danger"
+                              : order.status === "Pending"
+                              ? "bg-warning text-dark"
+                              : "bg-secondary"
+                          }`}
+                        >
+                          {order.status || "N/A"}
+                        </span>
+                      </td>
+                      <td>{order.payment_status || "Pending"}</td>
                       <td>{new Date(order.order_date).toLocaleDateString()}</td>
-                      <td className="d-flex justify-content-center gap-2">
+                      <td className="d-flex justify-content-center gap-2 flex-wrap">
                         <Button
                           variant="outline-primary"
                           size="sm"
@@ -153,7 +174,7 @@ const OrderTable = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center py-4 text-muted">
+                    <td colSpan="7" className="text-center py-4 text-muted">
                       No orders found.
                     </td>
                   </tr>
@@ -163,13 +184,16 @@ const OrderTable = () => {
           </div>
         )}
 
-        <div className="d-flex justify-content-end mt-3">
-          <PaginationComponent
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="d-flex justify-content-end mt-3">
+            <PaginationComponent
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -9,7 +9,6 @@ import AdminCategories from "../components/AdminPane/AdminCategories";
 import AdminDeliveryPage from "../components/AdminPane/AdminDeliveryPage";
 import AdminInbox from "../components/AdminPane/AdminInbox";
 import AdminSubcategories from "../components/AdminPane/AdminSubCategories";
-import CategoryCard from "../components/AdminPane/CategoryCard";
 import Dashboard from "../components/AdminPane/Dashboard";
 import EditCategoryForm from "../components/AdminPane/EditCategoryForm";
 import EditDeliveryPage from "../components/AdminPane/EditDelivereyPage";
@@ -109,10 +108,7 @@ const AdminRoute = [
     path: "subcategories",
     element: <AdminSubcategories />,
   },
-  {
-    path: "categoriesproducts",
-    element: <CategoryCard />,
-  },
+
   {
     path: "adminprofile",
     element: <AdminProfileSettingPage />,

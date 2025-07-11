@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -9,70 +9,36 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Checkbox,
   IconButton,
   Toolbar,
   TextField,
   Select,
   MenuItem,
-  Button,
   Fab,
   Pagination,
+  Tooltip,
+  Paper,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { deleteUsersRequest, fetchusersrequest } from "../../features/user/userActions";
+import {
+  deleteUsersRequest,
+  fetchusersrequest,
+} from "../../features/user/userActions";
 
 const UserTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { users = [] } = useSelector((state) => state.users || {});
-  console.log(users)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOption, setFilterOption] = useState("All");
-  const [selectedUsers, setSelectedUsers] = useState([]);
 
   useEffect(() => {
     dispatch(fetchusersrequest());
   }, [dispatch]);
-
-  const handleEditSelectedUsers = () => {
-    if (selectedUsers.length !== 1) {
-      alert("Please select exactly one user to edit.");
-      return;
-    }
-
-    const userToEdit = users.find((user) => user.id === selectedUsers[0]);
-    if (!userToEdit) {
-      alert("User data not found.");
-      return;
-    }
-
-    navigate("/admin/edituser", { state: { user: userToEdit } });
-  };
-
-  const handleDeleteSelectedUsers = () => {
-  if (selectedUsers.length === 0) {
-    alert("Please select at least one user to delete.");
-    return;
-  }
-
-  if (!window.confirm("Are you sure you want to delete selected users?")) {
-    return;
-  }
-
-  dispatch(deleteUsersRequest(selectedUsers));
-  setSelectedUsers([]);
-};
-
-  const handleCheckboxChange = (userId) => {
-    setSelectedUsers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    );
-  };
 
   const totalPages = Math.ceil(users.length / itemsPerPage);
   const indexOfLastUser = currentPage * itemsPerPage;
@@ -82,21 +48,43 @@ const UserTable = () => {
     const matchSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone_number.toLowerCase().includes(searchQuery.toLowerCase());
+      user.phonenumber?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return filterOption === "All" ? matchSearch : matchSearch && user.role === filterOption;
+    return filterOption === "All"
+      ? matchSearch
+      : matchSearch && user.role === filterOption;
   });
 
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+  const handleEdit = (user) => {
+    navigate("/admin/edituser", { state: { user } });
+  };
+
+  const handleDelete = (userId) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      dispatch(deleteUsersRequest([userId]));
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" fontWeight="bold" mb={2}>
-        Users
+      <Typography variant="h4" fontWeight="bold" mb={3} color="primary.dark">
+        Manage Users
       </Typography>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 3 }}>
-        <Toolbar sx={{ flexDirection: "column", gap: 2 }}>
+      <Card
+        variant="outlined"
+        sx={{
+          p: 3,
+          mb: 3,
+          borderRadius: 3,
+          boxShadow: 4,
+          backgroundColor: "#fff",
+        }}
+      >
+        {/* Filters */}
+        <Toolbar sx={{ px: 0, mb: 2 }}>
           <Box
             display="flex"
             justifyContent="space-between"
@@ -105,16 +93,12 @@ const UserTable = () => {
             gap={2}
           >
             <TextField
-              label="Search users"
+              label="Search by name, email or phone"
               variant="outlined"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               size="small"
-              sx={{
-                minWidth: 200,
-                height: "40px",
-                "@media (max-width:600px)": { minWidth: "100%" },
-              }}
+              sx={{ minWidth: 220 }}
             />
 
             <Select
@@ -122,83 +106,73 @@ const UserTable = () => {
               onChange={(e) => setFilterOption(e.target.value)}
               displayEmpty
               size="small"
-              sx={{
-                minWidth: 120,
-                height: "40px",
-                "@media (max-width:600px)": { minWidth: "100%" },
-              }}
+              sx={{ minWidth: 150 }}
             >
-              <MenuItem value="All">All</MenuItem>
+              <MenuItem value="All">All Roles</MenuItem>
               <MenuItem value="Admin">Admin</MenuItem>
               <MenuItem value="User">User</MenuItem>
             </Select>
-
-            <Box>
-              <IconButton
-                color="primary"
-                disabled={selectedUsers.length !== 1}
-                onClick={handleEditSelectedUsers}
-              >
-                <Edit />
-              </IconButton>
-              <IconButton
-                color="error"
-                disabled={selectedUsers.length === 0}
-                onClick={handleDeleteSelectedUsers}
-              >
-                <Delete />
-              </IconButton>
-            </Box>
           </Box>
         </Toolbar>
 
-        <TableContainer>
+        {/* Table */}
+        <TableContainer
+          component={Paper}
+          elevation={1}
+          sx={{ borderRadius: 2 }}
+        >
           <Table>
             <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    indeterminate={
-                      selectedUsers.length > 0 &&
-                      selectedUsers.length < currentUsers.length
-                    }
-                    checked={
-                      currentUsers.length > 0 &&
-                      selectedUsers.length === currentUsers.length
-                    }
-                    onChange={(e) =>
-                      setSelectedUsers(
-                        e.target.checked ? currentUsers.map((u) => u.id) : []
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell>S.NO</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Phone Number</TableCell>
+              <TableRow sx={{ backgroundColor: "#f1f1f1" }}>
+                <TableCell sx={{ fontWeight: "bold" }}>S.No</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Phone</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {currentUsers.length > 0 ? (
                 currentUsers.map((user, index) => (
-                  <TableRow key={user.id} hover>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedUsers.includes(user.id)}
-                        onChange={() => handleCheckboxChange(user.id)}
-                      />
-                    </TableCell>
+                  <TableRow
+                    key={user.id}
+                    hover
+                    sx={{
+                      transition: "background-color 0.2s ease",
+                    }}
+                  >
                     <TableCell>{indexOfFirstUser + index + 1}</TableCell>
-                    <TableCell>{user.name}</TableCell>
+                    <TableCell>
+                      <Typography fontWeight={500}>{user.name}</Typography>
+                    </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.phonenumber}</TableCell>
+                    <TableCell>
+                      <Tooltip title="Edit">
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <Edit />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No users available.
+                  <TableCell colSpan={5} align="center">
+                    <Typography variant="body2" fontStyle="italic">
+                      No users available.
+                    </Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -206,6 +180,7 @@ const UserTable = () => {
           </Table>
         </TableContainer>
 
+        {/* Pagination */}
         <Box display="flex" justifyContent="center" mt={2}>
           <Pagination
             count={totalPages}
@@ -216,14 +191,17 @@ const UserTable = () => {
         </Box>
       </Card>
 
-      <Fab
-        color="primary"
-        aria-label="add"
-        sx={{ position: "fixed", bottom: 32, right: 32 }}
-        onClick={() => navigate("/admin/addusers")}
-      >
-        <Add />
-      </Fab>
+      {/* Floating Action Button */}
+      <Tooltip title="Add New User">
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{ position: "fixed", bottom: 32, right: 32 }}
+          onClick={() => navigate("/admin/addusers")}
+        >
+          <Add />
+        </Fab>
+      </Tooltip>
     </Box>
   );
 };
