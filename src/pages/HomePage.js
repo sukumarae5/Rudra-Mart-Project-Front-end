@@ -21,6 +21,8 @@ import Categorypage from "./Categorypage";
 import ExploreOurProductspage from "./ExploreOurProductspage";
 import NewArrivalpage from "./NewArrivalpage";
 import SellingProductspage from "./SellingProductspage";
+import { Carousel } from "react-bootstrap";
+
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -148,66 +150,79 @@ const HomePage = () => {
     <div>
       {/* Product Category Navbar */}
      
-      {/* Banner Section */}
-      <Row style={{marginTop:"3%",}}>
-        <Col>
-          {bannerLoading ? (
-            <p className="text-center">Loading banner...</p>
-          ) : bannerError ? (
-            <p className="text-danger text-center">{bannerError}</p>
-          ) : banners.length > 0 ? (
-            <div
-              className="mx-1"
-              style={{
-                backgroundImage: `url(${banners[0].image_url})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                borderRadius: "20px",
-                height: "320px",
-                width: "100%",
-                maxWidth: "100%",
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "40px",
-                  transform: "translateY(-50%)",
-                  color: "white",
-                  maxWidth: "400px",
-                  padding: "20px",
-                }}
-              >
-                <h2 style={{ fontWeight: "bold", fontSize: "32px" }}>
-                  {banners[0].description ||
-                    "Groceries delivered in 10 minutes"}
-                </h2>
-                <p style={{ marginBottom: "20px", fontSize: "16px" }}>
-                  {banners[0].offers || "Fresh produce, daily essentials & more"}
-                </p>
-                <Button
-                  variant="light"
-                  style={{
-                    fontWeight: "bold",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    background: "white",
-                    color: "green",
-                  }}
-                >
-                  Shop Now →
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-center">No banner available</p>
-          )}
-        </Col>
-      </Row>
+  <Row style={{ marginTop: "3%" }}>
+  <Col>
+    {bannerLoading ? (
+      <p className="text-center">Loading banners...</p>
+    ) : bannerError ? (
+      <p className="text-danger text-center">{bannerError}</p>
+    ) : banners.length > 0 ? (
+      <Carousel
+  interval={3000} // Auto-scroll every 3 seconds
+  indicators={true}
+  fade
+  controls
+  pause={false} // Optional: ensures it doesn't stop on hover
+  className="rounded overflow-hidden shadow"
+>
+  {banners.map((banner, index) => (
+    <Carousel.Item key={index}>
+      <div
+        style={{
+          height: "320px",
+          backgroundImage: `url(${banner.image_url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            color: "white",
+            textAlign: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            padding: "20px 40px",
+            borderRadius: "10px",
+            maxWidth: "600px",
+          }}
+        >
+          <h2 style={{ fontWeight: "bold", fontSize: "32px" }}>
+            {banner.description || "Groceries delivered in 10 minutes"}
+          </h2>
+          <p style={{ fontSize: "16px", marginBottom: "20px" }}>
+            {banner.offers || "Fresh produce, daily essentials & more"}
+          </p>
+          <Button
+            variant="contained"
+            sx={{
+              fontWeight: "bold",
+              px: 4,
+              py: 1.5,
+              backgroundColor: "#ffffff",
+              color: "#28a745",
+              "&:hover": {
+                backgroundColor: "#f5f5f5",
+              },
+            }}
+          >
+            Shop Now →
+          </Button>
+        </div>
+      </div>
+    </Carousel.Item>
+  ))}
+</Carousel>
+
+    ) : (
+      <p className="text-center">No banners available</p>
+    )}
+  </Col>
+</Row>
+
        <ProductCategory />
       {/* Sections */}
       <Categorypage />

@@ -37,20 +37,22 @@ const AddProductForm = () => {
   } = useSelector((state) => state.products || {});
 
   const [product, setProduct] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    selling_price: "",
-    mrp: "",
-    stock: "",
-    unit: "",
-    image_url: "",
-    weight_kg: "",
-    is_active: false,
-    is_featured: false,
-    category_name: "",
-    subcategory_name: "",
-  });
+  name: "",
+  slug: "",
+  description: "",
+  selling_price: "",
+  mrp: "",
+  stock: "",
+  unit: "",
+  image_url: "",
+  thumbnail: [""],  // default with one input field
+  weight_kg: "",
+  is_active: false,
+  is_featured: false,
+  category_name: "",
+  subcategory_name: "",
+});
+
 
   useEffect(() => {
     dispatch(fetchProductCategoryRequest());
@@ -85,6 +87,23 @@ const AddProductForm = () => {
     const subcategory = subcategories.find((sub) => sub.name === name);
     return subcategory ? subcategory.id : null;
   };
+
+  const handleThumbnailChange = (index, value) => {
+  const updatedThumbnails = [...product.thumbnail];
+  updatedThumbnails[index] = value;
+  setProduct((prev) => ({ ...prev, thumbnail: updatedThumbnails }));
+};
+
+const addThumbnailField = () => {
+  setProduct((prev) => ({ ...prev, thumbnail: [...prev.thumbnail, ""] }));
+};
+
+const removeThumbnailField = (index) => {
+  const updatedThumbnails = [...product.thumbnail];
+  updatedThumbnails.splice(index, 1);
+  setProduct((prev) => ({ ...prev, thumbnail: updatedThumbnails }));
+};
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -127,20 +146,21 @@ const AddProductForm = () => {
     }
 
     const payload = {
-      name: product.name,
-      slug: product.slug,
-      description: product.description,
-      selling_price: product.selling_price,
-      mrp: product.mrp,
-      stock: product.stock,
-      unit: product.unit,
-      image_url: product.image_url,
-      weight_kg: product.weight_kg,
-      active: product.is_active ? 1 : 0,
-      featured: product.is_featured ? 1 : 0,
-      category_id,
-      subcategory_id,
-    };
+  name: product.name,
+  slug: product.slug,
+  description: product.description,
+  selling_price: product.selling_price,
+  mrp: product.mrp,
+  stock: product.stock,
+  unit: product.unit,
+  image_url: product.image_url,
+  thumbnail: product.thumbnail.filter(url => url.trim() !== ""), // clean empty entries
+  weight_kg: product.weight_kg,
+  active: product.is_active ? 1 : 0,
+  featured: product.is_featured ? 1 : 0,
+  category_id,
+  subcategory_id,
+};
 
     dispatch(createProductRequest(payload));
   };
@@ -323,6 +343,38 @@ const AddProductForm = () => {
             </Form.Group>
           </Col>
         </Row>
+
+        <Row className="mb-3">
+  <Col>
+    <Form.Group>
+      <Form.Label>Thumbnail URLs</Form.Label>
+      {product.thumbnail.map((thumb, index) => (
+        <div key={index} className="d-flex mb-2">
+          <Form.Control
+            type="text"
+            placeholder={`Thumbnail URL ${index + 1}`}
+            value={thumb}
+            onChange={(e) => handleThumbnailChange(index, e.target.value)}
+          />
+          {index > 0 && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => removeThumbnailField(index)}
+              className="ms-2"
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+      ))}
+      <Button variant="outline-primary" size="sm" onClick={addThumbnailField}>
+        Add Thumbnail
+      </Button>
+    </Form.Group>
+  </Col>
+</Row>
+
 
         <Row className="mb-3">
           <Col>
