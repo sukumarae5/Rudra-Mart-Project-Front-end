@@ -41,8 +41,9 @@ const Categorypage = () => {
             <Card
               className="shadow-sm border-0 h-100"
               style={{ cursor: "pointer" }}
-              onClick={() => handleCategoryClick(category.id, category.name)}
-            >
+              onClick={() => handleCategoryClick(category.id, category.name)}       
+            >  
+            
               <Card.Img
                 variant="top"
                 src={category.image_url}
