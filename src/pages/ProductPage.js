@@ -1,7 +1,7 @@
 // ProductPage.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {  FaTruck, FaUndo } from "react-icons/fa";
+import { FaUndo } from "react-icons/fa";
 import ReactImageMagnify from "react-image-magnify";
 import { useNavigate } from "react-router-dom";
 import Carousel from "react-multi-carousel";
@@ -15,6 +15,10 @@ import {
   Container,
   Grid,
   Typography,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import {
   addToCartRequest,
@@ -26,16 +30,12 @@ const getProductId = (product) => product.id || product._id;
 const ProductPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(false);
-  const [activeButton, setActiveButton] = useState("");
   const [quantity, setQuantity] = useState(1);
   const { cartItems = [] } = useSelector((state) => state.cart || {});
-
   const products = useSelector((state) => state.products?.products || []);
   const selectedProductFromRedux = useSelector(
     (state) => state.products?.selectedProduct || {}
   );
-
   const [product, setProduct] = useState(selectedProductFromRedux);
 
   useEffect(() => {
@@ -69,18 +69,10 @@ const ProductPage = () => {
   const handleCardClick = (clickedProduct) => {
     setProduct(clickedProduct);
     setQuantity(1);
-    setIsLiked(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleQuantityChange = (type) => {
-    setActiveButton(type);
-    setQuantity((prev) =>
-      type === "increment" ? prev + 1 : Math.max(prev - 1, 1)
-    );
-  };
-
-  const handleAddToCart = (e, product) => {
+  const handleAddToCart = (e) => {
     e.stopPropagation();
     const userToken = localStorage.getItem("authToken");
 
@@ -89,6 +81,7 @@ const ProductPage = () => {
       navigate("/login");
       return;
     }
+
     const user = JSON.parse(localStorage.getItem("user"));
 
     const isProductInCart = cartItems.some(
@@ -100,26 +93,7 @@ const ProductPage = () => {
       return;
     }
 
-    dispatch(addToCartRequest(user.id, product.id, 1));
-  };
-
-  const handleBuy = () => {
-    if (!product) return;
-
-    const checkoutItem = [
-      {
-        userId: user_id || "Guest",
-        productId: id,
-        productName: title,
-        productImage: image_url,
-        productPrice: parseFloat(price),
-        quantity,
-        totalPrice: parseFloat(price) * quantity,
-      },
-    ];
-
-    navigate("/CheckoutPage");
-    dispatch(fetcheckeoutpagedata(checkoutItem));
+    dispatch(addToCartRequest(user.id, product.id, quantity));
   };
 
   const responsive = {
@@ -154,80 +128,122 @@ const ProductPage = () => {
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <Typography variant="h4" fontWeight="bold" mb={2}>
-              {title}
-            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={8}>
+                <Typography variant="h5" fontWeight="600" mb={1}>
+                  {title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" mb={2}>
+                  6,034 ratings ★★★★☆
+                </Typography>
 
-            <Typography fontSize={18} fontWeight="bold" color="info.main">
-              ₹{parseFloat(selling_price || price).toLocaleString("en-IN")}
-              {mrp && (
-                <>
-                  <Typography
-                    component="span"
-                    fontSize={15}
-                    color="textSecondary"
-                    sx={{ textDecoration: "line-through", ml: 1 }}
-                  >
-                    ₹{parseFloat(mrp).toLocaleString("en-IN")}
-                  </Typography>
-                  <Typography
-                    component="span"
-                    fontSize={14}
-                    color="warning.main"
-                    sx={{ ml: 1 }}
-                  >
-                    ({Math.round(((mrp - (selling_price || price)) / mrp) * 100)}% OFF)
-                  </Typography>
-                </>
-              )}
-            </Typography>
+                <Typography fontSize={24} fontWeight="bold" color="success.main" mb={1}>
+                  ₹{parseFloat(selling_price || price).toLocaleString("en-IN")}
+                  {mrp && (
+                    <>
+                      <Typography
+                        component="span"
+                        fontSize={16}
+                        color="textSecondary"
+                        sx={{ textDecoration: "line-through", ml: 1 }}
+                      >
+                        ₹{parseFloat(mrp).toLocaleString("en-IN")}
+                      </Typography>
+                      <Typography
+                        component="span"
+                        fontSize={14}
+                        color="warning.main"
+                        sx={{ ml: 1 }}
+                      >
+                        ({Math.round(((mrp - (selling_price || price)) / mrp) * 100)}% OFF)
+                      </Typography>
+                    </>
+                  )}
+                </Typography>
 
-            <Typography color="textSecondary" mb={2}>
-              {description}
-            </Typography>
-
-            <Typography mb={2} color={stock > 0 ? "textPrimary" : "error"} fontWeight="bold">
-              Stock: {stock > 0 ? stock : "Out of Stock"}
-            </Typography>
-
-            <Box display="flex" alignItems="center" gap={2} mb={3}>
-              <Box display="flex" border="1px solid #aaa" borderRadius={1}>
-                <Button onClick={() => handleQuantityChange("decrement")} sx={{ minWidth: 40, bgcolor: activeButton === "decrement" ? "#fbe57b" : "transparent", color: "black", borderRight: "1px solid #000" }}>-</Button>
-                <Box px={3} py={1.5}>{quantity}</Box>
-                <Button onClick={() => handleQuantityChange("increment")} sx={{ minWidth: 40, bgcolor: activeButton === "increment" ? "#fbe57b" : "transparent", color: "black", borderLeft: "1px solid #000" }}>+</Button>
-              </Box>
-
-              <Button variant="contained" color="primary" onClick={handleBuy} disabled={stock === 0}>Buy Now</Button>
-              <Button variant="outlined" color="warning" onClick={(e) => handleAddToCart(e, product)}>Add</Button>
-              {/* <IconButton onClick={() => setIsLiked(!isLiked)}>
-                <FaHeart style={{ fill: isLiked ? "#dc3545" : "transparent", stroke: "black", strokeWidth: "30px" }} />
-              </IconButton> */}
-            </Box>
-
-            <Box border="1px solid #ccc" borderRadius={2} p={2} maxWidth={350}>
-              <Box display="flex" gap={2} mb={1}>
-                <FaTruck size={20} />
-                <Box>
-                  <Typography fontWeight="bold">Free Delivery</Typography>
-                  <Typography variant="body2" color="textSecondary">Enter your postal code for Delivery Availability</Typography>
+                <Box my={2} p={2} border="1px solid #ccc" borderRadius={2} bgcolor="#f9f9f9">
+                  <Typography fontWeight="bold" mb={1}>Save Extra with 3 Offers</Typography>
+                  <Typography variant="body2" color="error">Cashback: 5% with ICICI Amazon Pay</Typography>
+                  <Typography variant="body2">Bank Offer: 10% off with SBI Credit Card</Typography>
                 </Box>
-              </Box>
-              <hr />
-              <Box display="flex" gap={2} mt={1}>
-                <FaUndo size={20} />
-                <Box>
-                  <Typography fontWeight="bold">Easy Returns</Typography>
-                  <Typography variant="body2" color="textSecondary">Free 30 Days Delivery Returns. Details</Typography>
+
+                <Typography color="textSecondary" mb={2}>
+                  {description}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Box
+                  sx={{
+                    border: "1px solid #ddd",
+                    borderRadius: 2,
+                    p: 2,
+                    backgroundColor: "#fafafa",
+                    position: "sticky",
+                    top: 100,
+                  }}
+                >
+                  <Typography fontSize={22} fontWeight="bold" mb={1}>
+                    ₹{parseFloat(selling_price || price).toLocaleString("en-IN")}
+                  </Typography>
+
+                  <Typography variant="body2" color="success.main" fontWeight="500">
+                    FREE delivery Today 2PM – 4PM on orders over ₹499
+                  </Typography>
+                  <Typography variant="body2" mb={1}>
+                    Delivering to Hyderabad 500009
+                  </Typography>
+
+                  <Typography color={stock > 0 ? "green" : "error"} fontWeight="bold" mb={1}>
+                    {stock > 0 ? "In Stock" : "Out of Stock"}
+                  </Typography>
+
+                  <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                    <InputLabel id="qty-label">Qty</InputLabel>
+                    <Select
+                      labelId="qty-label"
+                      id="quantity"
+                      value={quantity}
+                      label="Qty"
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                    >
+                      {[...Array(10)].map((_, i) => (
+                        <MenuItem key={i + 1} value={i + 1}>{i + 1}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#ffd814",
+                      color: "#111",
+                      fontWeight: "bold",
+                      mb: 1,
+                      ":hover": { backgroundColor: "#f7ca00" },
+                    }}
+                    onClick={handleAddToCart}
+                  >
+                    Add to Cart
+                  </Button>
+
+                  <Box mt={2} display="flex" gap={1} alignItems="center">
+                    <FaUndo size={16} />
+                    <Typography variant="body2">30-day free return available</Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </Box>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Card>
 
       {relatedProducts.length > 0 && (
         <Container sx={{ mt: 6 }}>
-          <Typography variant="h5" textAlign="center" mb={3}>Related Products</Typography>
+          <Typography variant="h5" textAlign="center" mb={3}>
+            Related Products
+          </Typography>
           <Carousel
             responsive={responsive}
             infinite
@@ -238,18 +254,58 @@ const ProductPage = () => {
           >
             {relatedProducts.map((related) => (
               <Box key={getProductId(related)} px={1}>
-                <Card onClick={() => handleCardClick(related)} sx={{ width: 220, height: 340, display: "flex", flexDirection: "column", justifyContent: "space-between", transition: "transform 0.3s", ":hover": { boxShadow: 6, transform: "translateY(-6px)" }, cursor: "pointer" }}>
-                  <CardMedia component="img" image={related.image_url} alt={related.name} sx={{ height: 180, objectFit: "cover" }} />
+                <Card
+                  onClick={() => handleCardClick(related)}
+                  sx={{
+                    width: 220,
+                    height: 340,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: "transform 0.3s",
+                    ":hover": { boxShadow: 6, transform: "translateY(-6px)" },
+                    cursor: "pointer"
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    image={related.image_url}
+                    alt={related.name}
+                    sx={{ height: 180, objectFit: "cover" }}
+                  />
                   <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" noWrap>{related.name}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{related.description}</Typography>
+                    <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                      {related.name}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical"
+                      }}
+                    >
+                      {related.description}
+                    </Typography>
                     <Typography fontSize={14} fontWeight="bold" color="info.main">
                       ₹{parseFloat(related.selling_price).toLocaleString("en-IN")}
-                      <Typography component="span" fontSize={13} color="textSecondary" sx={{ textDecoration: "line-through", ml: 1 }}>
+                      <Typography
+                        component="span"
+                        fontSize={13}
+                        color="textSecondary"
+                        sx={{ textDecoration: "line-through", ml: 1 }}
+                      >
                         ₹{parseFloat(related.mrp).toLocaleString("en-IN")}
                       </Typography>
                       {related.mrp && related.selling_price && (
-                        <Typography component="span" fontSize={13} color="warning.main" sx={{ ml: 1 }}>
+                        <Typography
+                          component="span"
+                          fontSize={13}
+                          color="warning.main"
+                          sx={{ ml: 1 }}
+                        >
                           ({Math.round(((related.mrp - related.selling_price) / related.mrp) * 100)}% OFF)
                         </Typography>
                       )}
