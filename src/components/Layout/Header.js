@@ -199,6 +199,11 @@ const Header = () => {
         }}>
           Logout
         </Dropdown.Item>
+        <Dropdown.Item onClick={()=>{
+          navigate("/UserOrderHistory")
+        }}>
+        OrderHistory 
+        </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   ) : (

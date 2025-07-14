@@ -127,6 +127,11 @@ const AppRouter = createBrowserRouter([
           element:<UserSetNewpasswordpage/>
 
         }, 
+        {
+            path:"UserOrderHistory",
+            element:<UserOrderHistory/>
+
+          },
       
       {
         path: "/useraccountpage",

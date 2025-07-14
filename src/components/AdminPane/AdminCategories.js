@@ -17,6 +17,7 @@ import {
   fetchProductCategoryRequest,
 } from "../../features/categories/categoriesAction";
 import { fetchSubcategoryRequest } from "../../features/subcategories/subcategoryAction";
+import { fetchCategoryTitlesRequest } from "../../features/categorytitle/categoryActions";
 import { useNavigate } from "react-router-dom";
 import PaginationComponent from "../AdminPane/Pagination";
 
@@ -31,6 +32,11 @@ const AdminCategories = () => {
 
   const categoryState = useSelector((state) => state.categoryproducts);
   const subcategoryState = useSelector((state) => state.subcategory);
+  const categoryTitleState = useSelector((state) => state.categorytitle);
+
+  const categoryTitles = Array.isArray(categoryTitleState?.titles)
+    ? categoryTitleState.titles
+    : [];
 
   const categoryproduct = Array.isArray(categoryState?.categoryproduct)
     ? categoryState.categoryproduct
@@ -43,6 +49,7 @@ const AdminCategories = () => {
   useEffect(() => {
     dispatch(fetchProductCategoryRequest());
     dispatch(fetchSubcategoryRequest());
+    dispatch(fetchCategoryTitlesRequest());
   }, [dispatch]);
 
   useEffect(() => {
@@ -66,6 +73,11 @@ const AdminCategories = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const getTitleById = (id) => {
+    const titleObj = categoryTitles.find((t) => t.id === id);
+    return titleObj ? titleObj.name : "Unknown Title";
+  };
 
   return (
     <div className="container py-4">
@@ -163,6 +175,7 @@ const AdminCategories = () => {
             <thead className="bg-primary text-white">
               <tr>
                 <th className="text-start">Image</th>
+                <th>Title</th>
                 <th>Name</th>
                 <th>Slug</th>
                 <th>Description</th>
@@ -186,9 +199,12 @@ const AdminCategories = () => {
                         }}
                       />
                     </td>
+                    <td>{getTitleById(category.category_title_id)}</td>
                     <td className="text-wrap">{category.name}</td>
                     <td className="text-wrap">{category.slug || "N/A"}</td>
-                    <td className="text-wrap">{category.description || "N/A"}</td>
+                    <td className="text-wrap">
+                      {category.description || "N/A"}
+                    </td>
                     <td>
                       <span
                         className={`badge ${
@@ -220,7 +236,7 @@ const AdminCategories = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center py-4">
+                  <td colSpan="7" className="text-center py-4">
                     No categories found.
                   </td>
                 </tr>
@@ -228,7 +244,6 @@ const AdminCategories = () => {
             </tbody>
           </Table>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <PaginationComponent
               currentPage={currentPage}

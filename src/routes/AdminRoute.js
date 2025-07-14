@@ -6,9 +6,11 @@ import AddSubcategoryForm from "../components/AdminPane/AddSubcategoryForm";
 import AddUserForm from "../components/AdminPane/AddUserForm";
 import AdminBanners from "../components/AdminPane/AdminBanners";
 import AdminCategories from "../components/AdminPane/AdminCategories";
+import AdminCategoryTitle from "../components/AdminPane/AdminCategoryTitle";
 import AdminDeliveryPage from "../components/AdminPane/AdminDeliveryPage";
 import AdminInbox from "../components/AdminPane/AdminInbox";
 import AdminSubcategories from "../components/AdminPane/AdminSubCategories";
+import CategoryTitleForm from "../components/AdminPane/CategoryTitleForm";
 import Dashboard from "../components/AdminPane/Dashboard";
 import EditCategoryForm from "../components/AdminPane/EditCategoryForm";
 import EditDeliveryPage from "../components/AdminPane/EditDelivereyPage";
@@ -103,6 +105,14 @@ const AdminRoute = [
   {
     path: "addbanners",
     element: <AddBannerForm />,
+  },
+  {
+    path: "CategoryTitleForm",
+    element: <CategoryTitleForm />,
+  },
+  {
+    path: "AdminCategoryTitle",
+    element: <AdminCategoryTitle />,
   },
   {
     path: "subcategories",
