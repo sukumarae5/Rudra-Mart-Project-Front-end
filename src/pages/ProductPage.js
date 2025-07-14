@@ -55,10 +55,24 @@ const ProductPage = () => {
     selling_price,
   } = product || {};
 
-  const [mainImage, setMainImage] = useState(image_url);
+  // ✅ Parse image_url safely
+  let images = [];
+  if (Array.isArray(image_url)) {
+    images = image_url;
+  } else if (typeof image_url === "string" && image_url.startsWith("[")) {
+    try {
+      images = JSON.parse(image_url);
+    } catch {
+      images = [image_url];
+    }
+  } else if (typeof image_url === "string") {
+    images = [image_url];
+  }
+
+  const [mainImage, setMainImage] = useState(images[0] || "");
 
   useEffect(() => {
-    setMainImage(product?.image_url || "");
+    setMainImage(images[0] || "");
   }, [product]);
 
   const relatedProducts = products.filter(
@@ -117,16 +131,43 @@ const ProductPage = () => {
     <Box p={3}>
       <Card elevation={4} sx={{ borderRadius: 3, p: 3 }}>
         <Grid container spacing={4}>
+          {/* Left - Image and Thumbnails */}
           <Grid item xs={12} md={6}>
             <Box maxWidth={400} mx="auto">
               <ReactImageMagnify
-                smallImage={{ alt: "Product", isFluidWidth: true, src: mainImage }}
+                smallImage={{
+                  alt: "Product",
+                  isFluidWidth: true,
+                  src: mainImage,
+                }}
                 largeImage={{ src: mainImage, width: 1200, height: 1200 }}
                 enlargedImagePosition="beside"
               />
+              <Box mt={2} display="flex" gap={1} flexWrap="wrap" justifyContent="center">
+                {images.map((img, index) => (
+                  <Box
+                    key={index}
+                    component="img"
+                    src={img}
+                    alt={`thumb-${index}`}
+                    onClick={() => setMainImage(img)}
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      border: mainImage === img ? "2px solid #1976d2" : "1px solid #ccc",
+                      borderRadius: 1,
+                      objectFit: "cover",
+                      cursor: "pointer",
+                      transition: "0.3s",
+                      ":hover": { opacity: 0.8 },
+                    }}
+                  />
+                ))}
+              </Box>
             </Box>
           </Grid>
 
+          {/* Right - Info and Cart */}
           <Grid item xs={12} md={6}>
             <Grid container spacing={2}>
               <Grid item xs={12} md={8}>
@@ -239,6 +280,7 @@ const ProductPage = () => {
         </Grid>
       </Card>
 
+      {/* Related Products */}
       {relatedProducts.length > 0 && (
         <Container sx={{ mt: 6 }}>
           <Typography variant="h5" textAlign="center" mb={3}>
@@ -252,68 +294,85 @@ const ProductPage = () => {
             customLeftArrow={<button className="custom-arrow custom-left">‹</button>}
             customRightArrow={<button className="custom-arrow custom-right">›</button>}
           >
-            {relatedProducts.map((related) => (
-              <Box key={getProductId(related)} px={1}>
-                <Card
-                  onClick={() => handleCardClick(related)}
-                  sx={{
-                    width: 220,
-                    height: 340,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    transition: "transform 0.3s",
-                    ":hover": { boxShadow: 6, transform: "translateY(-6px)" },
-                    cursor: "pointer"
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={related.image_url}
-                    alt={related.name}
-                    sx={{ height: 180, objectFit: "cover" }}
-                  />
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                      {related.name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        overflow: "hidden",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical"
-                      }}
-                    >
-                      {related.description}
-                    </Typography>
-                    <Typography fontSize={14} fontWeight="bold" color="info.main">
-                      ₹{parseFloat(related.selling_price).toLocaleString("en-IN")}
-                      <Typography
-                        component="span"
-                        fontSize={13}
-                        color="textSecondary"
-                        sx={{ textDecoration: "line-through", ml: 1 }}
-                      >
-                        ₹{parseFloat(related.mrp).toLocaleString("en-IN")}
+            {relatedProducts.map((related) => {
+              let relImages = [];
+              try {
+                relImages =
+                  typeof related.image_url === "string" && related.image_url.startsWith("[")
+                    ? JSON.parse(related.image_url)
+                    : Array.isArray(related.image_url)
+                    ? related.image_url
+                    : [related.image_url];
+              } catch {
+                relImages = [related.image_url];
+              }
+
+              return (
+                <Box key={getProductId(related)} px={1}>
+                  <Card
+                    onClick={() => handleCardClick(related)}
+                    sx={{
+                      width: 220,
+                      height: 340,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      transition: "transform 0.3s",
+                      ":hover": { boxShadow: 6, transform: "translateY(-6px)" },
+                      cursor: "pointer",
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={relImages[0]}
+                      alt={related.name}
+                      sx={{ height: 180, objectFit: "cover" }}
+                    />
+                    <CardContent>
+                      <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                        {related.name}
                       </Typography>
-                      {related.mrp && related.selling_price && (
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          overflow: "hidden",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
+                        {related.description}
+                      </Typography>
+                      <Typography fontSize={14} fontWeight="bold" color="info.main">
+                        ₹{parseFloat(related.selling_price).toLocaleString("en-IN")}
                         <Typography
                           component="span"
                           fontSize={13}
-                          color="warning.main"
-                          sx={{ ml: 1 }}
+                          color="textSecondary"
+                          sx={{ textDecoration: "line-through", ml: 1 }}
                         >
-                          ({Math.round(((related.mrp - related.selling_price) / related.mrp) * 100)}% OFF)
+                          ₹{parseFloat(related.mrp).toLocaleString("en-IN")}
                         </Typography>
-                      )}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Box>
-            ))}
+                        {related.mrp && related.selling_price && (
+                          <Typography
+                            component="span"
+                            fontSize={13}
+                            color="warning.main"
+                            sx={{ ml: 1 }}
+                          >
+                            ({Math.round(
+                              ((related.mrp - related.selling_price) / related.mrp) * 100
+                            )}
+                            % OFF)
+                          </Typography>
+                        )}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
+              );
+            })}
           </Carousel>
         </Container>
       )}
