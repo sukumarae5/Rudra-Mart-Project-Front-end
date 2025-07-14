@@ -10,7 +10,10 @@ import {
 import { IoArrowBack } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 
-import { fetchProductRequest, updateProductRequest } from "../../features/product/productActions";
+import {
+  fetchProductRequest,
+  updateProductRequest,
+} from "../../features/product/productActions";
 import { fetchSubcategoryRequest } from "../../features/subcategories/subcategoryAction";
 import { fetchProductCategoryRequest } from "../../features/categories/categoriesAction";
 
@@ -30,25 +33,26 @@ const EditProductForm = () => {
     stock: "",
     unit: "",
     image_url: "",
+    thumbnail: "", // 
     weight_kg: "",
     active: false,
     featured: false,
   });
 
-const {
-  product = null,
-  loading = false,
-  error = null,
-  updateMessage = ""
-} = useSelector((state) => state.products|| {});
+  const { product = null, loading = false, updateMessage = "" } =
+    useSelector((state) => state.products || {});
 
   const categoryState = useSelector((state) => state.categoryproducts);
   const subcategoryState = useSelector((state) => state.subcategory);
 
-  const categoryproduct = Array.isArray(categoryState?.categoryproduct) ? categoryState.categoryproduct : [];
-  const subcategories = Array.isArray(subcategoryState?.subcategories) ? subcategoryState.subcategories : [];
-  console.log(product)
-  console.log(updateMessage)
+  const categoryproduct = Array.isArray(categoryState?.categoryproduct)
+    ? categoryState.categoryproduct
+    : [];
+
+  const subcategories = Array.isArray(subcategoryState?.subcategories)
+    ? subcategoryState.subcategories
+    : [];
+
   useEffect(() => {
     dispatch(fetchProductCategoryRequest());
     dispatch(fetchSubcategoryRequest());
@@ -73,6 +77,9 @@ const {
         weight_kg: product.weight_kg || "",
         active: Boolean(product.active),
         featured: Boolean(product.featured),
+      thumbnail: product.thumbnail
+    ? product.thumbnail.split(",").map((url) => url.trim())
+    : [],
       });
     }
   }, [product, id]);
@@ -88,13 +95,23 @@ const {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (id) {
-      dispatch(updateProductRequest(id, formData));
-    }
-    if (updateMessage) {
-      alert(updateMessage)
-      navigate("/admin/adminproducts");
+      const updatedPayload = {
+        ...formData,
+        thumbnail: formData.thumbnail
+          ? formData.thumbnail.split(",").map((url) => url.trim())
+          : [],
+      };
+
+      dispatch(updateProductRequest(id, updatedPayload));
     }
   };
+
+  useEffect(() => {
+    if (updateMessage) {
+      alert(updateMessage);
+      navigate("/admin/adminproducts");
+    }
+  }, [updateMessage, navigate]);
 
   return (
     <div className="container-fluid">
@@ -121,18 +138,29 @@ const {
       </Row>
 
       <Form onSubmit={handleSubmit} className="p-3 border rounded shadow">
-        {/* Form Fields */}
         <Row className="mb-3">
           <Col>
             <Form.Group>
               <Form.Label>Product Name *</Form.Label>
-              <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
           <Col>
             <Form.Group>
               <Form.Label>Slug *</Form.Label>
-              <Form.Control type="text" name="slug" value={formData.slug} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="slug"
+                value={formData.slug}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -141,7 +169,13 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Description *</Form.Label>
-              <Form.Control as="textarea" name="description" value={formData.description} onChange={handleChange} required />
+              <Form.Control
+                as="textarea"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -150,13 +184,25 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Selling Price *</Form.Label>
-              <Form.Control type="number" name="selling_price" value={formData.selling_price} onChange={handleChange} required />
+              <Form.Control
+                type="number"
+                name="selling_price"
+                value={formData.selling_price}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
           <Col>
             <Form.Group>
               <Form.Label>MRP *</Form.Label>
-              <Form.Control type="number" name="mrp" value={formData.mrp} onChange={handleChange} required />
+              <Form.Control
+                type="number"
+                name="mrp"
+                value={formData.mrp}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -165,10 +211,17 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Category *</Form.Label>
-              <Form.Select name="category_id" value={formData.category_id} onChange={handleChange} required>
+              <Form.Select
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Select Category</option>
                 {categoryproduct.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
                 ))}
               </Form.Select>
             </Form.Group>
@@ -176,11 +229,22 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Subcategory *</Form.Label>
-              <Form.Select name="subcategory_id" value={formData.subcategory_id} onChange={handleChange} required>
+              <Form.Select
+                name="subcategory_id"
+                value={formData.subcategory_id}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Select Subcategory</option>
-                {subcategories.filter((sub) => sub.category_id === parseInt(formData.category_id)).map((sub) => (
-                  <option key={sub.id} value={sub.id}>{sub.name}</option>
-                ))}
+                {subcategories
+                  .filter(
+                    (sub) => sub.category_id === parseInt(formData.category_id)
+                  )
+                  .map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.name}
+                    </option>
+                  ))}
               </Form.Select>
             </Form.Group>
           </Col>
@@ -190,13 +254,25 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Stock *</Form.Label>
-              <Form.Control type="number" name="stock" value={formData.stock} onChange={handleChange} required />
+              <Form.Control
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
           <Col>
             <Form.Group>
               <Form.Label>Unit *</Form.Label>
-              <Form.Control type="text" name="unit" value={formData.unit} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="unit"
+                value={formData.unit}
+                onChange={handleChange}
+                required
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -205,7 +281,28 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Image URL *</Form.Label>
-              <Form.Control type="text" name="image_url" value={formData.image_url} onChange={handleChange} required />
+              <Form.Control
+                type="text"
+                name="image_url"
+                value={formData.image_url}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group>
+              <Form.Label>Thumbnail URLs (comma-separated)</Form.Label>
+              <Form.Control
+                type="text"
+                name="thumbnail"
+                value={formData.thumbnail}
+                onChange={handleChange}
+                placeholder="https://img1.jpg, https://img2.jpg"
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -214,15 +311,33 @@ const {
           <Col>
             <Form.Group>
               <Form.Label>Weight (in kg)</Form.Label>
-              <Form.Control type="number" step="0.01" name="weight_kg" value={formData.weight_kg} onChange={handleChange} />
+              <Form.Control
+                type="number"
+                step="0.01"
+                name="weight_kg"
+                value={formData.weight_kg}
+                onChange={handleChange}
+              />
             </Form.Group>
           </Col>
         </Row>
 
         <Row className="mb-3">
           <Col>
-            <Form.Check type="switch" label="Active" name="active" checked={formData.active} onChange={handleChange} />
-            <Form.Check type="switch" label="Featured" name="featured" checked={formData.featured} onChange={handleChange} />
+            <Form.Check
+              type="switch"
+              label="Active"
+              name="active"
+              checked={formData.active}
+              onChange={handleChange}
+            />
+            <Form.Check
+              type="switch"
+              label="Featured"
+              name="featured"
+              checked={formData.featured}
+              onChange={handleChange}
+            />
           </Col>
         </Row>
 

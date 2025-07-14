@@ -6,6 +6,7 @@ import {
   updateCategoryRequest,
   fetchCategoryByIdRequest,
 } from "../../features/categories/categoriesAction";
+import { fetchCategoryTitlesRequest } from "../../features/categorytitle/categoryActions";
 
 const EditCategoryForm = () => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const EditCategoryForm = () => {
   const { selectedCategory, loading, success } = useSelector(
     (state) => state.categoryproducts
   );
+  const categoryTitleState = useSelector((state) => state.categorytitle.titles);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -23,16 +25,18 @@ const EditCategoryForm = () => {
     image_url: "",
     active: true,
     featured: false,
+    category_title_id: "",
   });
 
-  // Fetch category on mount
+  // Fetch category titles and selected category
   useEffect(() => {
     if (id) {
       dispatch(fetchCategoryByIdRequest(id));
     }
+    dispatch(fetchCategoryTitlesRequest());
   }, [dispatch, id]);
 
-  // Populate form when data is fetched
+  // Populate form when category is fetched
   useEffect(() => {
     if (selectedCategory && String(selectedCategory.id) === String(id)) {
       setFormData({
@@ -42,19 +46,12 @@ const EditCategoryForm = () => {
         image_url: selectedCategory.image_url || "",
         active: selectedCategory.active === 1,
         featured: selectedCategory.featured === 1,
+        category_title_id: selectedCategory.category_title_id || "",
       });
     }
   }, [selectedCategory, id]);
 
-  // Handle success state
-  useEffect(() => {
-    if (success) {
-      alert("Category updated successfully!");
-      navigate("/admin/categories");
-    }
-  }, [success, navigate]);
-
-  // Auto-generate slug when name changes
+  // Auto-generate slug from name
   useEffect(() => {
     const slug = formData.name
       .toLowerCase()
@@ -73,14 +70,17 @@ const EditCategoryForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const payload = {
       ...formData,
       active: formData.active ? 1 : 0,
       featured: formData.featured ? 1 : 0,
     };
+
     dispatch(updateCategoryRequest(id, payload));
   };
 
+  
   return (
     <div className="container p-4">
       <h4 className="mb-4">Edit Category</h4>
@@ -132,6 +132,23 @@ const EditCategoryForm = () => {
             onChange={handleChange}
             required
           />
+        </Form.Group>
+
+        <Form.Group controlId="categoryTitleId" className="mb-3">
+          <Form.Label>Category Title *</Form.Label>
+          <Form.Select
+            name="category_title_id"
+            value={formData.category_title_id}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Select Title --</option>
+            {categoryTitleState.map((title) => (
+              <option key={title.id} value={title.id}>
+                {title.name}
+              </option>
+            ))}
+          </Form.Select>
         </Form.Group>
 
         <Row className="mb-4">
