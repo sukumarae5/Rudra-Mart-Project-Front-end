@@ -3,11 +3,14 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { addCategoryRequest } from "../../features/categories/categoriesAction";
 import { useNavigate } from "react-router-dom";
+import { fetchCategoryTitlesRequest } from "../../features/categorytitle/categoryActions";
 
 const AddCategoryForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const { loading, success } = useSelector((state) => state.categoryproducts);
+  const categoryTitleState = useSelector((state) => state.categorytitle.titles);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -16,9 +19,15 @@ const AddCategoryForm = () => {
     image_url: "",
     active: true,
     featured: false,
+    category_title_id: "",
   });
 
-  // ✅ Auto-generate slug when name changes
+  // Fetch category titles on mount
+  useEffect(() => {
+    dispatch(fetchCategoryTitlesRequest());
+  }, [dispatch]);
+
+  // Auto-generate slug from name
   useEffect(() => {
     if (formData.name) {
       const generatedSlug = formData.name
@@ -29,6 +38,7 @@ const AddCategoryForm = () => {
     }
   }, [formData.name]);
 
+  // On form input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -37,6 +47,7 @@ const AddCategoryForm = () => {
     }));
   };
 
+  // Submit handler
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -47,17 +58,19 @@ const AddCategoryForm = () => {
       image_url: formData.image_url,
       active: formData.active ? 1 : 0,
       featured: formData.featured ? 1 : 0,
+      category_title_id: formData.category_title_id,
     };
 
     dispatch(addCategoryRequest(payload));
   };
 
-  useEffect(() => {
-    if (success) {
-      alert("Category added successfully!");
-      navigate("/admin/categories");
-    }
-  }, [success, navigate]);
+useEffect(() => {
+  if (success) {
+    alert("Category added successfully!");
+    navigate(-1); // 👈 goes back to the previous page
+  }
+}, [success, navigate]);
+
 
   return (
     <div className="container p-4">
@@ -112,6 +125,23 @@ const AddCategoryForm = () => {
             required
             placeholder="https://example.com/image.jpg"
           />
+        </Form.Group>
+
+        <Form.Group controlId="categoryTitleId" className="mb-3">
+          <Form.Label>Category Title *</Form.Label>
+          <Form.Select
+            name="category_title_id"
+            value={formData.category_title_id}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Select Title --</option>
+            {categoryTitleState.map((title) => (
+              <option key={title.id} value={title.id}>
+                {title.name}
+              </option>
+            ))}
+          </Form.Select>
         </Form.Group>
 
         <Row className="mb-3">

@@ -12,6 +12,7 @@ import subcategorySaga from '../features/subcategories/subcategorySaga';
 import bannerSaga from '../features/banners/bannerSaga';
 import deliverySaga from '../features/delivery/deliverySaga';
 import deliveryBoySaga from '../features/deliveryboydetails/deliveryBoySaga';
+import categoryTitleSaga from '../features/categorytitle/categorySaga';
 
 function* rootSaga() {
   yield all([
@@ -27,6 +28,8 @@ function* rootSaga() {
     bannerSaga(),
     deliverySaga(),
     deliveryBoySaga(),
+    categoryTitleSaga(),   
+      
   ]);
 }
 

@@ -20,10 +20,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import {
-  addToCartRequest,
-  fetcheckeoutpagedata,
-} from "../features/cart/cartActions";
+import { addToCartRequest } from "../features/cart/cartActions";
 
 const getProductId = (product) => product.id || product._id;
 
@@ -53,9 +50,10 @@ const ProductPage = () => {
     user_id,
     mrp,
     selling_price,
+    thumbnail = [],
   } = product || {};
 
-  // ✅ Parse image_url safely
+  // Parse image_url
   let images = [];
   if (Array.isArray(image_url)) {
     images = image_url;
@@ -69,10 +67,26 @@ const ProductPage = () => {
     images = [image_url];
   }
 
-  const [mainImage, setMainImage] = useState(images[0] || "");
+  // Parse thumbnails
+  let thumbnailImages = [];
+  try {
+    thumbnailImages =
+      typeof thumbnail === "string" && thumbnail.startsWith("[")
+        ? JSON.parse(thumbnail).filter((url) => url.trim())
+        : Array.isArray(thumbnail)
+        ? thumbnail.filter((url) => url.trim())
+        : [];
+  } catch {
+    thumbnailImages = [];
+  }
+
+  // Merge thumbnails and main images (optional)
+  const allImages = [...new Set([...images, ...thumbnailImages])];
+
+  const [mainImage, setMainImage] = useState(allImages[0] || "");
 
   useEffect(() => {
-    setMainImage(images[0] || "");
+    setMainImage(allImages[0] || "");
   }, [product]);
 
   const relatedProducts = products.filter(
@@ -89,24 +103,19 @@ const ProductPage = () => {
   const handleAddToCart = (e) => {
     e.stopPropagation();
     const userToken = localStorage.getItem("authToken");
-
     if (!userToken) {
       alert("Please log in");
       navigate("/login");
       return;
     }
-
     const user = JSON.parse(localStorage.getItem("user"));
-
     const isProductInCart = cartItems.some(
       (item) => item.user_id === user.id && item.product_id === product.id
     );
-
     if (isProductInCart) {
       alert("Product already in cart");
       return;
     }
-
     dispatch(addToCartRequest(user.id, product.id, quantity));
   };
 
@@ -131,26 +140,22 @@ const ProductPage = () => {
     <Box p={3}>
       <Card elevation={4} sx={{ borderRadius: 3, p: 3 }}>
         <Grid container spacing={4}>
-          {/* Left - Image and Thumbnails */}
+          {/* Main Image Viewer */}
           <Grid item xs={12} md={6}>
             <Box maxWidth={400} mx="auto">
               <ReactImageMagnify
-                smallImage={{
-                  alt: "Product",
-                  isFluidWidth: true,
-                  src: mainImage,
-                }}
+                smallImage={{ alt: "Product", isFluidWidth: true, src: mainImage }}
                 largeImage={{ src: mainImage, width: 1200, height: 1200 }}
                 enlargedImagePosition="beside"
               />
               <Box mt={2} display="flex" gap={1} flexWrap="wrap" justifyContent="center">
-                {images.map((img, index) => (
+                {allImages.map((img, index) => (
                   <Box
                     key={index}
                     component="img"
                     src={img}
                     alt={`thumb-${index}`}
-                    onClick={() => setMainImage(img)}
+                    onClick={() => setMainImage(img)} // ✅ onClick updates main image
                     sx={{
                       width: 60,
                       height: 60,
@@ -167,35 +172,20 @@ const ProductPage = () => {
             </Box>
           </Grid>
 
-          {/* Right - Info and Cart */}
+          {/* Product Info */}
           <Grid item xs={12} md={6}>
             <Grid container spacing={2}>
               <Grid item xs={12} md={8}>
-                <Typography variant="h5" fontWeight="600" mb={1}>
-                  {title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  6,034 ratings ★★★★☆
-                </Typography>
+                <Typography variant="h5" fontWeight="600" mb={1}>{title}</Typography>
 
                 <Typography fontSize={24} fontWeight="bold" color="success.main" mb={1}>
                   ₹{parseFloat(selling_price || price).toLocaleString("en-IN")}
                   {mrp && (
                     <>
-                      <Typography
-                        component="span"
-                        fontSize={16}
-                        color="textSecondary"
-                        sx={{ textDecoration: "line-through", ml: 1 }}
-                      >
+                      <Typography component="span" fontSize={16} color="textSecondary" sx={{ textDecoration: "line-through", ml: 1 }}>
                         ₹{parseFloat(mrp).toLocaleString("en-IN")}
                       </Typography>
-                      <Typography
-                        component="span"
-                        fontSize={14}
-                        color="warning.main"
-                        sx={{ ml: 1 }}
-                      >
+                      <Typography component="span" fontSize={14} color="warning.main" sx={{ ml: 1 }}>
                         ({Math.round(((mrp - (selling_price || price)) / mrp) * 100)}% OFF)
                       </Typography>
                     </>
@@ -208,46 +198,35 @@ const ProductPage = () => {
                   <Typography variant="body2">Bank Offer: 10% off with SBI Credit Card</Typography>
                 </Box>
 
-                <Typography color="textSecondary" mb={2}>
-                  {description}
-                </Typography>
+                <Typography color="textSecondary" mb={2}>{description}</Typography>
               </Grid>
 
+              {/* Cart Panel */}
               <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    border: "1px solid #ddd",
-                    borderRadius: 2,
-                    p: 2,
-                    backgroundColor: "#fafafa",
-                    position: "sticky",
-                    top: 100,
-                  }}
-                >
+                <Box sx={{
+                  border: "1px solid #ddd",
+                  borderRadius: 2,
+                  p: 2,
+                  backgroundColor: "#fafafa",
+                  position: "sticky",
+                  top: 100,
+                }}>
                   <Typography fontSize={22} fontWeight="bold" mb={1}>
                     ₹{parseFloat(selling_price || price).toLocaleString("en-IN")}
                   </Typography>
-
                   <Typography variant="body2" color="success.main" fontWeight="500">
                     FREE delivery Today 2PM – 4PM on orders over ₹499
                   </Typography>
                   <Typography variant="body2" mb={1}>
                     Delivering to Hyderabad 500009
                   </Typography>
-
                   <Typography color={stock > 0 ? "green" : "error"} fontWeight="bold" mb={1}>
                     {stock > 0 ? "In Stock" : "Out of Stock"}
                   </Typography>
 
                   <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                     <InputLabel id="qty-label">Qty</InputLabel>
-                    <Select
-                      labelId="qty-label"
-                      id="quantity"
-                      value={quantity}
-                      label="Qty"
-                      onChange={(e) => setQuantity(Number(e.target.value))}
-                    >
+                    <Select labelId="qty-label" id="quantity" value={quantity} label="Qty" onChange={(e) => setQuantity(Number(e.target.value))}>
                       {[...Array(10)].map((_, i) => (
                         <MenuItem key={i + 1} value={i + 1}>{i + 1}</MenuItem>
                       ))}
@@ -329,9 +308,7 @@ const ProductPage = () => {
                       sx={{ height: 180, objectFit: "cover" }}
                     />
                     <CardContent>
-                      <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                        {related.name}
-                      </Typography>
+                      <Typography variant="subtitle1" fontWeight="bold" noWrap>{related.name}</Typography>
                       <Typography
                         variant="body2"
                         color="text.secondary"
@@ -346,25 +323,12 @@ const ProductPage = () => {
                       </Typography>
                       <Typography fontSize={14} fontWeight="bold" color="info.main">
                         ₹{parseFloat(related.selling_price).toLocaleString("en-IN")}
-                        <Typography
-                          component="span"
-                          fontSize={13}
-                          color="textSecondary"
-                          sx={{ textDecoration: "line-through", ml: 1 }}
-                        >
+                        <Typography component="span" fontSize={13} color="textSecondary" sx={{ textDecoration: "line-through", ml: 1 }}>
                           ₹{parseFloat(related.mrp).toLocaleString("en-IN")}
                         </Typography>
                         {related.mrp && related.selling_price && (
-                          <Typography
-                            component="span"
-                            fontSize={13}
-                            color="warning.main"
-                            sx={{ ml: 1 }}
-                          >
-                            ({Math.round(
-                              ((related.mrp - related.selling_price) / related.mrp) * 100
-                            )}
-                            % OFF)
+                          <Typography component="span" fontSize={13} color="warning.main" sx={{ ml: 1 }}>
+                            ({Math.round(((related.mrp - related.selling_price) / related.mrp) * 100)}% OFF)
                           </Typography>
                         )}
                       </Typography>
@@ -377,28 +341,34 @@ const ProductPage = () => {
         </Container>
       )}
 
+      {/* Styled Arrows */}
       <style>{`
         .custom-arrow {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
           z-index: 10;
-          background: #6d6db7;
-          border: 1px solid #ccc;
+          background-color: white;
+          border: 2px solid #ccc;
           border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          font-size: 24px;
-          font-weight: bold;
+          width: 45px;
+          height: 45px;
+          font-size: 22px;
+          color: #333;
           cursor: pointer;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        .custom-left {
-          left: 10px;
+        .custom-arrow:hover {
+          background-color: #f0f0f0;
+          border-color: #aaa;
+          transform: translateY(-50%) scale(1.05);
         }
-        .custom-right {
-          right: 10px;
-        }
+        .custom-left { left: -20px; }
+        .custom-right { right: -20px; }
       `}</style>
     </Box>
   );

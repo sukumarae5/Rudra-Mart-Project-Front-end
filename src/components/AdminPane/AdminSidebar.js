@@ -131,9 +131,11 @@ const menuItems = [
   { path: "/admin/adminorders", icon: <HiOutlineShoppingBag size={18} />, label: "Orders" },
 { path: "/admin/admindeliverypage", icon: <HiOutlineTruck size={18} />, label: "Delivery" },
   { path: "/admin/adminusers", icon: <HiOutlineUserGroup size={18} />, label: "Users" },
+  { path: "/admin/AdminCategoryTitle", icon: <HiOutlineUserGroup size={18} />, label: "CategoryTitles" },
+  
   { path: "/admin/adminbanners", icon: <HiOutlinePhotograph size={18} />, label: "Banners" },
   { path: "/", icon: <HiOutlineArrowRight size={18} />, label: "Back to store" },
-  { path: "/", icon: <HiOutlineLogout size={18} />, label: "Logout" },
+  { path: "/logout", icon: <HiOutlineLogout size={18} />, label: "Logout" },
 ];
 
 export default AdminSidebar;
