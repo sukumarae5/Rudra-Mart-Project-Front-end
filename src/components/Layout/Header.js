@@ -161,8 +161,8 @@ const Header = () => {
           </Button>
 
          <Form className="flex-grow-1 mx-2" onSubmit={handleSearch}>
-<InputGroup className="w-10000">
-  <InputGroup.Text className="bg-white border-end-0">
+<InputGroup className="w-100">
+  <InputGroup.Text className="bg-white ">
     <BiSearch />
   </InputGroup.Text>
   <Form.Control

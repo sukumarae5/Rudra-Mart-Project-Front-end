@@ -56,7 +56,7 @@ const UserOrderHistory = () => {
                       <img
                         src={order.image_url}
                         alt={order.product_name}
-                        className="w-40 h-40 object-cover rounded"
+                        className="w-40  h-40 object-cover rounded"
                       />
                       <h4 className="text-md font-semibold mt-2">{order.product_name}</h4>
                       <p className="text-gray-500 text-sm">{order.category_name}</p>

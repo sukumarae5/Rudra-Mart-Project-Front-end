@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Spinner,
-  Row,
-  Col,
-  Button,
-  Container,
-} from "react-bootstrap";
+import {Card,Spinner,Row,Col,Button,Container,} from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSubcategoryRequest } from "../features/subcategories/subcategoryAction";
@@ -89,9 +82,7 @@ const SubcategoryPage = () => {
   
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
+      <div className="text-center py-5"> <Spinner animation="border" variant="primary" /> </div>
     );
   }
 
