@@ -30,7 +30,9 @@ function* fetchTitlesSaga() {
 
 function* addTitleSaga(action) {
   try {
-    const response = yield call(() => axios.post(BASE_URL + "/add", action.payload));
+    const response = yield call(() => axios.post(BASE_URL, action.payload));
+    console.log("Added new category title:", response.data);
+    // Dispatch success action with the new title
     yield put(addCategoryTitleSuccess(response.data));
     yield put(fetchCategoryTitlesRequest());
   } catch (err) {
@@ -41,6 +43,7 @@ function* addTitleSaga(action) {
 function* updateTitleSaga(action) {
   try {
     const { id, data } = action.payload;
+    console.log("Updating category title with ID:", id, "Data:", data);
     const response = yield call(() => axios.put(`${BASE_URL}/${id}`, data));
     yield put(updateCategoryTitleSuccess(response.data));
     yield put(fetchCategoryTitlesRequest());

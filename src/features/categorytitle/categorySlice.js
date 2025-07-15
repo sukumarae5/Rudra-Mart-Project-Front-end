@@ -27,6 +27,7 @@ const categoryTitleReducer = (state = initialState, action) => {
       return {
         ...state,
         titles: state.titles.map((t) => (t.id === action.payload.id ? action.payload : t)),
+
       };
     case DELETE_CATEGORY_TITLE_SUCCESS:
       return {

@@ -5,14 +5,15 @@ const CategoryTitleForm = ({ show, handleClose, onSubmit, initialData }) => {
   const [title, setTitle] = useState("");
 
   useEffect(() => {
-    if (initialData) setTitle(initialData.title);
+if (initialData) setTitle(initialData.name); // ✅ correct
     else setTitle("");
   }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (title.trim()) {
-      onSubmit({ title });
+      onSubmit({ name: title }); // ✅ correct
+
       setTitle("");
     }
   };

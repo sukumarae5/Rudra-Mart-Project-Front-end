@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Spinner } from "react-bootstrap";
+import { Table, Button, Spinner, Container } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCategoryTitlesRequest,
@@ -8,16 +8,13 @@ import {
   deleteCategoryTitleRequest,
 } from "../../features/categorytitle/categoryActions";
 import CategoryTitleForm from "./CategoryTitleForm";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const AdminCategoryTitle = () => {
   const dispatch = useDispatch();
 
   const categoryTitleState = useSelector((state) => state.categorytitle);
-
-  const titles = Array.isArray(categoryTitleState?.titles)
-    ? categoryTitleState.titles
-    : [];
-
+  const titles = Array.isArray(categoryTitleState?.titles) ? categoryTitleState.titles : [];
   const loading = categoryTitleState?.loading;
 
   const [showForm, setShowForm] = useState(false);
@@ -53,19 +50,25 @@ const AdminCategoryTitle = () => {
   };
 
   return (
-    <div>
-      <h4>Category Titles</h4>
-      <Button className="mb-3" onClick={handleAdd}>Add Category Title</Button>
+    <Container className="mt-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5>Category Titles</h5>
+        <Button variant="secondary" size="sm" onClick={handleAdd}>
+          Add Category Title
+        </Button>
+      </div>
 
       {loading ? (
-        <Spinner animation="border" />
-      ) : (
-        <Table striped bordered hover responsive>
+        <div className="text-center">
+          <Spinner animation="border" variant="secondary" />
+        </div>
+      ) : titles.length > 0 ? (
+        <Table bordered hover responsive className="mb-0">
           <thead>
             <tr>
-              <th>#</th>
+              <th>Id</th>
               <th>Title</th>
-              <th>Actions</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -73,27 +76,33 @@ const AdminCategoryTitle = () => {
               <tr key={title.id}>
                 <td>{index + 1}</td>
                 <td>{title.name}</td>
-                <td>
+                <td className="text-center">
                   <Button
-                    variant="info"
+                    variant="primary"
                     size="sm"
-                    onClick={() => handleEdit(title.id)}
+                    onClick={() => handleEdit(title)}
                     className="me-2"
+                    title="Edit"
                   >
-                    Edit
+                    <FaEdit className="me-1" /> 
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
                     onClick={() => handleDelete(title.id)}
+                    title="Delete"
                   >
-                    Delete
+                    <FaTrash className="me-1" />
                   </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
+      ) : (
+        <div className="text-center text-muted mt-4">
+          No category titles available.
+        </div>
       )}
 
       <CategoryTitleForm
@@ -102,7 +111,7 @@ const AdminCategoryTitle = () => {
         onSubmit={handleFormSubmit}
         initialData={editData}
       />
-    </div>
+    </Container>
   );
 };
 
