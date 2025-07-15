@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   fetchProductsWithCategoryRequest,
-  setSelectedProduct,
 } from "../product/productActions";
 
 const ProductCategory = () => {
@@ -39,12 +38,9 @@ const ProductCategory = () => {
     }
   }, [categoryproduct]);
 
-  const handleCategoryClick = (categoryId) => {
-    const filtered = categoryproduct.filter(
-      (product) => String(product.id) === String(categoryId)
-    );
-    dispatch(setSelectedProduct(filtered));
-    navigate("/contactpage");
+  // ✅ UPDATED NAVIGATION FUNCTION
+  const handleCategoryClick = (categoryId, categoryName) => {
+    navigate("/subcategories", { state: { categoryId, categoryName } });
   };
 
   const visibleCategories = showMore
@@ -124,10 +120,9 @@ const ProductCategory = () => {
         }
 
         .category-wrapper {
-          margin-top: 130px; /* Push content down */
+          margin-top: 130px;
         }
 
-        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
           .category-bar {
             top: 55px;
@@ -156,10 +151,8 @@ const ProductCategory = () => {
         }
       `}</style>
 
-      {/* Green Top Bar */}
       <div className="green-bar" />
 
-      {/* Category Bar */}
       <div className="category-bar">
         <div className="category-logo">Rudra</div>
 
@@ -167,7 +160,7 @@ const ProductCategory = () => {
           <div
             key={category.id}
             className="category-item"
-            onClick={() => handleCategoryClick(category.id)}
+            onClick={() => handleCategoryClick(category.id, category.name)} // ✅ updated
           >
             {category.name}
           </div>
@@ -180,7 +173,6 @@ const ProductCategory = () => {
         )}
       </div>
 
-      {/* Page Content Spacer */}
       <div className="category-wrapper" />
     </>
   );

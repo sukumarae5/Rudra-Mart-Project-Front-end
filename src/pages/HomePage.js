@@ -22,6 +22,7 @@ import ExploreOurProductspage from "./ExploreOurProductspage";
 import NewArrivalpage from "./NewArrivalpage";
 import SellingProductspage from "./SellingProductspage";
 import { Carousel } from "react-bootstrap";
+import StoreByCategory from "./StoreByCategory";
 
 
 const HomePage = () => {
@@ -226,6 +227,8 @@ const HomePage = () => {
        <ProductCategory />
       {/* Sections */}
       <Categorypage />
+            <StoreByCategory/>
+
       <ExploreOurProductspage />
       <SellingProductspage />
       <NewArrivalpage />

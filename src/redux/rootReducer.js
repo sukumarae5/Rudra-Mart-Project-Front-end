@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux';
-
 import productReducer from '../features/product/productSlice';
 import cartReducer from '../features/cart/cartSlice';
 import userReducer from '../features/user/userSlice';
@@ -27,7 +26,7 @@ const rootReducer = combineReducers({
   banners : bannerReducer,
   delivery: deliveryReducer,
   deliveryBoy: deliveryBoyReducer,
-    categorytitle: categoryTitleReducer, 
+  categorytitle: categoryTitleReducer, 
 
 });
 
