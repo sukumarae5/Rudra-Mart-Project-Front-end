@@ -64,7 +64,7 @@ const ProductCategory = () => {
           display: flex;
           overflow-x: auto;
           white-space: nowrap;
-          background-color: #fff;
+          background-color: #78be20;
           padding: 12px 16px;
           position: fixed;
           top: 57px;
@@ -81,7 +81,7 @@ const ProductCategory = () => {
         }
 
         .category-bar::-webkit-scrollbar-thumb {
-          background-color: #ccc;
+          background-color: #78be20;
           border-radius: 4px;
         }
 
@@ -91,16 +91,18 @@ const ProductCategory = () => {
         }
 
         .category-item {
-          margin-right: 16px;
-          font-size: 0.95rem;
+          margin-right: 25px;
+          font-size: 1.3rem;
           color: #000;
           cursor: pointer;
           flex-shrink: 0;
+          font-weight: bold;
+          font-family: "Cambria", sans-serif;
           white-space: nowrap;
         }
 
         .category-logo {
-          color: #78be20;
+          color: gold;
           font-weight: bold;
           font-size: 1.1rem;
           margin-right: 16px;
@@ -131,7 +133,7 @@ const ProductCategory = () => {
           }
 
           .category-item {
-            font-size: 0.85rem;
+            font-size: 60px;
             margin-right: 12px;
           }
 
@@ -150,6 +152,8 @@ const ProductCategory = () => {
           }
         }
       `}</style>
+      
+
 
       <div className="green-bar" />
 

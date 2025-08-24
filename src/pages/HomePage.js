@@ -151,7 +151,7 @@ const HomePage = () => {
     <div>
       {/* Product Category Navbar */}
      
-  <Row style={{ marginTop: "3%" }}>
+  <Row style={{ marginTop: "5%" }}>
   <Col>
     {bannerLoading ? (
       <p className="text-center">Loading banners...</p>
@@ -223,15 +223,15 @@ const HomePage = () => {
     )}
   </Col>
 </Row>
+<div style={{ paddingTop: "0px" }}> 
+  <ProductCategory />
+  <Categorypage />
+  <StoreByCategory />
+  <ExploreOurProductspage />
+  <SellingProductspage />
+  <NewArrivalpage />
+</div>
 
-       <ProductCategory />
-      {/* Sections */}
-      <Categorypage />
-            <StoreByCategory/>
-
-      <ExploreOurProductspage />
-      <SellingProductspage />
-      <NewArrivalpage />
     </div>
   );
 };

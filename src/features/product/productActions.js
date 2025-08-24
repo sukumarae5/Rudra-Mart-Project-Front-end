@@ -26,6 +26,12 @@ export const DELETE_PRODUCT_REQUEST = "DELETE_PRODUCT_REQUEST";
 export const DELETE_PRODUCT_SUCCESS = "DELETE_PRODUCT_SUCCESS";
 export const DELETE_PRODUCT_FAILURE = "DELETE_PRODUCT_FAILURE";
 
+export const RESET_PRODUCT_STATUS = "RESET_PRODUCT_STATUS";
+
+export const resetProductStatus = () => ({
+  type: RESET_PRODUCT_STATUS,
+});
+
 
 // Action Creators
 export const fetchproductsrequest = () => ({
@@ -106,15 +112,14 @@ export const fetchProductFailure = (error) => ({
   payload: error,
 });
 
-// Update product
-export const updateProductRequest = (id, productData) => ({
-  type: UPDATE_PRODUCT_REQUEST,
-  payload: { id, productData },
+export const updateProductRequest = (id, data) => ({
+  type: "UPDATE_PRODUCT_REQUEST",
+  payload: { id, data },
 });
 
-export const updateProductSuccess = (message) => ({
+export const updateProductSuccess = (updatedProduct) => ({
   type: UPDATE_PRODUCT_SUCCESS,
-  payload: message,
+  payload: updatedProduct,
 });
 
 export const updateProductFailure = (error) => ({

@@ -14,6 +14,8 @@ import {
   UPDATE_CATEGORY_FAILURE,
   DELETE_CATEGORY_FAILURE,
   DELETE_CATEGORY_SUCCESS,
+    RESET_CATEGORY_STATUS,
+
 } from "../categories/categoriesAction";
 
 const initialState = {
@@ -81,6 +83,12 @@ case DELETE_CATEGORY_FAILURE:
   return {
     ...state,
     error: action.payload,
+  };
+  case RESET_CATEGORY_STATUS:
+  return {
+    ...state,
+    success: false,
+    error: null,
   };
 
     default:

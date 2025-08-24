@@ -5,8 +5,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   updateCategoryRequest,
   fetchCategoryByIdRequest,
+  deleteCategoryRequest,
+  resetCategoryStatus, // ✅ Add this
 } from "../../features/categories/categoriesAction";
 import { fetchCategoryTitlesRequest } from "../../features/categorytitle/categoryActions";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+// Snackbar Alert component
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const EditCategoryForm = () => {
   const dispatch = useDispatch();
@@ -27,6 +36,9 @@ const EditCategoryForm = () => {
     featured: false,
     category_title_id: "",
   });
+
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   // Fetch category titles and selected category
   useEffect(() => {
@@ -60,6 +72,28 @@ const EditCategoryForm = () => {
     setFormData((prev) => ({ ...prev, slug }));
   }, [formData.name]);
 
+  // Show Snackbar and navigate after success
+  useEffect(() => {
+    if (success) {
+      setShowSuccessSnackbar(true);
+      const timeout = setTimeout(() => {
+             dispatch(resetCategoryStatus()); // ✅ reset so it won't be stuck true
+        navigate(`/admin/categories`);
+      }, 2500);
+      return () => clearTimeout(timeout);
+    }
+  }, [success, navigate]);
+
+  // Navigate after successful delete
+  useEffect(() => {
+    if (deleteSuccess) {
+      const timeout = setTimeout(() => {
+        navigate(`/admin/categories`);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [deleteSuccess, navigate]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -70,17 +104,21 @@ const EditCategoryForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const payload = {
       ...formData,
       active: formData.active ? 1 : 0,
       featured: formData.featured ? 1 : 0,
     };
-
     dispatch(updateCategoryRequest(id, payload));
   };
 
-  
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      dispatch(deleteCategoryRequest(id));
+      setDeleteSuccess(true);
+    }
+  };
+
   return (
     <div className="container p-4">
       <h4 className="mb-4">Edit Category</h4>
@@ -179,8 +217,35 @@ const EditCategoryForm = () => {
           <Button variant="primary" type="submit" disabled={loading}>
             {loading ? "Saving..." : "Update Category"}
           </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
         </div>
       </Form>
+
+      {/* Update Snackbar */}
+      <Snackbar
+        open={showSuccessSnackbar}
+        autoHideDuration={2500}
+        onClose={() => setShowSuccessSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setShowSuccessSnackbar(false)} severity="success">
+          Category updated successfully!
+        </Alert>
+      </Snackbar>
+
+      {/* Delete Snackbar */}
+      <Snackbar
+        open={deleteSuccess}
+        autoHideDuration={2000}
+        onClose={() => setDeleteSuccess(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setDeleteSuccess(false)} severity="info">
+          Category deleted successfully.
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

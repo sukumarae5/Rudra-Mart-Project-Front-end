@@ -19,6 +19,7 @@ export const DELETE_CATEGORY_REQUEST = "DELETE_CATEGORY_REQUEST";
 export const DELETE_CATEGORY_SUCCESS = "DELETE_CATEGORY_SUCCESS";
 export const DELETE_CATEGORY_FAILURE = "DELETE_CATEGORY_FAILURE";
 
+export const RESET_CATEGORY_STATUS = "RESET_CATEGORY_STATUS";
 export const SET_SELECTED_PRODUCT = "SET_SELECTED_PRODUCT";
 
 export const addCategoryRequest = (payload) => ({
@@ -26,7 +27,10 @@ export const addCategoryRequest = (payload) => ({
   payload,
 });
 
-export const addCategorySuccess = (data) => ({ type: ADD_CATEGORY_SUCCESS, payload: data });
+export const addCategorySuccess = (data) => ({ 
+  type: ADD_CATEGORY_SUCCESS,
+  payload: data
+  });
 export const addCategoryFailure = (error) => ({ type: ADD_CATEGORY_FAILURE, payload: error });
 export const fetchProductCategoryRequest = () => ({ type: FETCH_PRODUCTS_CATEGORY_REQUEST });
 export const fetchProductCategorySuccess = (data) => ({ type: FETCH_PRODUCTS_CATEGORY_SUCCESS, payload: data });
@@ -74,6 +78,11 @@ export const deleteCategorySuccess = (id) => ({
 export const deleteCategoryFailure = (error) => ({
   type: DELETE_CATEGORY_FAILURE,
   payload: error,
+});
+
+
+export const resetCategoryStatus = () => ({
+  type: RESET_CATEGORY_STATUS,
 });
 
 export const setSelectedProduct = (products) => ({ type: SET_SELECTED_PRODUCT, payload: products });

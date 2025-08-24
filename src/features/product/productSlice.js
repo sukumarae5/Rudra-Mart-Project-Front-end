@@ -4,8 +4,6 @@ import {
   FETCH_PRODUCTS_FAILURE,
   SET_SELECTED_PRODUCT,
   GET_SEARCH_PRODUCT,
-  ADD_TO_WISHlIST,
-  REMOVE_FROM_WISHLIST,
   FETCH_PRODUCTS_WITH_CATEGORY_REQUEST,
   FETCH_PRODUCTS_WITH_CATEGORY_SUCCESS,
   FETCH_PRODUCTS_WITH_CATEGORY_FAILURE,
@@ -21,6 +19,7 @@ import {
    DELETE_PRODUCT_REQUEST,
   DELETE_PRODUCT_SUCCESS,
   DELETE_PRODUCT_FAILURE,
+  RESET_PRODUCT_STATUS,
 } from "./productActions";
 
 const initialState = {
@@ -30,6 +29,7 @@ const initialState = {
   addToWishlist: [],
   productsWithCategory: [],
   createdMessage: "",
+  updatedProduct: null,
   product: null,
   updateMessage: "",
   loading: false,
@@ -37,7 +37,7 @@ const initialState = {
 };
 
 const productReducer = (state = initialState, action) => {
-  console.log(action.payload)
+  // console.log(action.payload)
   switch (action.type) {
     case FETCH_PRODUCTS_REQUEST:
       return { ...state, loading: true };
@@ -55,26 +55,26 @@ const productReducer = (state = initialState, action) => {
     case GET_SEARCH_PRODUCT:
       return { ...state, searchproduct: action.payload };
 
-    case ADD_TO_WISHlIST:
-      // Avoid duplicate wishlist items
-      const itemExists = state.addToWishlist.some(
-        (item) => item.id === action.payload.id
-      );
-      if (itemExists) return state;
-      return {
-        ...state,
-        addToWishlist: [...state.addToWishlist, action.payload],
-      };
-    case REMOVE_FROM_WISHLIST:
-      return {
-        ...state,
-        addToWishlist: state.addToWishlist.filter(
-          (item) => item.id !== action.payload
-        ),
-      };
+    // case ADD_TO_WISHlIST:
+    //   // Avoid duplicate wishlist items
+    //   const itemExists = state.addToWishlist.some(
+    //     (item) => item.id === action.payload.id
+    //   );
+    //   if (itemExists) return state;
+    //   return {
+    //     ...state,
+    //     addToWishlist: [...state.addToWishlist, action.payload],
+    //   };
+    // case REMOVE_FROM_WISHLIST:
+    //   return {
+    //     ...state,
+    //     addToWishlist: state.addToWishlist.filter(
+    //       (item) => item.id !== action.payload
+    //     ),
+    //   };
 
     case FETCH_PRODUCTS_WITH_CATEGORY_REQUEST:
-      return { ...state, loading: true };
+      return { ...state, loading: true, error: null, };
     case FETCH_PRODUCTS_WITH_CATEGORY_SUCCESS:
       return {
         ...state,
@@ -114,31 +114,69 @@ const productReducer = (state = initialState, action) => {
       return { ...state, loading: true, error: null, updateMessage: null };
 
     case UPDATE_PRODUCT_SUCCESS:
-      return { ...state, loading: false, updateMessage: action.payload };
+  return {
+    ...state,
+    loading: false,
+    updateMessage: action.payload.message,
+    products: state.products.map((product) =>
+    product.id === action.payload.id ? action.payload : product
+    ),
+    success: true,
+  };
 
-    case UPDATE_PRODUCT_FAILURE:
-      return { ...state, loading: false, error: action.payload };
+case UPDATE_PRODUCT_FAILURE:
+  return {
+    ...state,
+    loading: false,
+    error: action.payload,
+    success: false,
+  };
+
 
       case DELETE_PRODUCT_REQUEST:
       return {
         ...state,
         loading: true,
+        success: false,
+        
       };
     
-      case DELETE_PRODUCT_SUCCESS:
+  //     case DELETE_PRODUCT_SUCCESS:
+  // return {
+  //   ...state,
+  //   loading: false,
+  //           updateMessage: action.payload.message, // 👈 capture message here
+
+  //   products: state.products.filter((product) => product.id !== Number(action.payload)),
+  //   success: true,
+  // };
+case DELETE_PRODUCT_SUCCESS:
   return {
     ...state,
-    loading: false,
-    products: state.products.filter((product) => product.id !== action.payload),
+    productsWithCategory: state.productsWithCategory.filter(
+      (p) => p.product_id !== action.payload
+    ),
+    deleteProductSuccess: true,
   };
+
 
     case DELETE_PRODUCT_FAILURE:
       return {
         ...state,
         loading: false,
         error: action.payload,
+        success: false
       };
       
+      case RESET_PRODUCT_STATUS:
+  return {
+    ...state,
+    createdMessage: "",
+    error: null,
+    updateMessage: "",
+    deleteProductSuccess: false,
+  };
+
     default:
       return state;
   }

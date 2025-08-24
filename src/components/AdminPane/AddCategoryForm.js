@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { addCategoryRequest } from "../../features/categories/categoriesAction";
+import { addCategoryRequest, resetCategoryStatus } from "../../features/categories/categoriesAction";
 import { useNavigate } from "react-router-dom";
 import { fetchCategoryTitlesRequest } from "../../features/categorytitle/categoryActions";
 
@@ -67,9 +67,10 @@ const AddCategoryForm = () => {
 useEffect(() => {
   if (success) {
     alert("Category added successfully!");
-    navigate(-1); // 👈 goes back to the previous page
+    dispatch(resetCategoryStatus()); // ✅ reset success
+    navigate(-1);
   }
-}, [success, navigate]);
+}, [success, navigate, dispatch]);
 
 
   return (

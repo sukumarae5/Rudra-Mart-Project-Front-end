@@ -16,13 +16,13 @@ import {
   DELETE_PRODUCT_REQUEST,
   deleteProductSuccess,
   deleteProductFailure,
-} from "../product/productActions";
-import axios from "axios";
-import {
   fetchproductssuccess,
   fetchproductsfailure,
 } from "../product/productActions";
-import { deleteCategoryFailure, deleteCategorySuccess } from "../categories/categoriesAction";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+
 
 const fetchTheApi = async () => {
   try {
@@ -31,7 +31,6 @@ const fetchTheApi = async () => {
       {
         method: "GET",
         headers: {
-          Authorization: "Bearer YOUR_ACCESS_TOKEN", // Replace with your actual token
           "Content-Type": "application/json",
         },
       }
@@ -40,9 +39,9 @@ const fetchTheApi = async () => {
       throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
     const data = await response.json();
-    return data.products; // Assuming the API response contains a 'products' array
+    return data.products; 
   } catch (error) {
-    throw new Error("Failed to fetch products: " + error.message); // Additional error handling
+    throw new Error("Failed to fetch products: " + error.message);
   }
 };
 
@@ -116,7 +115,7 @@ function* createProductSaga(action) {
 }
 
 function* fetchProductByIdSaga(action) {
-      console.log(action.payload)
+  console.log(action.payload);
 
   try {
     const response = yield call(
@@ -124,7 +123,7 @@ function* fetchProductByIdSaga(action) {
       `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/products/${action.payload}`
     );
     const data = yield response.json();
-    console.log(data)
+    console.log(data);
     if (response.ok) {
       yield put(fetchProductSuccess(data));
     } else {
@@ -137,44 +136,39 @@ function* fetchProductByIdSaga(action) {
 
 function* updateProductSaga(action) {
   try {
-    const { id, productData } = action.payload;
-    console.log(action.payload)
+    const { id } = action.payload;
+    console.log("Updating product with ID:", id.id, id.data);
+    console.log(action.payload);
+
     const response = yield call(
-      fetch,
-      `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/products/${id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData),
-      }
+      axios.put,
+      `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/products/${id.id}`, // ✅ correct endpoint
+      id.data
     );
 
-    const data = yield response.json();
-
-    if (response.ok) {
-      yield put(updateProductSuccess("Product updated successfully"));
-    } else {
-      yield put(
-        updateProductFailure(data.error || "Failed to update product.")
-      );
-    }
+    yield put(updateProductSuccess(response.data, id.id)); // Make sure this includes `message`
+    toast.success(response.data.message); // Optional: toast here too
   } catch (error) {
     yield put(updateProductFailure(error.message));
+    toast.error('Failed to update product');
   }
 }
 
 function* deleteProductSaga(action) {
   try {
     const productId = action.payload;
-    yield call(
+    const response=yield call(
       axios.delete,
       `http://${process.env.REACT_APP_IP_ADDRESS}/api/products/products/${productId}`
     );
-    yield put(deleteProductSuccess(productId)); // ✅ Correct success action
+    console.log(response.data.message)
+    yield put(deleteProductSuccess(response.data));
+    yield put({ type: FETCH_PRODUCTS_REQUEST });  // triggers fresh data
   } catch (error) {
-    yield put(deleteProductFailure(error.message)); // ✅ Correct failure action
+    yield put(deleteProductFailure(error.message));
   }
 }
+
 
 export default function* productSaga() {
   yield takeEvery(FETCH_PRODUCTS_REQUEST, fetchProductSaga);
@@ -185,6 +179,5 @@ export default function* productSaga() {
   yield takeEvery(CREATE_PRODUCT_REQUEST, createProductSaga);
   yield takeEvery(FETCH_PRODUCT_REQUEST, fetchProductByIdSaga);
   yield takeEvery(UPDATE_PRODUCT_REQUEST, updateProductSaga);
-    yield takeEvery(DELETE_PRODUCT_REQUEST, deleteProductSaga);
-
+  yield takeEvery(DELETE_PRODUCT_REQUEST, deleteProductSaga);
 }

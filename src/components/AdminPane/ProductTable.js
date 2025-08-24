@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import {
   deleteProductRequest,
   fetchProductsWithCategoryRequest,
+  resetProductStatus,
 } from "../../features/product/productActions";
 import PaginationComponent from "./Pagination";
 import { GoPlus } from "react-icons/go";
@@ -24,7 +25,12 @@ import { BiSearch } from "react-icons/bi";
 const ProductTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { productsWithCategory = [] } = useSelector((state) => state.products || {});
+
+  const {
+    productsWithCategory = [],
+    deleteProductSuccess,
+    updateMessage 
+  } = useSelector((state) => state.products || {});
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -33,10 +39,20 @@ const ProductTable = () => {
   const [categories, setCategories] = useState([]);
   const [showInactive, setShowInactive] = useState(false);
 
+  // Fetch product list on mount
   useEffect(() => {
     dispatch(fetchProductsWithCategoryRequest());
   }, [dispatch]);
 
+  // Re-fetch products after successful delete
+  useEffect(() => {
+    if (deleteProductSuccess) {
+      dispatch(fetchProductsWithCategoryRequest());
+      dispatch(resetProductStatus()); // optional: reset success flag
+    }
+  }, [deleteProductSuccess, dispatch]);
+
+  // Extract unique categories
   useEffect(() => {
     if (productsWithCategory.length > 0) {
       const uniqueCategories = [
@@ -46,11 +62,11 @@ const ProductTable = () => {
     }
   }, [productsWithCategory]);
 
+  // Filtered product list
   const filteredProducts = productsWithCategory.filter((product) => {
     const name = (product.product_name || "").toLowerCase();
     const category = product.category_name || "";
     const matchesSearchQuery = name.includes(searchQuery.toLowerCase());
-
     return filterCategory === "All"
       ? matchesSearchQuery
       : matchesSearchQuery && category === filterCategory;
@@ -61,12 +77,19 @@ const ProductTable = () => {
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
+  // Delete handler
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       dispatch(deleteProductRequest(id));
-      navigate("/admin/adminproducts");
     }
   };
+   useEffect(() => {
+      if (updateMessage) {
+        alert(updateMessage);
+        navigate("/admin/adminproducts");
+        dispatch(resetProductStatus());
+      }
+    }, [updateMessage, navigate]);
 
   return (
     <div className="container-fluid px-2">
@@ -126,10 +149,10 @@ const ProductTable = () => {
           <Col xs={12} md={6} lg={3} className="d-flex justify-content-end gap-2 mt-2 mt-lg-0">
             <Button
               variant="outline-secondary"
-              onClick={() => window.location.reload()}
+              onClick={() => dispatch(fetchProductsWithCategoryRequest())}
               className="d-flex justify-content-center align-items-center"
               style={{ width: "44px", height: "38px" }}
-              aria-label="Reload page"
+              aria-label="Reload"
             >
               ⟳
             </Button>
@@ -168,7 +191,7 @@ const ProductTable = () => {
             <tbody>
               {currentProducts.length > 0 ? (
                 currentProducts.map((product) => (
-                  <tr key={product.product_id}>
+                  <tr key={product.id}>
                     <td className="text-start">
                       <img
                         src={product.image_url || "/placeholder.png"}

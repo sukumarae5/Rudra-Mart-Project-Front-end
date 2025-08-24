@@ -12,7 +12,7 @@ import {
 import { IoArrowBack } from "react-icons/io5";
 import { fetchSubcategoryRequest } from "../../features/subcategories/subcategoryAction";
 import { fetchProductCategoryRequest } from "../../features/categories/categoriesAction";
-import { createProductRequest } from "../../features/product/productActions";
+import { createProductRequest, resetProductStatus } from "../../features/product/productActions";
 
 const AddProductForm = () => {
   const navigate = useNavigate();
@@ -29,6 +29,7 @@ const AddProductForm = () => {
   const subcategories = Array.isArray(subcategoryState?.subcategories)
     ? subcategoryState.subcategories
     : [];
+    console.log("Category Data:", subcategories); 
 
   const {
     createdMessage = null,
@@ -55,20 +56,25 @@ const AddProductForm = () => {
 
 
   useEffect(() => {
-    dispatch(fetchProductCategoryRequest());
-    dispatch(fetchSubcategoryRequest());
-  }, [dispatch]);
+  dispatch(resetProductStatus()); // clear stale state
+  dispatch(fetchProductCategoryRequest());
+  dispatch(fetchSubcategoryRequest());
+}, [dispatch]);
 
-  useEffect(() => {
-    if (createdMessage) {
-      alert(createdMessage);
-      navigate("/admin/adminproducts");
-    }
 
-    if (error) {
-      alert(error);
-    }
-  }, [createdMessage, error, navigate]);
+useEffect(() => {
+  if (createdMessage) {
+    alert(createdMessage);
+    dispatch(resetProductStatus()); // optional safeguard
+    navigate("/admin/adminproducts");
+  }
+
+  if (error) {
+    alert(error);
+    dispatch(resetProductStatus());
+  }
+}, [createdMessage, error, dispatch, navigate]);
+
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
@@ -87,6 +93,7 @@ const AddProductForm = () => {
     const subcategory = subcategories.find((sub) => sub.name === name);
     return subcategory ? subcategory.id : null;
   };
+  console.log("Product State:", getSubcategoryIdByName);
 
   const handleThumbnailChange = (index, value) => {
   const updatedThumbnails = [...product.thumbnail];
